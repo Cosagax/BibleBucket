@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>Backyard Orbs — Enoch and the Watchers (2.1 Mobile)</title>
+<title>Backyard Orbs — Enoch and the Watchers (2.1 Mobile → 2.2 polish)</title>
 <style>
   html,body{height:100%;margin:0;background:#0b0f14;color:#e6f0ff;font-family:Arial,Helvetica,sans-serif; overscroll-behavior: none;}
   #wrap{display:flex;flex-direction:column;height:100%}
@@ -15,10 +15,9 @@
   canvas{display:block;width:100%;height:100%; touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;}
 
   /* Start (Primer) */
-  #title{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;background:rgba(11,15,20,0.96);backdrop-filter:saturate(120%) blur(2px)}
+  #title{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;background: linear-gradient(rgba(11,15,20,0.85), rgba(11,15,20,0.85)), url('enoch.png') center/cover no-repeat;backdrop-filter:saturate(120%) blur(2px)}
   #card{width:min(92%,780px);border:1px solid #243140;background:#0e141b;padding:16px 14px 18px;border-radius:12px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,0.35)}
-  #toggles{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:10px;color:#bcd0e3;font-size:13px}
-  #toggles label{display:flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid #243140;background:#0b1219;border-radius:8px}
+  #toggles{display:none} /* toggles removed */
   #card h1 { font-size: clamp(20px, 6vw, 28px); }
   .mono{font-variant-numeric:tabular-nums}
   footer{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);color:#9fb6cc;font-size:12px; padding-bottom: env(safe-area-inset-bottom);}
@@ -40,6 +39,22 @@
   #cinOverlay .verses{margin-top:14px;color:#eaf4ff;text-shadow:0 0 10px rgba(180,220,255,0.55);font-size:18px;line-height:1.35}
   #cinOverlay .hint{color:#9fb6cc;font-size:12px;margin-top:8px}
   #cinOverlay .btnRow{margin-top:16px;display:flex;gap:10px;justify-content:center}
+  #cinOverlay .center.topRight{
+    left: auto;
+    right: 6%;
+    top: 22%;
+    transform: translate(0,-50%);
+    text-align: right;
+    width: min(92%, 520px);
+  }
+  @media (max-width: 480px){
+    #cinOverlay .center.topRight{
+      right: 4%;
+      top: 18%;
+      width: min(92%, 420px);
+    }
+  }
+
 </style>
 </head>
 <body>
@@ -86,10 +101,7 @@
       <p style="margin:0 0 10px;color:#9fb6cc;font-size:12px">Hint: Streaks awaken the heavens to speak.</p>
 
       <button id="tPlay" class="btn" style="min-width:220px;margin-top:6px">Start Night Watch</button>
-      <div id="toggles">
-        <label><input type="checkbox" id="sfxToggle" checked> Sound Effects</label>
-        <label><input type="checkbox" id="motionToggle"> Reduced Motion</label>
-      </div>
+      <!-- Toggles removed for 2.2; defaults handled in JS -->
     </div>
   </div>
 
@@ -109,13 +121,9 @@
 
 <script>
 /*
-  Backyard Orbs — 2.1 Mobile
-  Safe mobile tweaks only:
-  • Prevent browser gestures/zoom.
-  • True touch input mirrors mouse.
-  • Auto reduced motion on tiny screens.
-  • Beam visibility scales on high-DPI.
-  • Player still: centered horizontally.
+  Backyard Orbs — 2.1 Mobile (2.2 polish: UI cleanup)
+  Change: Removed Sound/Reduced Motion toggles from start screen.
+  Defaults are now set in code; reduced motion still auto-enables on tiny screens.
 */
 (function(){
   // ===== canvas & utils =====
@@ -136,6 +144,7 @@
   const scoreEl=document.getElementById('scoreEl'), timeEl=document.getElementById('timeEl');
   const hitsEl=document.getElementById('hitsEl'), missesEl=document.getElementById('missesEl'), goalEl=document.getElementById('goalEl');
   const overlay=document.getElementById('cinOverlay'), titleText=document.getElementById('cinTitle'), versesBox=document.getElementById('verses'), againBtn=document.getElementById('againBtn'), hintEl=document.getElementById('cinHint');
+  const overlayCenter = overlay.querySelector('.center');
 
   // Lore toggle
   const loreBox=document.getElementById('loreBox');
@@ -145,12 +154,9 @@
     loreToggle.textContent=open?'Hide':'Read';
   });
 
-  // Toggles
-  const sfxToggle=document.getElementById('sfxToggle');
-  const motionToggle=document.getElementById('motionToggle');
-  let SFX_ENABLED=true, REDUCED_MOTION=false;
-  sfxToggle?.addEventListener('change',()=>SFX_ENABLED=sfxToggle.checked);
-  motionToggle?.addEventListener('change',()=>REDUCED_MOTION=motionToggle.checked);
+  // ===== defaults (toggles removed) =====
+  let SFX_ENABLED=true;
+  let REDUCED_MOTION=false;
 
   // Auto-reduced motion on small screens
   const isSmallScreen = Math.min(window.innerWidth, window.innerHeight) < 420;
@@ -332,7 +338,7 @@
   // ===== flow =====
   function startGame(){try{audio().resume()}catch{} STATE.running=true;STATE.paused=false;STATE.ended=false;STATE.mode='play';STATE.timeLeft=SETTINGS.timeStart;STATE.score=0;STATE.hits=0;STATE.misses=0;STATE.streak=0;entities.length=0;particles.length=0;watchers.length=0;spawnTimer=0;player.x=(canvas.clientWidth - player.w)/2;player.y=player.feetY-player.h;captain.reset();titleEl.style.display='none';pauseBtn.disabled=false;resetBtn.disabled=false;overlay.style.display='none';versesBox.innerHTML='';againBtn.style.display='none';titleText.textContent='ENOCH';hintEl.textContent='Tap or press any key to continue…';starFade=1}
   function togglePause(){if(!STATE.running||STATE.mode!=='play')return;STATE.paused=!STATE.paused;pauseBtn.textContent=STATE.paused?'Resume':'Pause'}
-  function resetGame(){STATE.running=false;STATE.paused=false;STATE.ended=false;STATE.mode='play';titleEl.style.display='flex';pauseBtn.disabled=true;resetBtn.disabled=true;pauseBtn.textContent='Pause';overlay.style.display='none';versesBox.innerHTML='';againBtn.style.display='none';starFade=1}
+  function resetGame(){STATE.running=false;STATE.paused=false;STATE.ended=false;STATE.mode='play';titleEl.style.display='flex';pauseBtn.disabled=true;resetBtn.disabled=true;pauseBtn.textContent='Pause';overlay.style.display='none';versesBox.innerHTML='';againBtn.style.display='none';overlayCenter.classList.remove('topRight');starFade=1}
   startBtn.addEventListener('click',()=>{if(!STATE.running)startGame()}); tPlay.addEventListener('click',()=>{if(!STATE.running)startGame()});
   pauseBtn.addEventListener('click',togglePause); resetBtn.addEventListener('click',resetGame);
 
@@ -465,6 +471,7 @@
   let cinWin=null;
 
   function startWinCinematic(){
+    overlayCenter.classList.remove('topRight');
     sfx.win();
     STATE.mode='cin_win';
     overlay.style.display='block';
@@ -590,7 +597,7 @@
     return { points: chosen, meta:{staffTip, center, radius} };
   }
 
-  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]]}return a}
+  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j]]}return a}
   function randomSubset(arr,n){const s=shuffle([...arr]);return s.slice(0,Math.max(0,Math.min(n,s.length)))}
 
   function updateWinCinematic(dt){
@@ -678,6 +685,7 @@
   let cinLose=null;
 
   function startLoseCinematic(){
+    overlayCenter.classList.add('topRight');
     sfx.lose();
     STATE.mode='cin_lose';
     overlay.style.display='none';
