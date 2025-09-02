@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>Backyard Orbs — Enoch and the Watchers (2.1 Mobile)</title>
+<title>Backyard Orbs  -  Enoch and the Watchers (2.1 Mobile)</title>
 <style>
   html,body{height:100%;margin:0;background:#0b0f14;color:#e6f0ff;font-family:Arial,Helvetica,sans-serif; overscroll-behavior: none;}
   #wrap{display:flex;flex-direction:column;height:100%}
@@ -37,11 +37,10 @@
   #cinOverlay{position:absolute;inset:0;pointer-events:auto;display:none}
   #cinOverlay .center{position:absolute;left:50%;top:78%;transform:translate(-50%,-50%);width:min(92%,820px);text-align:center; pointer-events:none}
   #cinOverlay .title{font-size:28px;letter-spacing:6px;color:#eaf4ff;text-shadow:0 0 16px rgba(150,210,255,.6);opacity:.95}
-  #cinOverlay .verses{margin-top:14px;color:#eaf4ff;text-shadow:0 0 10px rgba(180,220,255,0.55);font-size:18px;line-height:1.35}
+  #cinOverlay .verses{margin-top:14px;color:#eaf4ff;text-shadow:0 0 10px rgba(180,220,255,0.55);font-size:clamp(14px,4.2vw,22px);line-height:1.33;padding:0 16px}
   #cinOverlay .hint{color:#9fb6cc;font-size:12px;margin-top:8px}
   #cinOverlay .btnRow{margin-top:16px;display:flex;gap:10px;justify-content:center}
-  /* Top-right placement for lose overlay */
-  #cinOverlay .center.topRight{left:auto;right:6%;top:calc(24% + env(safe-area-inset-top));transform:translate(0,-50%);text-align:right;width:min(92%,520px)}
+  #cinOverlay .center.topRight{left:auto;right:6%;top:calc(24% + env(safe-area-inset-top));transform:translate(0,-50%);text-align:right;width:min(92%,520px);padding-right:max(16px,env(safe-area-inset-right));word-wrap:break-word}
   @media (max-width:520px){#cinOverlay .center.topRight{right:4%;top:calc(22% + env(safe-area-inset-top));width:min(92%,420px)}}
 
   #toggles{display:none !important; visibility:hidden !important; height:0; overflow:hidden}
@@ -72,15 +71,15 @@
           <button id="loreToggle" class="btn small">Read</button>
         </div>
         <div id="loreBody">
-          <p>Tonight the luminaries stir—stars sliding like messengers. Not burning rocks, but living lights. Yet <em>something</em> is watching the watchers.</p>
+          <p>Tonight the luminaries stir - stars sliding like messengers. Not burning rocks, but living lights. Yet <em>something</em> is watching the watchers.</p>
           <p>Use your backyard beam to identify the light sources and unlock their messages. <span style="color:#9fe2ff">Blue orbs</span> answer truth; <span style="color:#ff9aa0">red drones</span> spoof and interfere.</p>
-          <p>Beware the watching AI-drones—they do not want the mysteries of <strong>Enoch and the Watchers</strong> exposed. Gather truth before dawn and you may see the Heavens speak.</p>
+          <p>Beware the watching AI-drones - they do not want the mysteries of <strong>Enoch and the Watchers</strong> exposed. Gather truth before dawn and you may see the Heavens speak.</p>
         </div>
       </div>
 
       <p style="margin:6px 0 6px">
-        <span style="color:#9fe2ff">Blue orbs</span> are living lights — keepers of truth.<br>
-        <span style="color:#ff9aa0">Red drones</span> are deceivers — fallen watchers and their toys.
+        <span style="color:#9fe2ff">Blue orbs</span> are living lights  -  keepers of truth.<br>
+        <span style="color:#ff9aa0">Red drones</span> are deceivers  -  fallen watchers and their toys.
       </p>
       <p style="margin:0 0 10px">Shine your beam, gather truth, avoid the counterfeit. Reach <strong>1500</strong> before dawn.</p>
 
@@ -105,7 +104,7 @@
     <div class="center">
       <div id="cinTitle" class="title">ENOCH</div>
       <div id="verses" class="verses"></div>
-      <div class="hint" id="cinHint">Tap or press any key to continue…</div>
+      <div class="hint" id="cinHint">Tap or press any key to continue...</div>
       <div class="btnRow"><button id="againBtn" class="btn" style="pointer-events:auto;display:none">Play Again</button></div>
     </div>
   </div>
@@ -114,13 +113,13 @@
 
 <script>
 /*
-  Backyard Orbs — 2.1 Mobile
+  Backyard Orbs  -  2.1 Mobile
   Safe mobile tweaks only:
-  • Prevent browser gestures/zoom.
-  • True touch input mirrors mouse.
-  • Auto reduced motion on tiny screens.
-  • Beam visibility scales on high-DPI.
-  • Player still: centered horizontally.
+  � Prevent browser gestures/zoom.
+  � True touch input mirrors mouse.
+  � Auto reduced motion on tiny screens.
+  � Beam visibility scales on high-DPI.
+  � Player still: centered horizontally.
 */
 (function(){
   // ===== canvas & utils =====
@@ -295,7 +294,7 @@
     ctx.strokeStyle='#cfae82'; ctx.lineWidth=3.5;
     ctx.beginPath(); ctx.moveTo(leftSx,leftSy); ctx.lineTo(arm.elbowX-torsoX,arm.elbowY-torsoY); ctx.lineTo(arm.handX-torsoX,arm.handY-torsoY); ctx.stroke();
 
-    // RIGHT ARM (stationary at outer side — relaxed, slight bend)
+    // RIGHT ARM (stationary at outer side  -  relaxed, slight bend)
     const elbowRx = rightSx + 1;         
     const elbowRy = rightSy + 14;
     const handRx  = rightSx + 1;
@@ -336,7 +335,7 @@
   let laserCD=0, laserSparkTimer=0;
 
   // ===== flow =====
-  function startGame(){try{audio().resume()}catch{} STATE.running=true;STATE.paused=false;STATE.ended=false;STATE.mode='play';STATE.timeLeft=SETTINGS.timeStart;STATE.score=0;STATE.hits=0;STATE.misses=0;STATE.streak=0;entities.length=0;particles.length=0;watchers.length=0;spawnTimer=0;player.x=(canvas.clientWidth - player.w)/2;player.y=player.feetY-player.h;captain.reset();titleEl.style.display='none';pauseBtn.disabled=false;resetBtn.disabled=false;overlay.style.display='none';versesBox.innerHTML='';againBtn.style.display='none';titleText.textContent='ENOCH';hintEl.textContent='';starFade=1}
+  function startGame(){try{audio().resume()}catch{} STATE.running=true;STATE.paused=false;STATE.ended=false;STATE.mode='play';STATE.timeLeft=SETTINGS.timeStart;STATE.score=0;STATE.hits=0;STATE.misses=0;STATE.streak=0;entities.length=0;particles.length=0;watchers.length=0;spawnTimer=0;player.x=(canvas.clientWidth - player.w)/2;player.y=player.feetY-player.h;captain.reset();titleEl.style.display='none';pauseBtn.disabled=false;resetBtn.disabled=false;overlay.style.display='none';versesBox.innerHTML='';againBtn.style.display='none';titleText.textContent='ENOCH';hintEl.textContent='Tap or press any key to continue...';starFade=1}
   function togglePause(){if(!STATE.running||STATE.mode!=='play')return;STATE.paused=!STATE.paused;pauseBtn.textContent=STATE.paused?'Resume':'Pause'}
   function resetGame(){STATE.running=false;STATE.paused=false;STATE.ended=false;STATE.mode='play';titleEl.style.display='flex';pauseBtn.disabled=true;resetBtn.disabled=true;pauseBtn.textContent='Pause';overlay.style.display='none';versesBox.innerHTML='';againBtn.style.display='none';starFade=1;try{overlayCenter.classList.remove('topRight')}catch{}}
   startBtn.addEventListener('click',()=>{if(!STATE.running)startGame()}); tPlay.addEventListener('click',()=>{if(!STATE.running)startGame()});
@@ -758,7 +757,7 @@
       if(player.x > exitX){
         L.phase=3;
         titleText.textContent='SPOTTED';
-        hintEl.textContent='Tap or press any key…';
+        hintEl.textContent='';
         versesBox.innerHTML='';
         addLine('The drones marked you.');
         addLine('Agents escorted you away.');
