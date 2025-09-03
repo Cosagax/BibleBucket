@@ -3,108 +3,106 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>BibleBucket • Home</title>
+  <title>Bible Bucket</title>
   <meta name="description" content="BibleBucket — a clean, mobile-first hub for games, reading, and writings by Jake & August." />
   <link rel="icon" type="image/png" href="assets/book.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
-    :root{--bg:#0b0f17;--ink:#e9efff;--muted:#a6b3d1;--line:#1a2540;--card:#0f1626;--card2:#101a2e;--radius:18px}
-    *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);
-         background:radial-gradient(1000px 700px at 50% -10%,#14213f 0%,#0e162b 50%,var(--bg) 100%);
-         -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-    a{color:inherit;text-decoration:none}
+    :root{
+      --bg:#0b0f17; --ink:#e9efff; --muted:#a6b3d1; --line:#1a2540;
+      --card:#0f1626; --card2:#101a2e; --brand:#7cc4ff; --accent:#ffd36a; --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; color:var(--ink); background:radial-gradient(1000px 700px at 50% -10%, #14213f 0%, #0e162b 50%, var(--bg) 100%); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility}
+    a{color:inherit; text-decoration:none}
     .wrap{max-width:1100px;margin:0 auto;padding:16px}
-    header{position:sticky;top:0;z-index:10;background:linear-gradient(0deg,rgba(11,15,23,0),rgba(11,15,23,.9) 70%,rgba(11,15,23,1));
-           border-bottom:1px solid rgba(255,255,255,.06);backdrop-filter:saturate(130%) blur(6px)}
-    .nav{display:flex;align-items:center;gap:12px;padding:12px 8px}
-    .logo{width:50px;height:50px;object-fit:contain}
-    .title{font-weight:800;letter-spacing:.4px;font-size:1.6rem}
+
+    /* Header */
+    header{position:sticky;top:0;z-index:10;background:linear-gradient(0deg, rgba(11,15,23,0), rgba(11,15,23,.9) 70%, rgba(11,15,23,1)); border-bottom:1px solid rgba(255,255,255,.06); backdrop-filter:saturate(130%) blur(6px)}
+    .nav{display:flex;align-items:center;justify-content:flex-start;padding:12px 8px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{width:100px;height:100px; object-fit:contain; display:block}
+    .title{font-weight:800;letter-spacing:.4px; font-size:2rem}
+
+    /* Hero */
     .hero{padding:40px 12px 16px}
-    .card{background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0));
-          border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:22px;box-shadow:0 10px 40px rgba(0,0,0,.25)}
-    .headline{font-size:clamp(28px,5vw,46px);line-height:1.05;margin:6px 0 10px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0)); border:1px solid rgba(255,255,255,.06); border-radius:var(--radius); padding:22px; box-shadow:0 10px 40px rgba(0,0,0,.25)}
+    .headline{font-size:clamp(28px,5vw,46px); line-height:1.05; margin:6px 0 10px}
     .sub{color:var(--muted)}
     .cta-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-    .btn{display:inline-block;padding:10px 12px;border:1px solid #243559;border-radius:12px;background:#0f1626;font-weight:600}
+
+    /* Grid tiles */
     .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
-    @media (max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}}
-    @media (max-width:640px){.grid{grid-template-columns:1fr}}
-    .tile{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:var(--radius);
-          padding:16px;display:flex;flex-direction:column;gap:8px}
+    @media (max-width: 980px){.grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width: 640px){.grid{grid-template-columns:1fr}}
+    .tile{background:linear-gradient(180deg, var(--card), var(--card2)); border:1px solid var(--line); border-radius:var(--radius); padding:16px; display:flex; flex-direction:column; gap:8px}
     .tile h3{margin:0}
     .tile p{margin:0;color:var(--muted)}
-    .go{margin-top:auto;display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;border:1px solid #243559}
-    .go:hover{transform:translateY(-1px)}
+    .tile .go{margin-top:auto; display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border-radius:12px; border:1px solid #243559}
+    .tile .go:hover{transform:translateY(-1px)}
+
     footer{opacity:.85;font-size:13px;padding:28px 12px 50px}
   </style>
 </head>
 <body>
   <header>
     <div class="wrap nav">
-      <img class="logo" src="assets/book.png" alt="BibleBucket logo" />
-      <div class="title">BibleBucket</div>
+      <div class="brand">
+        <img class="logo" src="assets/book.png" alt="BibleBucket logo" />
+        <div class="title">BibleBucket</div>
+      </div>
     </div>
   </header>
 
   <main class="wrap hero" id="home">
     <section class="card">
-      <h1 class="headline">A bible hub for verses, games, and little wake-ups.</h1>
-      <p class="sub">Built by Jake & August... exercises and reading to wake you up from the Matrix / Babylon 2.0, yup they rebuilt it.</p>
+      <h1 class="headline">Welcome a Bible Hub of Games, Comics, Removed Books, and other Bible Explorations.</h1>
+      <p class="sub">Built by Jake and August: games and readings based about the bible and also it's lost books and mysteries!</p>
       <div class="cta-row">
-        <a class="btn" href="games/orbs/">Explore Games</a>
-        <a class="btn" href="construction.html">Start Reading</a>
-        <a class="btn" href="construction.html">What is BibleBucket?</a>
+        <a class="btn" href="games/orbs/">?? Explore Games</a>
+        <a class="btn" href="construction.html">?? Start Reading</a>
+        <a class="btn" href="construction.html">?? What is BibleBucket?</a>
       </div>
     </section>
 
     <section class="grid" aria-label="Quick links">
-      <!-- 1) Orbs -->
-      <a class="tile" href="games/orbs/">
-        <h3>Backyard Orbs <span style="font-size:12px;opacity:.7">(alpha)</span></h3>
-        <p>Laser the fakes, spare the messengers. Touch-friendly, quick play.</p>
-        <span class="go">Open ></span>
-      </a>
-
-      <!-- 2) Comic PDF -->
-      <a class="tile" href="assets/comic-bible.pdf" target="_blank" rel="noopener">
+      <a class="tile" href="construction.html">
         <h3>Comic Bible (PDF)</h3>
-        <p>Visual comic Bible - quick, approachable reading.</p>
-        <span class="go">Open PDF ></span>
+        <p>Visual comic Bible Jake likes — we’ll host or link the PDF here.</p>
+        <span class="go">View ?</span>
       </a>
-
-      <!-- 3) Writings (placeholder) -->
+      <a class="tile" href="games/orbs/">
+        <h3>Backyard Orbs</h3>
+        <p>Laser the fakes, spare the messengers. Touch-friendly, quick play.</p>
+        <span class="go">Open ?</span>
+      </a>
+      <a class="tile" href="construction.html">
+        <h3>Reading Index — Complete</h3>
+        <p>Full Bible index in our chronological flow — includes the “missing” books we reference.</p>
+        <span class="go">Open Index ?</span>
+      </a>
       <a class="tile" href="construction.html">
         <h3>Writings</h3>
         <p>Notes, reflections, and dev logs as we build.</p>
-        <span class="go">Browse ></span>
+        <span class="go">Browse ?</span>
       </a>
-
-      <!-- 4) Reading Index (placeholder) -->
-      <a class="tile" href="construction.html">
-        <h3>Reading Index - Complete</h3>
-        <p>Full Bible index in our chronological flow - includes the "missing" books we reference.</p>
-        <span class="go">Open Index ></span>
-      </a>
-
-      <!-- 5) Community (placeholder) -->
       <a class="tile" href="construction.html">
         <h3>Community</h3>
         <p>Prayer requests, ideas, and feedback (coming soon).</p>
-        <span class="go">Preview ></span>
+        <span class="go">Preview ?</span>
       </a>
-
-      <!-- 6) Game Roadmap (placeholder) -->
       <a class="tile" href="construction.html">
         <h3>Game Roadmap</h3>
-        <p>What's next after Orbs - tiny arcade experiments.</p>
-        <span class="go">See plans ></span>
+        <p>What’s next after Orbs — tiny arcade experiments.</p>
+        <span class="go">See plans ?</span>
       </a>
-
-      <!-- 7) Dev Notes (placeholder) -->
       <a class="tile" href="construction.html">
         <h3>Dev Notes</h3>
         <p>DNS & Pages config, structure, and build choices.</p>
-        <span class="go">Open ></span>
+        <span class="go">Open ?</span>
       </a>
     </section>
 
@@ -114,7 +112,6 @@
   </main>
 
   <script>
-    // Keep year current
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
 </body>
