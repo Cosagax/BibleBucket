@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bible Bucket</title>
-  <meta name="description" content="BibleBucket — a clean, mobile-first hub for games, reading, and writings by Jake & August." />
+  <meta name="description" content="BibleBucket - a clean, mobile-first hub for games, reading, and writings by Jake & August." />
   <link rel="icon" type="image/png" href="assets/book.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,6 +33,8 @@
     .headline{font-size:clamp(28px,5vw,46px); line-height:1.05; margin:6px 0 10px}
     .sub{color:var(--muted)}
     .cta-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .btn{background:var(--brand);color:#000;font-weight:600;padding:10px 18px;border-radius:10px;display:inline-block;transition:all .2s ease}
+    .btn:hover{background:var(--accent);transform:translateY(-2px)}
 
     /* Grid tiles */
     .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
@@ -59,55 +61,55 @@
 
   <main class="wrap hero" id="home">
     <section class="card">
-      <h1 class="headline">Welcome a Bible Hub of Games, Comics, Removed Books, and other Bible Explorations.</h1>
-      <p class="sub">Built by Jake and August: games and readings based about the bible and also it's lost books and mysteries!</p>
+      <h1 class="headline">Welcome! This is a Bible hub of Games, Comics, and a place to Explore the Bible's mysteries.</h1>
+      <p class="sub">Built by Jake and August: games and readings based around the bible and also its lost books and mysteries!</p>
       <div class="cta-row">
-        <a class="btn" href="games/orbs/">?? Explore Games</a>
-        <a class="btn" href="construction.html">?? Start Reading</a>
-        <a class="btn" href="construction.html">?? What is BibleBucket?</a>
+        <a class="btn" href="games/orbs/">Explore Games</a>
+        <a class="btn" href="construction.html">Explore Mysteries</a>
+        <a class="btn" href="construction.html">What is Bible Bucket</a>
       </div>
     </section>
 
     <section class="grid" aria-label="Quick links">
-      <a class="tile" href="construction.html">
-        <h3>Comic Bible (PDF)</h3>
-        <p>Visual comic Bible Jake likes — we’ll host or link the PDF here.</p>
-        <span class="go">View ?</span>
-      </a>
       <a class="tile" href="games/orbs/">
         <h3>Backyard Orbs</h3>
         <p>Laser the fakes, spare the messengers. Touch-friendly, quick play.</p>
-        <span class="go">Open ?</span>
+        <span class="go">Open -></span>
       </a>
       <a class="tile" href="construction.html">
-        <h3>Reading Index — Complete</h3>
-        <p>Full Bible index in our chronological flow — includes the “missing” books we reference.</p>
-        <span class="go">Open Index ?</span>
+        <h3>Comic book Action Bible</h3>
+        <p>Read the comic book The Action Bible, here at Bible Bucket!</p>
+        <span class="go">View -></span>
+      </a>
+      <a class="tile" href="construction.html">
+        <h3>Complete Bible Index</h3>
+        <p>Full Bible index in our chronological flow - includes the "missing" books we reference.</p>
+        <span class="go">Open Index -></span>
       </a>
       <a class="tile" href="construction.html">
         <h3>Writings</h3>
         <p>Notes, reflections, and dev logs as we build.</p>
-        <span class="go">Browse ?</span>
+        <span class="go">Browse -></span>
       </a>
       <a class="tile" href="construction.html">
         <h3>Community</h3>
         <p>Prayer requests, ideas, and feedback (coming soon).</p>
-        <span class="go">Preview ?</span>
+        <span class="go">Preview -></span>
       </a>
       <a class="tile" href="construction.html">
         <h3>Game Roadmap</h3>
-        <p>What’s next after Orbs — tiny arcade experiments.</p>
-        <span class="go">See plans ?</span>
+        <p>What's next after Orbs - tiny arcade experiments.</p>
+        <span class="go">See plans -></span>
       </a>
       <a class="tile" href="construction.html">
         <h3>Dev Notes</h3>
-        <p>DNS & Pages config, structure, and build choices.</p>
-        <span class="go">Open ?</span>
+        <p>DNS and Pages config, structure, and build choices.</p>
+        <span class="go">Open -></span>
       </a>
     </section>
 
     <footer class="wrap">
-      <div class="sub">© <span id="year"></span> BibleBucket — Jake & August.</div>
+      <div class="sub">© <span id="year"></span> BibleBucket - Jake & August.</div>
     </footer>
   </main>
 
