@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,6 +44,8 @@
     .tile{background:linear-gradient(180deg, var(--card), var(--card2)); border:1px solid var(--line); border-radius:var(--radius); padding:16px; display:flex; flex-direction:column; gap:8px}
     .tile h3{margin:0}
     .tile p{margin:0;color:var(--muted)}
+    .status-new{color:limegreen;font-size:0.85em;font-weight:600;margin-left:6px}
+    .status-progress{color:orange;font-size:0.85em;font-weight:600;margin-left:6px}
     .tile .go{margin-top:auto; display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border-radius:12px; border:1px solid #243559}
     .tile .go:hover{transform:translateY(-1px)}
 
@@ -61,7 +64,7 @@
 
   <main class="wrap hero" id="home">
     <section class="card">
-      <h1 class="headline">Welcome! This is a Bible hub of Games, Comics, and a place to Explore the Bible's mysteries.</h1>
+      <h1 class="headline">Explore the Bible's mysteries.</h1>
       <p class="sub">Built by Jake and August: games and readings based around the bible and also its lost books and mysteries!</p>
       <div class="cta-row">
         <a class="btn" href="games/orbs/">Explore Games</a>
@@ -72,12 +75,12 @@
 
     <section class="grid" aria-label="Quick links">
       <a class="tile" href="games/orbs/">
-        <h3>Backyard Orbs</h3>
+        <h3>Backyard Orbs <span class="status-new">(new)</span></h3>
         <p>Laser the fakes, spare the messengers. Touch-friendly, quick play.</p>
         <span class="go">Open -></span>
       </a>
       <a class="tile" href="construction.html">
-        <h3>Comic book Action Bible</h3>
+        <h3>Comic book Action Bible <span class="status-progress">(in progress)</span></h3>
         <p>Read the comic book The Action Bible, here at Bible Bucket!</p>
         <span class="go">View -></span>
       </a>
