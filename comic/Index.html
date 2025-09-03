@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Action Bible – Comic Reader Index (Full Bible)</title>
+  <style>
+    :root { --bg:#0b0d10; --card:#12151a; --ink:#e8eef7; --muted:#9fb3c8; --accent:#66b2ff; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+    header{position:sticky;top:0;background:linear-gradient(180deg,#0b0d10,#0b0d10cc 70%,transparent);backdrop-filter:saturate(120%) blur(6px);z-index:10}
+    .wrap{max-width:1080px;margin:0 auto;padding:20px}
+    h1{font-size:clamp(22px,3vw,32px);margin:8px 0 12px;letter-spacing:.3px}
+    .sub{color:var(--muted);font-size:.95rem;margin-bottom:16px}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    input[type="search"],select{flex:1;min-width:180px;background:#0e1217;border:1px solid #1e2733;color:var(--ink);padding:10px 12px;border-radius:12px}
+    .btn{background:#0e1217;border:1px solid #1e2733;color:var(--ink);padding:10px 12px;border-radius:12px;cursor:pointer}
+    .btn:hover{border-color:#2f3d50}
+    .tabs{display:flex;gap:8px;margin-top:10px}
+    .tab{padding:8px 12px;border-radius:999px;border:1px solid #1e2733;cursor:pointer;color:var(--muted)}
+    .tab.active{color:var(--ink);border-color:#334358;background:#0f1319}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:18px}
+    .card{background:var(--card);border:1px solid #1b2330;border-radius:16px;padding:14px}
+    .title{font-weight:600;margin:4px 0 8px}
+    .meta{font-size:.9rem;color:var(--muted)}
+    a.cta{display:inline-flex;align-items:center;gap:8px;margin-top:10px;text-decoration:none;border:1px solid #243041;border-radius:12px;padding:8px 10px;color:var(--accent)}
+    a.cta:hover{background:#0e141c}
+    .parts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:18px}
+    .part{background:var(--card);border:1px solid #1b2330;border-radius:16px;padding:14px}
+    .pill{display:inline-block;background:#0f161f;border:1px solid #203044;color:var(--muted);padding:4px 8px;border-radius:999px;font-size:.85rem}
+    .notice{margin-top:14px;color:var(--muted);font-size:.92rem}
+    .footer{color:#7f94aa;font-size:.85rem;margin:28px 0 40px}
+    details.editor{margin-top:18px;border:1px dashed #2a394c;border-radius:14px;padding:10px}
+    details.editor summary{cursor:pointer;color:var(--accent)}
+    table{width:100%;border-collapse:separate;border-spacing:0 8px}
+    td,th{padding:6px 8px;text-align:left}
+    tr{background:#0f1319;border:1px solid #1b2230}
+    input.inline{width:64px;background:#0b1118;border:1px solid #1e2836;color:var(--ink);padding:6px;border-radius:8px}
+    .right{display:flex;gap:8px;justify-content:flex-end}
+    .viewer{margin-top:14px;display:grid;grid-template-columns:1fr;gap:8px}
+    .viewerbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    iframe{width:100%;height:min(80vh,900px);border:1px solid #1b2230;border-radius:14px;background:#0f1319}
+    .hint{color:#86a3bf;font-size:.85rem}
+    .warn{color:#ffb37b;font-size:.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>📖 Action Bible – Chapter Index (Genesis → Revelation)</h1>
+      <div class="sub">Chapter-by-chapter links into split PDFs in <code>/assets/</code>. Tap a chapter to jump to the right part & page. Use the built‑in editor to finalize exact page numbers from the comics.</div>
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="Search chapters… (e.g., Moses, David, Revelation)" />
+        <button class="btn" id="continueBtn">Continue reading</button>
+      </div>
+      <div class="tabs">
+        <div class="tab active" data-tab="chapters">Chapters</div>
+        <div class="tab" data-tab="parts">Parts (1–7)</div>
+        <div class="tab" data-tab="editor">Editor</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="chapters"></section>
+    <section id="parts" style="display:none"></section>
+
+    <section id="editpanel" style="display:none">
+      <details class="editor" open>
+        <summary>⚙️ Edit TOC (set part & page) and export <code>toc.json</code></summary>
+        <div class="warn">Heads‑up: The comic pages are images, so automatic detection isn’t reliable. This editor lets you set accurate starts fast using the live PDF viewer below.</div>
+        <div id="editor"></div>
+        <div class="right" style="margin-top:10px">
+          <button class="btn" id="reset">Reset to defaults</button>
+          <button class="btn" id="download">Download toc.json</button>
+        </div>
+      </details>
+
+      <div class="viewer">
+        <div class="viewerbar">
+          <span class="hint">PDF preview:</span>
+          <label>Part
+            <select id="partSel"></select>
+          </label>
+          <label>Page <input class="inline" id="pageInput" type="number" min="1" value="1" /></label>
+          <button class="btn" id="openPage">Open page</button>
+          <button class="btn" id="setForRow">Set start for selected chapter</button>
+          <span class="hint" id="selHint">No chapter selected yet.</span>
+        </div>
+        <iframe id="pdfFrame" title="PDF preview"></iframe>
+      </div>
+    </section>
+
+    <p class="footer">Tip: Most browsers accept <code>#page=</code> anchors in PDF URLs. Example: <code>assets/comic_003.pdf#page=17</code>.</p>
+  </main>
+
+  <script>
+    // === File locations (already uploaded under /assets/) ===
+    const PARTS = [1,2,3,4,5,6,7].map(n => ({ n, href: `assets/comic_00${n}.pdf` }));
+
+    // === Full Bible default TOC (book-level; adjust pages to match your comic) ===
+    // Pages default to 1; update via the Editor while previewing.
+    const BOOKS = [
+      "Genesis","Exodus","Leviticus","Numbers","Deuteronomy","Joshua","Judges","Ruth","1 Samuel","2 Samuel","1 Kings","2 Kings","1 Chronicles","2 Chronicles","Ezra","Nehemiah","Esther","Job","Psalms","Proverbs","Ecclesiastes","Song of Solomon","Isaiah","Jeremiah","Lamentations","Ezekiel","Daniel","Hosea","Joel","Amos","Obadiah","Jonah","Micah","Nahum","Habakkuk","Zephaniah","Haggai","Zechariah","Malachi",
+      "Matthew","Mark","Luke","John","Acts","Romans","1 Corinthians","2 Corinthians","Galatians","Ephesians","Philippians","Colossians","1 Thessalonians","2 Thessalonians","1 Timothy","2 Timothy","Titus","Philemon","Hebrews","James","1 Peter","2 Peter","1 John","2 John","3 John","Jude","Revelation"
+    ];
+
+    // Rough default part distribution (tweak freely in editor)
+    const PART_BY_BOOK = idx => {
+      // Heuristic: OT across 1–4, Gospels 5–6, Acts–Rev in 7
+      if (idx < 39) { // OT (39)
+        return idx < 10 ? 1 : idx < 20 ? 2 : idx < 30 ? 3 : 4;
+      } else if (idx < 43) { // Gospels
+        return 5 + (idx-39 > 1 ? 1 : 0); // Matthew, Mark -> 5; Luke, John -> 6
+      } else if (idx === 43) { // Acts
+        return 7; 
+      } else { // Epistles & Revelation
+        return 7;
+      }
+    };
+
+    const DEFAULT_TOC = BOOKS.map((title, i) => ({ title, part: PART_BY_BOOK(i), page: 1 }));
+
+    // Load saved TOC if available
+    const saved = localStorage.getItem('actionBibleTOC_full');
+    let TOC = saved ? JSON.parse(saved) : DEFAULT_TOC;
+
+    // === Rendering ===
+    const elChapters = document.getElementById('chapters');
+    const elParts = document.getElementById('parts');
+    const elSearch = document.getElementById('search');
+    const elEditPanel = document.getElementById('editpanel');
+
+    function pdfHref(part, page){
+      const p = PARTS.find(x => x.n === Number(part));
+      return p ? `${p.href}#page=${page}` : '#';
+    }
+
+    function chapterCard(item, i){
+      const href = pdfHref(item.part, item.page);
+      const disabled = !item.part || !item.page;
+      return `
+        <div class="card" data-i="${i}">
+          <div class="pill">${i+1 <= 39 ? 'OT' : 'NT'} · #${i+1}</div>
+          <div class="title">${item.title}</div>
+          <div class="meta">Part ${item.part ?? '—'} · Page ${item.page ?? '—'}</div>
+          ${disabled ? `<span class="meta">Set part/page in Editor ↓</span>` : `<a class=\"cta\" href=\"${href}\" target=\"_blank\">Open chapter →</a>`}
+        </div>
+      `;
+    }
+
+    function renderChapters(filter=""){
+      const q = filter.trim().toLowerCase();
+      const list = q ? TOC.filter(x => (x.title+" "+x.part+" "+x.page).toLowerCase().includes(q)) : TOC;
+      elChapters.innerHTML = `
+        <div class="grid">${list.map((x,i)=>chapterCard(x,i)).join('')}</div>
+        <div class="notice">${list.length} chapter${list.length!==1?'s':''} shown.</div>
+      `;
+    }
+
+    function renderParts(){
+      elParts.innerHTML = `
+        <div class="parts">
+          ${PARTS.map(p=>`
+            <div class="part">
+              <div class="title">Part ${p.n}</div>
+              <div class="meta">File: <code>${p.href}</code></div>
+              <a class="cta" href="${p.href}" target="_blank">Open PDF →</a>
+            </div>`).join('')}
+        </div>`;
+    }
+
+    renderChapters();
+    renderParts();
+
+    // Tabs
+    document.querySelectorAll('.tab').forEach(t=>{
+      t.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+        t.classList.add('active');
+        const which = t.dataset.tab;
+        elChapters.style.display = which==='chapters' ? '' : 'none';
+        elParts.style.display = which==='parts' ? '' : 'none';
+        elEditPanel.style.display = which==='editor' ? '' : 'none';
+      });
+    });
+
+    // Search
+    elSearch.addEventListener('input', e=>renderChapters(e.target.value));
+
+    // Remember last opened link
+    document.body.addEventListener('click', (e) => {
+      const a = e.target.closest('a.cta');
+      if(a){
+        localStorage.setItem('actionBibleLast_full', a.href);
+      }
+    });
+
+    // Continue reading
+    const contBtn = document.getElementById('continueBtn');
+    const last = localStorage.getItem('actionBibleLast_full');
+    if(last){
+      contBtn.style.display = 'inline-block';
+      contBtn.addEventListener('click', ()=> window.open(last, '_blank'));
+    }
+
+    // === Inline TOC editor with PDF preview ===
+    const elEditor = document.getElementById('editor');
+    let selectedRow = -1;
+
+    function renderEditor(){
+      elEditor.innerHTML = `
+        <table>
+          <thead>
+            <tr style="background:transparent;border:none">
+              <th>#</th><th>Title</th><th>Part</th><th>Page</th><th>Link</th>
+            </tr>
+          </thead>
+          <tbody>
+          ${TOC.map((x,i)=>`
+            <tr data-row="${i}" style="${i===selectedRow?'outline:2px solid #2b65ff':''}">
+              <td class="meta">${i+1}</td>
+              <td><input class="inline" style="width:260px" value="${x.title.replace(/\"/g,'&quot;')}" data-k="title" data-i="${i}" /></td>
+              <td><input class="inline" type="number" min="1" max="7" value="${x.part}" data-k="part" data-i="${i}" /></td>
+              <td><input class="inline" type="number" min="1" value="${x.page}" data-k="page" data-i="${i}" /></td>
+              <td>${x.part && x.page ? `<a class=\"cta\" href=\"${pdfHref(x.part,x.page)}\" target=\"_blank\">Test →</a>` : '<span class="meta">—</span>'}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>`;
+
+      elEditor.querySelectorAll('input').forEach(inp=>{
+        inp.addEventListener('change', (e)=>{
+          const i = Number(e.target.dataset.i);
+          const k = e.target.dataset.k;
+          const val = k==='title' ? e.target.value : Number(e.target.value);
+          TOC[i][k] = val;
+          localStorage.setItem('actionBibleTOC_full', JSON.stringify(TOC));
+          renderChapters(elSearch.value);
+          renderEditor();
+        });
+      });
+
+      elEditor.querySelectorAll('tr[data-row]').forEach(tr=>{
+        tr.addEventListener('click', ()=>{
+          selectedRow = Number(tr.getAttribute('data-row'));
+          renderEditor();
+          updateSelHint();
+        });
+      });
+    }
+    renderEditor();
+
+    // Reset / Download
+    document.getElementById('reset').addEventListener('click', ()=>{
+      if(confirm('Reset TOC to defaults (books with heuristic parts)?')){
+        TOC = JSON.parse(JSON.stringify(DEFAULT_TOC));
+        localStorage.setItem('actionBibleTOC_full', JSON.stringify(TOC));
+        renderChapters(elSearch.value); renderEditor();
+      }
+    });
+
+    document.getElementById('download').addEventListener('click', ()=>{
+      const blob = new Blob([JSON.stringify(TOC, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'toc.json'; a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // === PDF Viewer controls ===
+    const partSel = document.getElementById('partSel');
+    const pageInput = document.getElementById('pageInput');
+    const openPageBtn = document.getElementById('openPage');
+    const setForRowBtn = document.getElementById('setForRow');
+    const pdfFrame = document.getElementById('pdfFrame');
+    const selHint = document.getElementById('selHint');
+
+    function updateSelHint(){
+      if(selectedRow < 0){ selHint.textContent = 'No chapter selected yet.'; return; }
+      selHint.textContent = `Selected: #${selectedRow+1} – ${TOC[selectedRow].title}`;
+    }
+
+    PARTS.forEach(p=>{
+      const opt = document.createElement('option');
+      opt.value = p.n; opt.textContent = `Part ${p.n}`; partSel.appendChild(opt);
+    });
+
+    function openCurrent(){
+      const part = Number(partSel.value || 1);
+      const page = Number(pageInput.value || 1);
+      pdfFrame.src = `${pdfHref(part, page)}`;
+    }
+
+    openPageBtn.addEventListener('click', openCurrent);
+    setForRowBtn.addEventListener('click', ()=>{
+      if(selectedRow < 0){ alert('Select a chapter row in the table first.'); return; }
+      const part = Number(partSel.value || 1);
+      const page = Number(pageInput.value || 1);
+      TOC[selectedRow].part = part; TOC[selectedRow].page = page;
+      localStorage.setItem('actionBibleTOC_full', JSON.stringify(TOC));
+      renderChapters(elSearch.value); renderEditor(); updateSelHint();
+    });
+
+    // Default viewer to Part 1, Page 1
+    partSel.value = 1; pageInput.value = 1; openCurrent(); updateSelHint();
+  </script>
+</body>
+</html>
