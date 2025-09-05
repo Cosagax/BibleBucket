@@ -24,8 +24,8 @@
     header{position:sticky;top:0;z-index:10;background:linear-gradient(0deg, rgba(11,15,23,0), rgba(11,15,23,.9) 70%, rgba(11,15,23,1)); border-bottom:1px solid rgba(255,255,255,.06); backdrop-filter:saturate(130%) blur(6px)}
     .nav{display:flex;align-items:center;justify-content:flex-start;padding:12px 8px}
     .brand{display:flex;align-items:center;gap:12px}
-    .logo{width:100px;height:100px; object-fit:contain; display:block}
-    .title{font-weight:800;letter-spacing:.4px; font-size:2rem}
+    .logo{width:60px;height:60px;object-fit:contain;display:block}
+    .title{font-weight:800;letter-spacing:.4px; font-size:1.8rem}
 
     /* Hero */
     .hero{padding:40px 12px 16px}
@@ -43,9 +43,10 @@
     .tile{background:linear-gradient(180deg, var(--card), var(--card2)); border:1px solid var(--line); border-radius:var(--radius); padding:16px; display:flex; flex-direction:column; gap:8px}
     .tile h3{margin:0}
     .tile p{margin:0;color:var(--muted)}
-    .status-new{color:limegreen;font-size:0.85em;font-weight:600;margin-left:6px}
     .tile .go{margin-top:auto; display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border-radius:12px; border:1px solid #243559}
     .tile .go:hover{transform:translateY(-1px)}
+
+    .new-label{color:limegreen; font-weight:bold;}
 
     footer{opacity:.85;font-size:13px;padding:28px 12px 50px}
   </style>
@@ -73,39 +74,39 @@
 
     <section class="grid" aria-label="Quick links">
       <a class="tile" href="games/orbs/">
-        <h3>Backyard Orbs <span class="status-new">(new)</span></h3>
+        <h3>Backyard Orbs <span class="new-label">(new)</span></h3>
         <p>Laser the fakes, spare the messengers. Touch-friendly, quick play.</p>
-        <span class="go">Open -></span>
+        <span class="go">Open ?</span>
       </a>
       <a class="tile" href="comic/index.html">
-        <h3>Comic book Action Bible <span class="status-new">(new)</span></h3>
+        <h3>Comic book Action Bible <span class="new-label">(new)</span></h3>
         <p>Read the comic book The Action Bible, here at Bible Bucket!</p>
-        <span class="go">View -></span>
+        <span class="go">View ?</span>
       </a>
-      <a class="tile" href="construction.html">
-        <h3>Complete Bible Index</h3>
-        <p>Full Bible index in our chronological flow - includes the "missing" books we reference.</p>
-        <span class="go">Open Index -></span>
+      <a class="tile" href="bibleindex/index.html">
+        <h3>Complete Bible Index <span class="new-label">(new)</span></h3>
+        <p>Full Bible index in our chronological flow – includes the "missing" books we reference.</p>
+        <span class="go">Open Index ?</span>
       </a>
       <a class="tile" href="construction.html">
         <h3>Writings</h3>
         <p>Notes, reflections, and dev logs as we build.</p>
-        <span class="go">Browse -></span>
+        <span class="go">Browse ?</span>
       </a>
       <a class="tile" href="construction.html">
         <h3>Community</h3>
         <p>Prayer requests, ideas, and feedback (coming soon).</p>
-        <span class="go">Preview -></span>
+        <span class="go">Preview ?</span>
       </a>
       <a class="tile" href="construction.html">
         <h3>Game Roadmap</h3>
         <p>What's next after Orbs - tiny arcade experiments.</p>
-        <span class="go">See plans -></span>
+        <span class="go">See plans ?</span>
       </a>
       <a class="tile" href="construction.html">
         <h3>Dev Notes</h3>
         <p>DNS and Pages config, structure, and build choices.</p>
-        <span class="go">Open -></span>
+        <span class="go">Open ?</span>
       </a>
     </section>
 
