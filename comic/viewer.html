@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Comic Viewer</title>
+  <style>
+    :root{--bg:#0b0d10;--ink:#e8eef7;--muted:#9fb3c8}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif}
+    header{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #1b2330;background:#0f1319;position:sticky;top:0;z-index:5}
+    a{color:#8ec7ff;text-decoration:none}
+    .btn{background:#0e1217;border:1px solid #1e2733;color:var(--ink);padding:8px 10px;border-radius:10px;cursor:pointer}
+    .btn:hover{border-color:#2f3d50}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    iframe,embed,object{width:100%;height:min(86vh,1200px);border:0}
+    main{padding:10px}
+    .muted{color:var(--muted)}
+    .input{background:#0e1217;border:1px solid #1e2733;color:var(--ink);padding:6px 8px;border-radius:8px;width:72px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="row">
+      <a href="Index.html">← Back to Index</a>
+      <span class="muted" id="label"></span>
+    </div>
+    <div class="row">
+      <button class="btn" id="prevChapter">⟨ Prev chapter</button>
+      <button class="btn" id="nextChapter">Next chapter ⟩</button>
+    </div>
+  </header>
+  <main>
+    <div class="row" style="margin-bottom:10px">
+      <label>Part <input id="part" class="input" type="number" min="1" max="7"></label>
+      <label>Page <input id="page" class="input" type="number" min="1"></label>
+      <button class="btn" id="go">Go</button>
+      <span class="muted">Tip: add <code>&view=FitH</code> to fit width.</span>
+    </div>
+    <iframe id="frame" title="Comic PDF"></iframe>
+  </main>
+  <script>
+    // Build the raw PDF url from part/page
+    function pdfUrl(part,page){
+      const p = String(part).padStart(2,'0');
+      return `../assets/comic_00${part}.pdf#page=${page}`;
+    }
+
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
+    const frame = document.getElementById('frame');
+    const partInput = document.getElementById('part');
+    const pageInput = document.getElementById('page');
+    const label = document.getElementById('label');
+
+    function load(){
+      const part = Number(params.get('part')||1);
+      const page = Number(params.get('page')||1);
+      partInput.value = part; pageInput.value = page;
+      frame.src = pdfUrl(part,page);
+      label.textContent = `Part ${part} · Page ${page}`;
+      // remember position
+      localStorage.setItem('actionBibleLast_full', frame.src);
+    }
+
+    document.getElementById('go').addEventListener('click', ()=>{
+      const part = Number(partInput.value||1);
+      const page = Number(pageInput.value||1);
+      params.set('part', String(part));
+      params.set('page', String(page));
+      history.replaceState(null, '', `?${params.toString()}`);
+      load();
+    });
+
+    // Simple prev/next handlers — rely on index storing an ordered TOC in localStorage
+    function moveChapter(delta){
+      try{
+        const toc = JSON.parse(localStorage.getItem('actionBibleTOC_full'));
+        const currentHref = localStorage.getItem('actionBibleLast_full');
+        if(!toc || !currentHref) return;
+        const idx = toc.findIndex(x => currentHref.includes(`comic_00${x.part}.pdf#page=${x.page}`));
+        if(idx<0) return;
+        const n = toc[idx+delta]; if(!n) return;
+        params.set('part', String(n.part));
+        params.set('page', String(n.page));
+        history.replaceState(null,'',`?${params.toString()}`);
+        load();
+      }catch(e){}
+    }
+    document.getElementById('prevChapter').addEventListener('click', ()=>moveChapter(-1));
+    document.getElementById('nextChapter').addEventListener('click', ()=>moveChapter(1));
+
+    load();
+  </script>
+</body>
+</html>
