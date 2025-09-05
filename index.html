@@ -16,14 +16,23 @@
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; color:var(--ink); background:radial-gradient(1000px 700px at 50% -10%, #14213f 0%, #0e162b 50%, var(--bg) 100%); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility}
+    body{
+      margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      color:var(--ink);
+      background:radial-gradient(1000px 700px at 50% -10%, #14213f 0%, #0e162b 50%, var(--bg) 100%);
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    }
     a{color:inherit; text-decoration:none}
     .wrap{max-width:1100px;margin:0 auto;padding:16px}
+
+    /* Header */
     header{position:sticky;top:0;z-index:10;background:linear-gradient(0deg, rgba(11,15,23,0), rgba(11,15,23,.9) 70%, rgba(11,15,23,1)); border-bottom:1px solid rgba(255,255,255,.06); backdrop-filter:saturate(130%) blur(6px)}
     .nav{display:flex;align-items:center;justify-content:flex-start;padding:12px 8px}
     .brand{display:flex;align-items:center;gap:12px}
     .logo{width:60px;height:60px; object-fit:contain; display:block}
     .title{font-weight:800;letter-spacing:.4px; font-size:2rem}
+
+    /* Hero */
     .hero{padding:40px 12px 16px}
     .card{background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0)); border:1px solid rgba(255,255,255,.06); border-radius:var(--radius); padding:22px; box-shadow:0 10px 40px rgba(0,0,0,.25)}
     .headline{font-size:clamp(28px,5vw,46px); line-height:1.05; margin:6px 0 10px}
@@ -31,6 +40,8 @@
     .cta-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
     .btn{background:var(--brand);color:#000;font-weight:600;padding:10px 18px;border-radius:10px;display:inline-block;transition:all .2s ease}
     .btn:hover{background:var(--accent);transform:translateY(-2px)}
+
+    /* Grid */
     .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
     @media (max-width: 980px){.grid{grid-template-columns:repeat(2,1fr)}}
     @media (max-width: 640px){.grid{grid-template-columns:1fr}}
@@ -41,6 +52,7 @@
     .tile .go:hover{transform:translateY(-1px)}
     .new-label { color: #00c853; font-weight: bold; }
     .coming { color: orange; font-weight: bold; }
+
     footer{opacity:.85;font-size:13px;padding:28px 12px 50px}
   </style>
 </head>
@@ -69,37 +81,43 @@
       <a class="tile" href="games/orbs/">
         <h3>Backyard Orbs <span class="new-label">(new)</span></h3>
         <p>Laser the fakes, spare the messengers. Touch-friendly, quick play.</p>
-        <span class="go">Open ?</span>
+        <span class="go">Open ></span>
       </a>
+
       <a class="tile" href="comic/index.html">
         <h3>Comic book Action Bible <span class="new-label">(new)</span></h3>
         <p>Read the comic book The Action Bible, here at Bible Bucket!</p>
-        <span class="go">View ?</span>
+        <span class="go">View ></span>
       </a>
+
       <a class="tile" href="bibleindex/index.html">
         <h3>Complete Bible Index <span class="new-label">(new)</span></h3>
-        <p>Full Bible index in our chronological flow – includes the "missing" books we reference.</p>
-        <span class="go">Open Index ?</span>
+        <p>Full Bible index in our chronological flow - includes the "missing" books we reference.</p>
+        <span class="go">Open Index ></span>
       </a>
+
       <a class="tile" href="construction.html">
         <h3>Mysteries and Artifacts <span class="coming">(coming soon)</span></h3>
         <p>Dive into some Rabbit Holes and review some Artifacts</p>
-        <span class="go">Browse ?</span>
+        <span class="go">Browse ></span>
       </a>
+
       <a class="tile" href="construction.html">
         <h3>Community</h3>
         <p>Prayer requests, ideas, and feedback (coming soon).</p>
-        <span class="go">Preview ?</span>
+        <span class="go">Preview ></span>
       </a>
+
       <a class="tile" href="construction.html">
         <h3>Game Roadmap</h3>
         <p>What's next after Orbs - tiny arcade experiments.</p>
-        <span class="go">See plans ?</span>
+        <span class="go">See plans ></span>
       </a>
+
       <a class="tile" href="construction.html">
         <h3>Dev Notes</h3>
         <p>DNS and Pages config, structure, and build choices.</p>
-        <span class="go">Open ?</span>
+        <span class="go">Open ></span>
       </a>
     </section>
 
