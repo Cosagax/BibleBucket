@@ -4,65 +4,78 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>BibleBucket</title>
-  <meta name="description" content="BibleBucket - games, mysteries, and readings built by Jake & August." />
+  <meta name="description" content="BibleBucket - a hub for games, comics, and mysteries built by Jake & August." />
   <link rel="icon" type="image/png" href="assets/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg:#0d1117; --ink:#f0f6fc; --muted:#a6b3c9;
-      --line:#1a2540; --card:#161b22; --card2:#1c2330;
-      --brand:#58a6ff; --accent:#ffd36a; --radius:18px;
-      --success:#3fb950; --warn:#f0883e;
+    :root{
+      --bg:#0b0f17; --ink:#e9efff; --muted:#a6b3d1; --line:#1a2540;
+      --card:#0f1626; --card2:#101a2e; --brand:#7cc4ff; --accent:#ffd36a; --radius:18px;
     }
     *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);}
-    a{color:inherit;text-decoration:none}
-
+    html,body{height:100%}
+    body{margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; color:var(--ink); background:radial-gradient(1000px 700px at 50% -10%, #14213f 0%, #0e162b 50%, var(--bg) 100%); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility}
+    a{color:inherit; text-decoration:none}
     .wrap{max-width:1100px;margin:0 auto;padding:16px}
 
     /* Header */
-    header{padding:16px;display:flex;align-items:center;gap:16px}
-    header img{height:80px;width:80px}
-    header .title{font-size:2.4rem;font-weight:800}
+    header{position:sticky;top:0;z-index:10;background:linear-gradient(0deg, rgba(11,15,23,0), rgba(11,15,23,.9) 70%, rgba(11,15,23,1)); border-bottom:1px solid rgba(255,255,255,.06); backdrop-filter:saturate(130%) blur(6px)}
+    .nav{display:flex;align-items:center;justify-content:flex-start;padding:12px 8px}
+    .brand{display:flex;align-items:center;gap:14px}
+    .logo{width:120px;height:120px; object-fit:contain; display:block}
+    .title{font-weight:800;letter-spacing:.4px; font-size:2.6rem}
 
     /* Hero */
-    .hero{padding:20px 12px}
-    .headline{font-size:clamp(28px,5vw,46px);font-weight:800;margin:6px 0}
-    .sub{color:var(--muted);margin-bottom:12px}
+    .hero{padding:40px 12px 16px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0)); border:1px solid rgba(255,255,255,.06); border-radius:var(--radius); padding:22px; box-shadow:0 10px 40px rgba(0,0,0,.25)}
+    .headline{font-size:clamp(28px,5vw,46px); line-height:1.05; margin:6px 0 10px}
+    .sub{color:var(--muted)}
     .cta-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-    .btn{background:var(--brand);color:#000;font-weight:600;padding:10px 18px;border-radius:10px;transition:all .2s ease}
+    .btn{background:var(--brand);color:#000;font-weight:600;padding:10px 18px;border-radius:10px;display:inline-block;transition:all .2s ease}
     .btn:hover{background:var(--accent);transform:translateY(-2px)}
 
-    /* Grid */
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:20px}
-    .tile{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:8px}
-    .tile h3{margin:0;font-size:1.1rem}
+    /* Grid tiles */
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+    @media (max-width: 980px){.grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width: 640px){.grid{grid-template-columns:1fr}}
+    .tile{background:linear-gradient(180deg, var(--card), var(--card2)); border:1px solid var(--line); border-radius:var(--radius); padding:16px; display:flex; flex-direction:column; gap:8px}
+    .tile h3{margin:0}
     .tile p{margin:0;color:var(--muted)}
-    .tile .go{margin-top:auto;display:inline-flex;align-items:center;gap:6px;padding:10px 12px;border-radius:12px;border:1px solid #243559}
-    .badge-new{color:var(--success);font-weight:600;margin-left:4px}
-    .badge-soon{color:var(--warn);font-weight:600;margin-left:4px}
+    .tile .go{margin-top:auto; display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border-radius:12px; border:1px solid #243559}
+    .tile .go:hover{transform:translateY(-1px)}
 
-    footer{opacity:.7;font-size:13px;padding:28px 12px;text-align:center}
+    footer{opacity:.85;font-size:13px;padding:28px 12px 50px}
+    .badge-new{color:#4ade80;font-weight:600;margin-left:6px}
+    .badge-soon{color:#fbbf24;font-weight:600;margin-left:6px}
   </style>
 </head>
 <body>
-  <header class="wrap">
-    <img src="assets/logo.png" alt="BibleBucket logo"/>
-    <div class="title">BibleBucket</div>
+  <header>
+    <div class="wrap nav">
+      <div class="brand">
+        <img class="logo" src="assets/logo.png" alt="BibleBucket logo" />
+        <div class="title">BibleBucket</div>
+      </div>
+    </div>
   </header>
 
-  <main class="wrap hero">
-    <h1 class="headline">Explore the Bible's mysteries.</h1>
-    <p class="sub">Built by Jake and August: games and mysteries based around the Bible and also its lost books!</p>
-    <div class="cta-row">
-      <a class="btn" href="games/index.html">Explore Games</a>
-      <a class="btn" href="mysteries/index.html">Explore Mysteries</a>
-      <a class="btn" href="about.html">What is Bible Bucket</a>
-    </div>
+  <main class="wrap hero" id="home">
+    <section class="card">
+      <h1 class="headline">Explore the Bible's mysteries.</h1>
+      <p class="sub">Built by Jake and August: games and readings based around the Bible and also its lost books and mysteries!</p>
+      <div class="cta-row">
+        <a class="btn" href="games/index.html">Explore Games</a>
+        <a class="btn" href="mysteries/index.html">Explore Mysteries</a>
+        <a class="btn" href="about.html">What is Bible Bucket</a>
+      </div>
+    </section>
 
-    <section class="grid">
+    <section class="grid" aria-label="Quick links">
       <a class="tile" href="games/orbs/">
         <h3>Backyard Orbs <span class="badge-new">(new)</span></h3>
-        <p>Laser the fakes, spare the messengers. Touch-friendly, quick play.</p>
+        <p>Collect the glowing orbs to score points and avoid the drones that drain them. Touch-friendly, quick play.</p>
         <span class="go">Open &rarr;</span>
       </a>
       <a class="tile" href="comic/index.html">
@@ -72,12 +85,12 @@
       </a>
       <a class="tile" href="bibleindex/index.html">
         <h3>Complete Bible Index <span class="badge-new">(new)</span></h3>
-        <p>Full Bible index in our chronological flow – includes the "missing" books we reference.</p>
+        <p>Full Bible index in our chronological flow &ndash; includes the "missing" books we reference.</p>
         <span class="go">Open Index &rarr;</span>
       </a>
       <a class="tile" href="mysteries/index.html">
         <h3>Mysteries and Artifacts <span class="badge-new">(new)</span></h3>
-        <p>Dive into some Rabbit Holes and review some Artifacts.</p>
+        <p>Dive into some Rabbit Holes and review some Artifacts</p>
         <span class="go">Browse &rarr;</span>
       </a>
       <a class="tile" href="construction.html">
@@ -86,10 +99,10 @@
         <span class="go">Preview &rarr;</span>
       </a>
     </section>
-  </main>
 
-  <footer>
-    &copy; 2025 BibleBucket – Jake & August.
-  </footer>
+    <footer class="wrap">
+      <div class="sub">&copy; 2025 BibleBucket - Jake &amp; August.</div>
+    </footer>
+  </main>
 </body>
 </html>
