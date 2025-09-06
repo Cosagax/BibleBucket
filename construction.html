@@ -6,54 +6,80 @@
   <title>BibleBucket • Under Construction</title>
   <link rel="icon" type="image/png" href="assets/logo.png" />
   <style>
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      background: radial-gradient(1000px 700px at 50% -10%, #14213f 0%, #0e162b 50%, #0b0f17 100%);
-      color: #e9efff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
-      padding: 20px;
+    :root{
+      --bg:#0b2547;           /* match the bucket tile background */
+      --bg2:#0f1d39;
+      --fg:#e9efff;
+      --muted:#a6b3d1;
+      --rule:#243559;
+      --accent:#58a6ff;
+      --radius:12px;
     }
-    img {
-      width: 100px;
-      height: auto;
-      margin-bottom: 20px;
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--fg);
+      display:flex;
+      flex-direction:column;
+      min-height:100%;
     }
-    h1 {
-      font-size: 2rem;
-      margin: 0 0 10px;
-    }
-    p {
-      color: #a6b3d1;
-      margin: 0 0 20px;
-      font-size: 1rem;
-    }
-    a {
-      display: inline-block;
-      margin-top: 10px;
-      padding: 10px 18px;
-      border-radius: 12px;
-      border: 1px solid #243559;
-      background: #0f1626;
-      color: #e9efff;
-      text-decoration: none;
-      font-weight: 600;
-    }
-    a:hover {
-      transform: translateY(-1px);
-      background: #162540;
-    }
+    /* Top bar (same vibe as the site) */
+    .topbar{display:flex;gap:14px;align-items:center;padding:16px 20px;background:var(--bg2);border-bottom:1px solid var(--rule)}
+    .logo{width:56px;height:56px;border-radius:10px;background:var(--bg);display:grid;place-items:center;overflow:hidden}
+    .logo img{width:56px;height:56px;display:block}
+    .brand h1{font-size:28px;margin:0}
+    .brand .sub{color:var(--muted);font-size:14px}
+    .navline{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+    .btn{background:var(--bg2);border:1px solid var(--rule);color:var(--fg);padding:10px 14px;border-radius:10px;text-decoration:none;font-weight:600}
+    .btn:hover{border-color:var(--accent)}
+
+    /* Center card */
+    .wrap{flex:1;display:grid;place-items:center;padding:24px}
+    .card{max-width:760px;width:100%;background:var(--bg2);border:1px solid var(--rule);border-radius:var(--radius);padding:28px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    .card img{width:96px;height:auto;margin-bottom:14px}
+    h1{margin:0 0 6px;font-size:28px}
+    p{margin:0 0 18px;color:var(--muted)}
+    .cta{display:inline-block;margin-top:6px;padding:10px 18px;border-radius:12px;border:1px solid var(--rule);background:#0f1626;color:var(--fg);text-decoration:none;font-weight:700}
+    .cta:hover{transform:translateY(-1px);background:#162540}
+
+    .footer{border-top:1px solid var(--rule);color:var(--muted);padding:14px 20px;text-align:center}
+    @media (max-width:520px){.navline{display:none}}
   </style>
 </head>
 <body>
-  <img src="assets/logo.png" alt="BibleBucket logo" />
-  <h1>🚧 BibleBucket is under construction 🚧</h1>
-  <p>Please come back later when this section is updated.</p>
-  <a href="index.html">⬅ Back to Home</a>
+
+  <!-- Header + Nav -->
+  <header class="topbar">
+    <div class="logo"><img src="assets/logo.png" alt="BibleBucket logo"></div>
+    <div class="brand">
+      <h1>BibleBucket</h1>
+      <div class="sub">Mysteries & Rabbit Holes</div>
+    </div>
+    <nav class="navline">
+      <a class="btn" href="index.html">Home</a>
+      <a class="btn" href="games/index.html">Games</a>
+      <a class="btn" href="comic/index.html">Comics</a>
+      <a class="btn" href="mysteries/index.html">Mysteries</a>
+      <a class="btn" href="bibleindex/index.html">Complete Bible Index</a>
+      <a class="btn" href="about.html">About</a>
+    </nav>
+  </header>
+
+  <!-- Centered message -->
+  <main class="wrap">
+    <div class="card">
+      <img src="assets/logo.png" alt="BibleBucket logo">
+      <h1>🚧 BibleBucket is under construction 🚧</h1>
+      <p>Please come back later when this section is updated.</p>
+      <a class="cta" href="index.html">⬅ Back to Home</a>
+    </div>
+  </main>
+
+  <footer class="footer">
+    Built by Jake & August • BibleBucket
+  </footer>
+
 </body>
 </html>
