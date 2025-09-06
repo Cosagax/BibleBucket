@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mysteries — BibleBucket</title>
+  <meta name="description" content="A growing shelf of deep dives: Babylon 2.0, the Trumpets, Enoch, Thomas, the Shroud of Turin, and more." />
+  <style>
+    :root{
+      --bg:#0d1117; --bg2:#161b22; --fg:#c9d1d9; --accent:#58a6ff;
+      --rule:#30363d; --muted:#9ca3af; --ok:#2ecc71; --warn:#e74c3c; --note:#9b9b9b;
+      --radius:12px;
+    }
+    html,body{background:var(--bg);color:var(--fg);margin:0;font-family:ui-sans-serif,system-ui,Segoe UI,Helvetica,Arial,sans-serif}
+    a{color:inherit}
+    .wrap{max-width:1100px;margin:0 auto;padding:24px 20px}
+    .topbar{display:flex;gap:14px;align-items:center;padding:16px 20px}
+    .logo{width:56px;height:56px;border-radius:10px;background:#0b2547;display:grid;place-items:center;overflow:hidden}
+    .logo img{width:56px;height:56px;display:block}
+    .brand h1{font-size:32px;line-height:1.1;margin:0}
+    .brand .sub{color:var(--muted);font-size:14px;margin-top:2px}
+    .navline{margin-left:auto;display:flex;gap:10px}
+    .btn{background:var(--bg2);border:1px solid var(--rule);color:var(--fg);padding:10px 14px;border-radius:10px;text-decoration:none;font-weight:600}
+    .btn:hover{border-color:var(--accent)}
+    .hero{background:linear-gradient(180deg, rgba(88,166,255,.12), rgba(0,0,0,0));border-bottom:1px solid var(--rule)}
+    .hero-inner{max-width:1100px;margin:0 auto;padding:28px 20px 18px}
+    .hero h2{font-size:36px;margin:0 0 6px}
+    .hero p{color:var(--muted);margin:0}
+    .shelf{padding:10px 0 36px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+    .card{background:var(--bg2);border:1px solid var(--rule);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:8px;position:relative;transition:transform .12s ease, border-color .12s ease}
+    .card.link{cursor:pointer;text-decoration:none}
+    .card.link:hover{transform:translateY(-2px);border-color:var(--accent)}
+    .kicker{color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+    .title{font-size:20px;margin:0}
+    .desc{opacity:.9;margin:0}
+    .cta{margin-top:auto;color:var(--accent);font-weight:600}
+    .badge{position:absolute;top:12px;right:12px;background:#223; border:1px solid var(--rule); color:#e2e8f0; padding:4px 10px; border-radius:999px; font-size:12px}
+    .footer{border-top:1px solid var(--rule);color:var(--muted);padding:14px 20px;text-align:center}
+    @media (max-width:520px){
+      .brand h1{font-size:26px}
+      .logo{width:48px;height:48px}
+      .logo img{width:48px;height:48px}
+      .navline{display:none}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- top bar with logo + quick nav -->
+  <header class="topbar">
+    <div class="logo">
+      <img src="../assets/logo.png" alt="BibleBucket logo">
+    </div>
+    <div class="brand">
+      <h1>BibleBucket</h1>
+      <div class="sub">Explore the Bible’s mysteries.</div>
+    </div>
+    <nav class="navline">
+      <a class="btn" href="../index.html">Home</a>
+      <a class="btn" href="../games/index.html">Games</a>
+      <a class="btn" href="../bibleindex/index.html">Complete Bible Index</a>
+    </nav>
+  </header>
+
+  <!-- banner / page title -->
+  <section class="hero">
+    <div class="hero-inner">
+      <h2>Mysteries</h2>
+      <p>A growing shelf of deep dives: lost books, end-time signs, and artifacts—each link opens a full article.</p>
+    </div>
+  </section>
+
+  <!-- the bookshelf -->
+  <main class="wrap shelf">
+    <div class="grid">
+      <!-- Babylon 2.0 -->
+      <a class="card link" href="babylon-2.html">
+        <span class="badge">New</span>
+        <div class="kicker">Explainer</div>
+        <h3 class="title">Babylon 2.0</h3>
+        <p class="desc">The modern control stack—economy, media, signals, and spiritual deception hiding in plain sight.</p>
+        <span class="cta">Open →</span>
+      </a>
+
+      <!-- The Trumpets -->
+      <a class="card link" href="trumpets.html">
+        <span class="badge">New</span>
+        <div class="kicker">Study</div>
+        <h3 class="title">The Trumpets</h3>
+        <p class="desc">Prophecy’s alarm clock: seven blasts, seven warnings, and how to watch wisely without fear.</p>
+        <span class="cta">Open →</span>
+      </a>
+
+      <!-- Book of Enoch -->
+      <a class="card link" href="enoch.html">
+        <div class="kicker">Texts</div>
+        <h3 class="title">Book of Enoch</h3>
+        <p class="desc">The watchers, the firmament, and why this “banned” book still echoes through end-time discussions.</p>
+        <span class="cta">Open →</span>
+      </a>
+
+      <!-- Gospel of Thomas -->
+      <a class="card link" href="gospel-of-thomas.html">
+        <div class="kicker">Texts</div>
+        <h3 class="title">Gospel of Thomas</h3>
+        <p class="desc">Sayings of Jesus outside the canon—wisdom, warning, or misdirection? How to read it safely.</p>
+        <span class="cta">Open →</span>
+      </a>
+
+      <!-- Shroud of Turin -->
+      <a class="card link" href="shroud-of-turin.html">
+        <div class="kicker">Artifact</div>
+        <h3 class="title">Shroud of Turin</h3>
+        <p class="desc">A cloth bearing the image of a crucified man—artifact, medieval forgery, or a sign for our age?</p>
+        <span class="cta">Open →</span>
+      </a>
+
+      <!-- placeholders you can duplicate as we add more -->
+      <!--
+      <a class="card link" href="ark-of-the-covenant.html">
+        <div class="kicker">Artifact</div>
+        <h3 class="title">Ark of the Covenant</h3>
+        <p class="desc">Where did it go—and why the silence might be the loudest clue.</p>
+        <span class="cta">Open →</span>
+      </a>
+      -->
+    </div>
+  </main>
+
+  <footer class="footer">
+    Built by Jake & August • BibleBucket
+  </footer>
+
+</body>
+</html>
