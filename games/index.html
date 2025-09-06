@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Games — BibleBucket</title>
+  <meta name="description" content="Tiny Bible arcade — quick plays with big themes. Play Backyard Orbs and preview upcoming games." />
+  <link rel="icon" type="image/png" href="../assets/logo.png" />
+  <style>
+    :root{
+      --bg:#0d1117; --bg2:#161b22; --fg:#c9d1d9; --accent:#58a6ff;
+      --rule:#30363d; --muted:#9ca3af; --radius:12px;
+    }
+    html,body{background:var(--bg);color:var(--fg);margin:0;font-family:ui-sans-serif,system-ui,Segoe UI,Helvetica,Arial,sans-serif}
+    a{color:inherit}
+    .wrap{max-width:1100px;margin:0 auto;padding:24px 20px}
+
+    /* top bar */
+    .topbar{display:flex;gap:14px;align-items:center;padding:16px 20px}
+    .logo{width:56px;height:56px;border-radius:10px;background:#0b2547;display:grid;place-items:center;overflow:hidden}
+    .logo img{width:56px;height:56px;display:block}
+    .brand h1{font-size:32px;line-height:1.1;margin:0}
+    .brand .sub{color:var(--muted);font-size:14px;margin-top:2px}
+    .navline{margin-left:auto;display:flex;gap:10px}
+    .btn{background:var(--bg2);border:1px solid var(--rule);color:var(--fg);padding:10px 14px;border-radius:10px;text-decoration:none;font-weight:600}
+    .btn:hover{border-color:var(--accent)}
+
+    /* hero */
+    .hero{background:linear-gradient(180deg, rgba(88,166,255,.12), rgba(0,0,0,0));border-bottom:1px solid var(--rule)}
+    .hero-inner{max-width:1100px;margin:0 auto;padding:28px 20px 18px}
+    .hero h2{font-size:36px;margin:0 0 6px}
+    .hero p{color:var(--muted);margin:0}
+
+    /* grid */
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+    .card{background:var(--bg2);border:1px solid var(--rule);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:8px;position:relative;transition:transform .12s ease, border-color .12s ease}
+    .card.link{cursor:pointer;text-decoration:none}
+    .card.link:hover{transform:translateY(-2px);border-color:var(--accent)}
+    .kicker{color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+    .title{font-size:20px;margin:0}
+    .desc{opacity:.9;margin:0}
+    .meta{color:var(--muted);font-size:12px}
+    .cta{margin-top:auto;color:var(--accent);font-weight:600}
+    .badge{position:absolute;top:12px;right:12px;background:#223;border:1px solid var(--rule);color:#e2e8f0;padding:4px 10px;border-radius:999px;font-size:12px}
+
+    .footer{border-top:1px solid var(--rule);color:var(--muted);padding:14px 20px;text-align:center;margin-top:28px}
+
+    @media (max-width:520px){
+      .brand h1{font-size:26px}
+      .logo{width:48px;height:48px}
+      .logo img{width:48px;height:48px}
+      .navline{display:none}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- top bar -->
+  <header class="topbar">
+    <div class="logo">
+      <img src="../assets/logo.png" alt="BibleBucket logo">
+    </div>
+    <div class="brand">
+      <h1>BibleBucket</h1>
+      <div class="sub">Tiny Bible arcade — quick plays with big themes</div>
+    </div>
+    <nav class="navline">
+      <a class="btn" href="../index.html">Home</a>
+      <a class="btn" href="../comic/index.html">Comics</a>
+      <a class="btn" href="../mysteries/index.html">Mysteries</a>
+      <a class="btn" href="../about.html">About</a>
+    </nav>
+  </header>
+
+  <!-- hero -->
+  <section class="hero">
+    <div class="hero-inner">
+      <h2>Games</h2>
+      <p>Fast to play, easy to learn, Bible-rooted. Built mobile-first.</p>
+    </div>
+  </section>
+
+  <!-- shelf -->
+  <main class="wrap">
+    <div class="grid">
+
+      <!-- Backyard Orbs -->
+      <a class="card link" href="./orbs/index.html">
+        <span class="badge">New</span>
+        <div class="kicker">Arcade</div>
+        <h3 class="title">Backyard Orbs</h3>
+        <p class="desc">Laser the fakes, spare the messengers. Can you tell the difference?</p>
+        <div class="meta">Playtime: ~1 min • Input: touch/mouse</div>
+        <span class="cta">Play →</span>
+      </a>
+
+      <!-- Noah's Ark (coming soon) -->
+      <a class="card link" href="../construction.html">
+        <span class="badge">Coming soon</span>
+        <div class="kicker">Survival</div>
+        <h3 class="title">Noah’s Ark</h3>
+        <p class="desc">Steer the ark through storm bands. Survive 60 seconds to see land.</p>
+        <div class="meta">Playtime: 1 min • Input: swipe/keys</div>
+        <span class="cta">Details →</span>
+      </a>
+
+      <!-- David vs Goliath (coming soon) -->
+      <a class="card link" href="../construction.html">
+        <span class="badge">Coming soon</span>
+        <div class="kicker">Skill shot</div>
+        <h3 class="title">David vs Goliath</h3>
+        <p class="desc">Spin the sling, steady your aim, land the headshot before time’s up.</p>
+        <div class="meta">Playtime: 1 min • Input: press/hold + release</div>
+        <span class="cta">Details →</span>
+      </a>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    Built by Jake & August • BibleBucket
+  </footer>
+
+</body>
+</html>
