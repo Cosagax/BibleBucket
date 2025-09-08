@@ -16,14 +16,18 @@
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; color:var(--ink); background:radial-gradient(1000px 700px at 50% -10%, #14213f 0%, #0e162b 50%, var(--bg) 100%); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility}
+    body{
+      margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      color:var(--ink);
+      background:radial-gradient(1000px 700px at 50% -10%, #14213f 0%, #0e162b 50%, var(--bg) 100%);
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    }
     a{color:inherit; text-decoration:none}
     .wrap{max-width:1100px;margin:0 auto;padding:16px}
 
     /* Header */
     header{position:sticky;top:0;z-index:10;background:linear-gradient(0deg, rgba(11,15,23,0), rgba(11,15,23,.9) 70%, rgba(11,15,23,1)); border-bottom:1px solid rgba(255,255,255,.06); backdrop-filter:saturate(130%) blur(6px)}
-    .nav{display:flex;align-items:center;justify-content:flex-start;padding:12px 8px}
-    .brand{display:flex;align-items:center;gap:14px}
+    .nav{display:flex;align-items:center;gap:14px;padding:12px 8px}
     .logo{width:120px;height:120px; object-fit:contain; display:block}
     .title{font-weight:800;letter-spacing:.4px; font-size:2.6rem}
 
@@ -36,7 +40,7 @@
     .btn{background:var(--brand);color:#000;font-weight:600;padding:10px 18px;border-radius:10px;display:inline-block;transition:all .2s ease}
     .btn:hover{background:var(--accent);transform:translateY(-2px)}
 
-    /* Grid tiles */
+    /* Grid */
     .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
     @media (max-width: 980px){.grid{grid-template-columns:repeat(2,1fr)}}
     @media (max-width: 640px){.grid{grid-template-columns:1fr}}
@@ -46,24 +50,23 @@
     .tile .go{margin-top:auto; display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border-radius:12px; border:1px solid #243559}
     .tile .go:hover{transform:translateY(-1px)}
 
-    footer{opacity:.85;font-size:13px;padding:28px 12px 50px}
     .badge-new{color:#4ade80;font-weight:600;margin-left:6px}
     .badge-soon{color:#fbbf24;font-weight:600;margin-left:6px}
+
+    footer{opacity:.85;font-size:13px;padding:28px 12px 50px}
   </style>
 </head>
 <body>
   <header>
     <div class="wrap nav">
-      <div class="brand">
-        <img class="logo" src="assets/logo.png" alt="BibleBucket logo" />
-        <div class="title">BibleBucket</div>
-      </div>
+      <img class="logo" src="assets/logo.png" alt="BibleBucket logo" />
+      <div class="title">BibleBucket</div>
     </div>
   </header>
 
   <main class="wrap hero" id="home">
     <section class="card">
-      <h1 class="headline">Explore the Bible's mysteries.</h1>
+      <h1 class="headline">Explore the Bible&#39;s mysteries.</h1>
       <p class="sub">Built by Jake and August: games and readings based around the Bible and also its lost books and mysteries!</p>
       <div class="cta-row">
         <a class="btn" href="games/index.html">Explore Games</a>
@@ -73,26 +76,42 @@
     </section>
 
     <section class="grid" aria-label="Quick links">
+      <!-- Backyard Orbs -->
       <a class="tile" href="games/orbs/">
         <h3>Backyard Orbs <span class="badge-new">(new)</span></h3>
         <p>Collect the glowing orbs to score points and avoid the drones that drain them. Touch-friendly, quick play.</p>
         <span class="go">Open &rarr;</span>
       </a>
+
+      <!-- Noah's Ark (new game) -->
+      <a class="tile" href="games/noah/index.html">
+        <h3>Noah&#39;s Ark <span class="badge-new">(new)</span></h3>
+        <p>Play as Noah and gather the animals before the Flood begins. Touch-friendly, ~1 min play.</p>
+        <span class="go">Play &rarr;</span>
+      </a>
+
+      <!-- Comic -->
       <a class="tile" href="comic/index.html">
         <h3>Comic book Action Bible <span class="badge-new">(new)</span></h3>
         <p>Read the comic book The Action Bible, here at Bible Bucket!</p>
         <span class="go">View &rarr;</span>
       </a>
+
+      <!-- Complete Bible Index -->
       <a class="tile" href="bibleindex/index.html">
         <h3>Complete Bible Index <span class="badge-new">(new)</span></h3>
-        <p>Full Bible index in our chronological flow &ndash; includes the "missing" books we reference.</p>
+        <p>Full Bible index in our chronological flow &ndash; includes the &quot;missing&quot; books we reference.</p>
         <span class="go">Open Index &rarr;</span>
       </a>
+
+      <!-- Mysteries & Artifacts -->
       <a class="tile" href="mysteries/index.html">
         <h3>Mysteries and Artifacts <span class="badge-new">(new)</span></h3>
         <p>Dive into some Rabbit Holes and review some Artifacts</p>
         <span class="go">Browse &rarr;</span>
       </a>
+
+      <!-- Community -->
       <a class="tile" href="construction.html">
         <h3>Community <span class="badge-soon">(coming soon)</span></h3>
         <p>Prayer requests, ideas, and feedback (message board coming soon).</p>
@@ -101,7 +120,7 @@
     </section>
 
     <footer class="wrap">
-      <div class="sub">&copy; 2025 BibleBucket - Jake &amp; August.</div>
+      <div class="sub">&copy; 2025 BibleBucket &mdash; Jake &amp; August.</div>
     </footer>
   </main>
 </body>
