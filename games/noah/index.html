@@ -25,6 +25,22 @@
   #startBtn{padding:14px 18px;border-radius:14px;border:1px solid #375a9d;background:#1e3a8a;box-shadow:0 2px 0 #0008;color:#e6edf3;font-weight:800;cursor:pointer;width:100%}
   .backlink{display:block;margin-top:12px;font-size:13px;color:#9fb3d9;text-decoration:none}
   .backlink:hover{text-decoration:underline;color:#cdd9f9}
+
+  /* ---------- Outcome overlay (scripture fades) ---------- */
+  .noah-overlay{
+    position:fixed;left:50%;transform:translateX(-50%);bottom:12%;
+    display:flex;flex-direction:column;gap:8px;align-items:center;text-align:center;
+    pointer-events:none;z-index:9999;padding:4px 8px;max-width:min(90vw,800px)
+  }
+  .noah-line{
+    opacity:0;font-size:clamp(14px,2.2vw,18px);line-height:1.35;letter-spacing:.2px;
+    text-shadow:0 1px 2px rgba(0,0,0,.35)
+  }
+  .noah-line .ref{opacity:.85;font-weight:600;margin-right:.35em}
+  .noah-win .noah-line{color:#ffffff}
+  .noah-loss .noah-line{color:#9ca3af}
+  @keyframes noahFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  .noah-in{animation:noahFadeIn .8s ease forwards}
 </style>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -46,6 +62,44 @@
       <a href="https://biblebucket.com" class="backlink">← Back to BibleBucket</a>
     </div>
   </div>
+
+<script>
+/* ---------- Scripture Overlay (win/loss) ---------- */
+(function(){
+  const STYLE_CLASS="noah-overlay";
+  const WIN = [
+    { ref:"Genesis 7:16", text:"Then the Lord shut him in." },
+    { ref:"Genesis 7:17", text:"For forty days the flood kept coming on the earth, and as the waters increased they lifted the ark high above the earth." },
+    { ref:"Genesis 7:24", text:"The waters flooded the earth for a hundred and fifty days." }
+  ];
+  const LOSS = [
+    { ref:"Genesis 7:22", text:"Everything on dry land that had the breath of life in its nostrils died." },
+    { ref:"Genesis 7:23", text:"Only Noah was left, and those with him in the ark." },
+    { ref:"Genesis 6:12", text:"All flesh had corrupted their way upon the earth." }
+  ];
+  function create(lines, mode){
+    // clear any existing
+    document.querySelectorAll("."+STYLE_CLASS).forEach(el=>el.remove());
+    const root=document.createElement("div");
+    root.className=`${STYLE_CLASS} ${mode==="loss"?"noah-loss":"noah-win"}`;
+    lines.forEach((ln,i)=>{
+      const p=document.createElement("p");
+      p.className="noah-line";
+      p.style.animationDelay=`${0.2+i*0.9}s`;
+      p.innerHTML=`<span class="ref">${ln.ref}</span>— ${ln.text}`;
+      root.appendChild(p);
+    });
+    document.body.appendChild(root);
+    requestAnimationFrame(()=>root.querySelectorAll(".noah-line").forEach(n=>n.classList.add("noah-in")));
+    return root;
+  }
+  window.NoahOutcomeOverlay={
+    showWin(){ return create(WIN,"win"); },
+    showLoss(){ return create(LOSS,"loss"); },
+    clear(){ document.querySelectorAll("."+STYLE_CLASS).forEach(el=>el.remove()); }
+  };
+})();
+</script>
 
 <script>
 (function(){
@@ -180,6 +234,9 @@
     document.getElementById('hud').textContent=`Pairs: ${S.score}/${S.target}`;
     rain.drops.length=0; flashT=0; nextFlashAt=8000; shakeX=shakeY=0;
     comets.length=0; nextCometAt=5000; verseIdx=0;
+
+    // clear any scripture overlay between rounds
+    if (window.NoahOutcomeOverlay) NoahOutcomeOverlay.clear();
   }
 
   function refill(){
@@ -215,10 +272,13 @@
   addEventListener('pointerup',()=>S&&(S.ptr.act=false),{passive:true});
   window.addEventListener('contextmenu',e=>e.preventDefault());
 
-  // ------------ Prologue wiring (Start works here) ------------
+  // ------------ Prologue wiring ------------
   const prologue=document.getElementById('prologue');
   const startBtn=document.getElementById('startBtn');
-  function showPrologue(){ prologue.classList.remove('hide'); prologue.style.display='grid'; S=null; }
+  function showPrologue(){
+    prologue.classList.remove('hide'); prologue.style.display='grid'; S=null;
+    if (window.NoahOutcomeOverlay) NoahOutcomeOverlay.clear(); // ensure no overlay visible on menu
+  }
   function hidePrologue(){ prologue.classList.add('hide'); setTimeout(()=>{ prologue.style.display='none'; reset(); startLoop(); },260); }
   startBtn.addEventListener('click', hidePrologue);
   document.getElementById('restart').addEventListener('click', showPrologue);
@@ -313,7 +373,14 @@
     comets=comets.filter(c=>c.life>0 && c.x>-120 && c.x<s.w+120);
   }
 
-  function endRound(win){ if(!S||S.over) return; S.over=true; S.win=win; }
+  function endRound(win){
+    if(!S||S.over) return;
+    S.over=true; S.win=win;
+    // Show outcome scripture (white for win, gray for loss)
+    if (window.NoahOutcomeOverlay) {
+      win ? NoahOutcomeOverlay.showWin() : NoahOutcomeOverlay.showLoss();
+    }
+  }
 
   // ------------ Draw ------------
   function draw(){
@@ -329,12 +396,12 @@
     if(bgLoaded) g.drawImage(bg,0,0,w,h);
     else { const sky=g.createLinearGradient(0,0,0,h*.3); sky.addColorStop(0,'#68a9e6'); sky.addColorStop(1,'#94c7f0'); g.fillStyle=sky; g.fillRect(0,0,w,h*.3); g.fillStyle='#2e6a32'; g.fillRect(0,h*.3,w,h*.7); }
 
-    // Progressive darkening: base at 10s, then a small layer every 10s
+    // Progressive darkening
     if(S.meter.t >= DARK_BASE_AT){
-      g.fillStyle='rgba(0,0,20,0.35)'; g.fillRect(0,0,w,h); // base moodier layer
+      g.fillStyle='rgba(0,0,20,0.35)'; g.fillRect(0,0,w,h);
       const extraSteps = Math.max(0, Math.floor((S.meter.t - DARK_BASE_AT) / DARK_STEP_MS));
-      const perStep = 0.06; // small increment per 10s
-      const extraA = Math.min(0.35, extraSteps * perStep); // cap to stay playable
+      const perStep = 0.06;
+      const extraA = Math.min(0.35, extraSteps * perStep);
       if(extraA > 0){ g.fillStyle = `rgba(0,0,20,${extraA.toFixed(3)})`; g.fillRect(0,0,w,h); }
     }
 
@@ -354,7 +421,7 @@
     drawNoah(S.noah.x,S.noah.y,NOAH_SCALE);
     if(S.noah.carry){ const em=CATALOG.find(x=>x.t===S.noah.carry)?.e||'❓'; const spr=spriteFor(em); g.drawImage(spr.img,S.noah.x-30-spr.ox,S.noah.y-14-spr.oy); }
 
-    // rain (heavy from 5s onward)
+    // rain
     const rainInt = (S.meter.t>=RAIN_START)?1:0; spawnRain(rainInt,w,h); drawRain(rainInt);
 
     // meter
@@ -366,7 +433,12 @@
 
     // end screen + flood flip
     if(S.over && endLoaded) g.drawImage(endBg,0,0,w,h);
-    if(S.over){ g.fillStyle='rgba(0,0,0,.5)'; g.fillRect(0,0,w,h); g.fillStyle='#e6edf3'; g.textAlign='center'; g.textBaseline='middle'; g.font='bold 28px system-ui'; g.fillText(S.win?'ALL ABOARD!':"TIME'S UP!", w/2,h/2-8); g.font='16px system-ui'; g.fillText('Tap or press Restart', w/2, h/2+20); }
+    if(S.over){
+      g.fillStyle='rgba(0,0,0,.5)'; g.fillRect(0,0,w,h);
+      g.fillStyle='#e6edf3'; g.textAlign='center'; g.textBaseline='middle';
+      g.font='bold 28px system-ui'; g.fillText(S.win?'ALL ABOARD!':"TIME'S UP!", w/2,h/2-8);
+      g.font='16px system-ui'; g.fillText('Tap or press Restart', w/2, h/2+20);
+    }
 
     g.restore();
 
