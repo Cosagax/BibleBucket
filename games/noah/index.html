@@ -77,7 +77,6 @@ function syncOverlayToCanvas(){
   const canvas=document.getElementById('game');
   const r=canvas.getBoundingClientRect();
   document.documentElement.style.setProperty('--overlay-max', (Math.max(240, r.width - 24)) + 'px');
-  // center the overlay over the canvas center (not the page)
   for(const el of document.querySelectorAll('.noah-overlay')){
     el.style.left = (r.left + r.width/2) + 'px';
   }
@@ -124,7 +123,6 @@ window.addEventListener('resize', syncOverlayToCanvas);
   const canvas = document.getElementById('game');
   const g = canvas.getContext('2d');
 
-  // --- Tunables & timings ---
   const BG_PATHS = ['background.png','./background.png','../background.png'];
   const END_BG_PATHS = ['background02.png','./background02.png','../background02.png'];
   const PLAY_SPLIT = 0.45;
@@ -132,16 +130,14 @@ window.addEventListener('resize', syncOverlayToCanvas);
   const ROUND_MS = 60000;
   const ACTIVE_CAP = 24;
 
-  // Storm timings
-  const RAIN_START = 5000;     // heavy rain at 5s
-  const DARK_BASE_AT = 10000;  // first darken at 10s
-  const DARK_STEP_MS = 10000;  // darker every 10s
-  const LIGHTNING_MIN = 7000;  // lightning 7–8s cadence
+  const RAIN_START = 5000;
+  const DARK_BASE_AT = 10000;
+  const DARK_STEP_MS = 10000;
+  const LIGHTNING_MIN = 7000;
   const LIGHTNING_VAR = 1000;
 
   const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
-  // --- Fit / DPR ---
   function fit(){
     const maxW = Math.min(innerWidth-16, 500);
     const maxH = Math.min(innerHeight-80, 900);
@@ -155,7 +151,6 @@ window.addEventListener('resize', syncOverlayToCanvas);
   }
   fit(); addEventListener('resize', ()=>{ fit(); draw(); });
 
-  // --- Load backgrounds ---
   let bg=null,bgLoaded=false, iBG=0;
   (function loadBG(){
     if(iBG>=BG_PATHS.length) return;
@@ -173,7 +168,6 @@ window.addEventListener('resize', syncOverlayToCanvas);
     im.src=END_BG_PATHS[iEBG];
   })();
 
-  // --- Rain ---
   const rain = {drops:[], max:700};
   function spawnRain(intensity,w,h){
     const n = Math.floor(intensity*6);
@@ -190,7 +184,6 @@ window.addEventListener('resize', syncOverlayToCanvas);
     g.stroke(); g.restore();
   }
 
-  // --- Emoji sprites ---
   const spriteMap = new Map();
   function spriteFor(emoji){
     if(spriteMap.has(emoji)) return spriteMap.get(emoji);
@@ -204,7 +197,6 @@ window.addEventListener('resize', syncOverlayToCanvas);
     spriteMap.set(emoji,spr); return spr;
   }
 
-  // --- Helpers ---
   const clamp=(v,a,b)=>v<a?a:(v>b?b:v);
   const rand=(a,b)=>Math.random()*(b-a)+a;
 
@@ -224,7 +216,6 @@ window.addEventListener('resize', syncOverlayToCanvas);
       vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,turn:1000+Math.random()*1600};
   }
 
-  // --- Scripture comets ---
   const GENESIS = [
     {ref:'Gen 6:5', txt:'Every imagination of man’s heart was only evil continually.'},
     {ref:'Gen 6:11',txt:'The earth was corrupt and filled with violence.'},
@@ -232,9 +223,8 @@ window.addEventListener('resize', syncOverlayToCanvas);
     {ref:'Gen 6:13',txt:'The end of all flesh is come before Me.'},
     {ref:'Gen 6:18',txt:'But with thee will I establish My covenant.'}
   ];
-  let comets=[], nextCometAt=5000, cometInterval=5000, verseIdx=0; // start at 5s, fairly frequent
+  let comets=[], nextCometAt=5000, cometInterval=5000, verseIdx=0;
 
-  // --- State ---
   let S=null, loopStarted=false, flashT=0, nextFlashAt=8000, shakeX=0, shakeY=0;
 
   function reset(){
@@ -274,14 +264,12 @@ window.addEventListener('resize', syncOverlayToCanvas);
     }
   }
 
-  // --- Toast ---
   function toast(t,ms=1200){
     const el=document.getElementById('toast');
     el.textContent=t; el.style.display='block';
     clearTimeout(toast._t); toast._t=setTimeout(()=>el.style.display='none',ms);
   }
 
-  // --- Controls ---
   addEventListener('keydown',e=>S&&(S.keys[e.key]=true),{passive:true});
   addEventListener('keyup',e=>S&&(S.keys[e.key]=false),{passive:true});
   canvas.addEventListener('pointerdown',e=>{const r=canvas.getBoundingClientRect(); S&&(S.ptr={act:true,x:e.clientX-r.left,y:e.clientY-r.top});},{passive:true});
@@ -289,16 +277,14 @@ window.addEventListener('resize', syncOverlayToCanvas);
   addEventListener('pointerup',()=>S&&(S.ptr.act=false),{passive:true});
   window.addEventListener('contextmenu',e=>e.preventDefault());
 
-  // --- Prologue / Start wiring ---
   const prologue=document.getElementById('prologue');
   const startBtn=document.getElementById('startBtn');
   function showPrologue(){ prologue.classList.remove('hide'); prologue.style.display='grid'; S=null; }
   function hidePrologue(){ prologue.classList.add('hide'); setTimeout(()=>{ prologue.style.display='none'; reset(); startLoop(); },260); }
   startBtn.addEventListener('click', hidePrologue);
   document.getElementById('restart').addEventListener('click', showPrologue);
-  showPrologue(); // initial
+  showPrologue();
 
-  // --- Loop ---
   function startLoop(){ if(!loopStarted){ loopStarted=true; requestAnimationFrame(step); } }
   function step(){
     requestAnimationFrame(step);
@@ -313,19 +299,16 @@ window.addEventListener('resize', syncOverlayToCanvas);
     draw();
   }
 
-  // --- Comets ---
   function spawnComet(){
     const skyH=Math.floor(S.h*(PLAY_SPLIT-0.05)); const y=rand(40,Math.max(60,skyH-40));
     const left=Math.random()<0.5;
-    const speed=rand(1.6,2.2); // slower for readability
+    const speed=rand(1.6,2.2);
     comets.push({x:left?-60:S.w+60,y, vx:(left?1:-1)*speed, life:11000, tail:[], verse:GENESIS[verseIdx++%GENESIS.length]});
   }
 
-  // --- Update ---
   function update(dtMs){
     const dt=dtMs/16.67,s=S;if(!s)return;
 
-    // Noah move
     let vx=0,vy=0;
     if(s.keys['ArrowLeft']||s.keys['a'])vx-=1;
     if(s.keys['ArrowRight']||s.keys['d'])vx+=1;
@@ -335,7 +318,6 @@ window.addEventListener('resize', syncOverlayToCanvas);
     else if(s.ptr.act){ const dx=s.ptr.x-s.noah.x,dy=s.ptr.y-s.noah.y,d=Math.hypot(dx,dy); if(d>1){ s.noah.x+=(dx/d)*s.noah.spd*dt*3; s.noah.y+=(dy/d)*s.noah.spd*dt*3; } }
     s.noah.x=clamp(s.noah.x,24,s.w-24); s.noah.y=clamp(s.noah.y,s.split+20,s.h-26);
 
-    // Animals roam/avoid
     for(const a of s.animals){
       if(a.board||a.grab) continue;
       a.turn-=dtMs;
@@ -346,19 +328,20 @@ window.addEventListener('resize', syncOverlayToCanvas);
       if(a.y<s.split+20){a.y=s.split+20;a.vy=Math.abs(a.vy);} if(a.y>s.h-24){a.y=s.h-24;a.vy=-Math.abs(a.vy);}
     }
 
-    // Grab + Pair
+    // Grab + Pair (toasts removed)
     for(const a of s.animals){
       if(a.board) continue;
       const d=Math.hypot(a.x-s.noah.x,a.y-s.noah.y);
       if(d < a.r + s.noah.r){
         if(!s.noah.carry){
           s.noah.carry=a.t; a.grab=true; ensureMateActive(a.t);
-          toast(`${a.e} Found! Find its pair.`); if(navigator.vibrate) navigator.vibrate(18); break;
+          if(navigator.vibrate) navigator.vibrate(18);
+          break;
         } else if(s.noah.carry===a.t && !a.grab){
           const tx=rand(40,s.w-40),ty=rand(40,s.split-30);
           for(const b of s.animals){ if(b.t===a.t){ b.board=true; b.grab=false; b.fly={x:b.x,y:b.y,tx,ty,t:0}; } }
           s.noah.carry=null; s.score++; document.getElementById('hud').textContent=`Pairs: ${s.score}/${s.target}`;
-          toast(`Pair boarded! ${a.e}${a.e}`); if(navigator.vibrate) navigator.vibrate([12,20,12]);
+          if(navigator.vibrate) navigator.vibrate([12,20,12]);
           if(s.score>=s.target){ endRound(true); } else { for(let i=s.animals.length-1;i>=0;i--){ if(s.animals[i].board && !s.animals[i].fly) s.animals.splice(i,1); } refill(); }
           break;
         }
@@ -367,21 +350,17 @@ window.addEventListener('resize', syncOverlayToCanvas);
       }
     }
 
-    // Follow + fly
     const bob=Math.sin(performance.now()/180)*2;
     for(const a of s.animals){ if(a.grab && !a.board){ const tx=s.noah.x-30,ty=s.noah.y-12+bob; a.x+=(tx-a.x)*0.35; a.y+=(ty-a.y)*0.35; } }
     for(const a of s.animals){ if(a.fly){ a.fly.t=Math.min(1,a.fly.t+dtMs/600); a.x=a.fly.x+(a.fly.tx-a.fly.x)*a.fly.t; a.y=a.fly.y+(a.fly.ty-a.fly.y)*a.fly.t; if(a.fly.t>=1) a.fly=null; } }
 
-    // Timer + storm warnings
     s.meter.t+=dtMs;
     if(!s._warn && s.meter.t>=RAIN_START){ s._warn=true; toast('Storm Warning! 🌩️',1400); }
     if(!s.win && s.meter.t>=s.meter.dur){ endRound(false); }
 
-    // Lightning + shake
     if(!s.over && s.meter.t>=RAIN_START && s.meter.t>=nextFlashAt){ flashT=120; nextFlashAt=s.meter.t + LIGHTNING_MIN + Math.random()*LIGHTNING_VAR; }
     if(flashT>0){ flashT-=dtMs; shakeX=(Math.random()-0.5)*3; shakeY=(Math.random()-0.5)*3; } else { shakeX=shakeY=0; }
 
-    // Comets (start at 5s; frequent & slower)
     if(!s.over && s.meter.t>=nextCometAt){ spawnComet(); nextCometAt+=cometInterval; }
     for(const c of comets){
       c.life-=dtMs; c.x+=c.vx*(dtMs/16.67);
@@ -397,7 +376,6 @@ window.addEventListener('resize', syncOverlayToCanvas);
     if(win) window.NoahOutcomeOverlay?.showWin(); else window.NoahOutcomeOverlay?.showLoss();
   }
 
-  // --- Draw ---
   function draw(){
     const w=canvas.clientWidth,h=canvas.clientHeight;
     g.clearRect(0,0,w,h);
@@ -411,7 +389,6 @@ window.addEventListener('resize', syncOverlayToCanvas);
     if(bgLoaded) g.drawImage(bg,0,0,w,h);
     else { const sky=g.createLinearGradient(0,0,0,h*.3); sky.addColorStop(0,'#68a9e6'); sky.addColorStop(1,'#94c7f0'); g.fillStyle=sky; g.fillRect(0,0,w,h*.3); g.fillStyle='#2e6a32'; g.fillRect(0,h*.3,w,h*.7); }
 
-    // Progressive darkening: 10s base + extra every 10s
     if(S.meter.t >= DARK_BASE_AT){
       g.fillStyle='rgba(0,0,20,0.35)'; g.fillRect(0,0,w,h);
       const extraSteps = Math.max(0, Math.floor((S.meter.t - DARK_BASE_AT) / DARK_STEP_MS));
@@ -420,7 +397,6 @@ window.addEventListener('resize', syncOverlayToCanvas);
       if(extraA > 0){ g.fillStyle = `rgba(0,0,20,${extraA.toFixed(3)})`; g.fillRect(0,0,w,h); }
     }
 
-    // Comets
     for(const c of comets){
       for(const t of c.tail){ g.fillStyle=`rgba(255,255,255,${0.12*t.a})`; g.beginPath(); g.arc(t.x,t.y,Math.max(1,t.r),0,Math.PI*2); g.fill(); }
       const grd=g.createRadialGradient(c.x,c.y,0,c.x,c.y,18); grd.addColorStop(0,'rgba(255,255,255,.95)'); grd.addColorStop(1,'rgba(255,255,255,.05)');
@@ -431,22 +407,18 @@ window.addEventListener('resize', syncOverlayToCanvas);
       g.fillText(text,x,y); g.font='11px system-ui'; g.fillStyle='#b9c7e6'; g.fillText(ref,x,y+14); g.restore();
     }
 
-    // Animals + Noah
     for(const a of S.animals){ if(a.board && !a.fly) continue; const spr=spriteFor(a.e); g.drawImage(spr.img, a.x-spr.ox, a.y-spr.oy); }
     drawNoah(S.noah.x,S.noah.y,NOAH_SCALE);
     if(S.noah.carry){ const em=CATALOG.find(x=>x.t===S.noah.carry)?.e||'❓'; const spr=spriteFor(em); g.drawImage(spr.img,S.noah.x-30-spr.ox,S.noah.y-14-spr.oy); }
 
-    // Rain (heavy from 5s)
     const rainInt=(S.meter.t>=RAIN_START)?1:0; spawnRain(rainInt,w,h); drawRain(rainInt);
 
-    // Timer bar
     const pad=18, meterH=6, meterY=h-18, meterW=w-pad*2, p=Math.min(1,S.meter.t/S.meter.dur);
     g.fillStyle='#0b1b2c'; g.fillRect(pad,meterY,meterW,meterH);
     const startC=(S.meter.t>=RAIN_START)?'#0ea5e9':'#2b9cd8', endC=(S.meter.t>=RAIN_START)?'#0369a1':'#004e7a';
     const grad=g.createLinearGradient(pad,0,pad+meterW,0); grad.addColorStop(0,startC); grad.addColorStop(1,endC);
     g.fillStyle=grad; g.fillRect(pad,meterY,meterW*p,meterH);
 
-    // End screen + flood flip
     if(S.over && endLoaded) g.drawImage(endBg,0,0,w,h);
     if(S.over){
       g.fillStyle='rgba(0,0,0,.5)'; g.fillRect(0,0,w,h);
@@ -457,7 +429,6 @@ window.addEventListener('resize', syncOverlayToCanvas);
 
     g.restore();
 
-    // Lightning flash overlay
     if(flashT>0){ const a=Math.min(1,flashT/120); g.fillStyle=`rgba(255,255,255,${0.6*a})`; g.fillRect(0,0,w,h); }
   }
 
