@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>Noah's Ark</title>
+<style>
+  :root{--safe-top:env(safe-area-inset-top,0px);--safe-right:env(safe-area-inset-right,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px)}
+  html,body{height:100%;margin:0;padding:0;background:#0d1117;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}
+  body{padding:var(--safe-top) var(--safe-right) calc(var(--safe-bottom) + 8px) var(--safe-left)}
+  #wrap{display:grid;place-items:center;height:100%}
+  canvas{background:#000;border:2px solid #1b2535;border-radius:16px;touch-action:none}
+  .hud{position:fixed;top:calc(8px + var(--safe-top));left:0;right:0;display:flex;justify-content:center;color:#e6edf3;font-weight:700;text-shadow:0 1px 0 #000;pointer-events:none}
+  .btnbar{position:fixed;bottom:calc(10px + var(--safe-bottom));left:0;right:0;display:flex;justify-content:center}
+  button{padding:12px 16px;border-radius:14px;border:1px solid #2b3a55;background:#111826;color:#e6edf3;font-weight:700;cursor:pointer;box-shadow:0 2px 0 #0008;-webkit-tap-highlight-color:transparent}
+  .toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#f5f7fb;font-weight:800;font-size:22px;padding:12px 18px;border-radius:14px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);box-shadow:0 6px 30px rgba(0,0,0,.25);backdrop-filter:blur(3px) saturate(120%);display:none;text-align:center;max-width:86vw}
+  #prologue{position:fixed;inset:0;display:grid;place-items:center;z-index:10;background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.55)),url("intro.png") center/cover no-repeat,#0d1117;opacity:1;transition:opacity .25s ease}
+  #prologue.hide{opacity:0;pointer-events:none}
+  .card{width:min(520px,92vw);background:rgba(17,24,38,.82);border:1px solid #2b3a55;border-radius:18px;padding:22px;box-shadow:0 10px 40px #0009;color:#e6edf3;text-align:center;backdrop-filter:saturate(120%) blur(2px)}
+  .card h1{margin:0 0 12px;font-size:28px}
+  .verse{font-size:16px;line-height:1.4;color:#dbe6ff;margin:0 0 10px}
+  .ref{font-size:12px;opacity:.85}
+  .objective{margin:8px 0 14px;font-weight:600}
+  .controls{margin:2px 0 14px;font-size:12px;color:#9fb3d9}
+  #startBtn{padding:14px 18px;border-radius:14px;border:1px solid #375a9d;background:#1e3a8a;box-shadow:0 2px 0 #0008;color:#e6edf3;font-weight:800;cursor:pointer;width:100%}
+  .backlink{display:block;margin-top:12px;font-size:13px;color:#9fb3d9;text-decoration:none}
+  .backlink:hover{text-decoration:underline;color:#cdd9f9}
+</style>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+  <div id="wrap"><canvas id="game" width="420" height="720" aria-label="Noah's Ark Game"></canvas></div>
+  <div class="hud" id="hud"></div>
+  <div class="btnbar"><button id="restart">Restart</button></div>
+  <div class="toast" id="toast"></div>
+
+  <!-- Prologue -->
+  <div id="prologue" role="dialog" aria-labelledby="p-title" aria-describedby="p-desc">
+    <div class="card">
+      <h1 id="p-title">Noah’s Ark</h1>
+      <p class="verse" id="p-desc">“You are to bring into the ark <strong>two of every living creature</strong>, male and female...”<br><span class="ref">Genesis 6:19–20</span></p>
+      <p class="objective">As Noah, gather <strong>24 pairs</strong> before the flood rises.</p>
+      <p class="controls">Move with Arrow / WASD keys or tap/drag the field.</p>
+      <button id="startBtn" aria-label="Start Game">Start Game</button>
+      <a href="https://biblebucket.com" class="backlink">← Back to BibleBucket</a>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('game');
+  const g = canvas.getContext('2d');
+
+  // ------------ Tunables ------------
+  const BG_PATHS = ['background.png','./background.png','../background.png'];
+  const END_BG_PATHS = ['background02.png','./background02.png','../background02.png'];
+  const PLAY_SPLIT = 0.45;
+  const NOAH_SCALE = 1.3;
+  const ROUND_MS = 60000;
+  const ACTIVE_CAP = 24;
+
+  // Timings
+  const RAIN_START = 5000;       // heavy rain starts
+  const DARK_BASE_AT = 10000;    // first darken (stronger)
+  const DARK_STEP_MS = 10000;    // add a bit every 10s
+  const LIGHTNING_MIN = 7000;    // 7–8s cadence
+  const LIGHTNING_VAR = 1000;
+
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+  // ------------ Fit / DPR ------------
+  function fit(){
+    const maxW = Math.min(innerWidth-16, 500);
+    const maxH = Math.min(innerHeight-80, 900);
+    const aspect = 9/16;
+    let w = maxW, h = w/aspect; if(h>maxH){ h=maxH; w=h*aspect; }
+    const dpr = Math.min(isMobile?1.0:1.25, devicePixelRatio||1);
+    canvas.style.width=w+'px'; canvas.style.height=h+'px';
+    canvas.width = Math.round(w*dpr); canvas.height = Math.round(h*dpr);
+    g.setTransform(dpr,0,0,dpr,0,0);
+  }
+  fit(); addEventListener('resize', ()=>{ fit(); draw(); });
+
+  // ------------ Load backgrounds ------------
+  let bg=null,bgLoaded=false, iBG=0;
+  (function loadBG(){
+    if(iBG>=BG_PATHS.length) return;
+    const im = new Image();
+    im.onload=()=>{ bg=im; bgLoaded=true; draw(); };
+    im.onerror=()=>{ iBG++; loadBG(); };
+    im.src = BG_PATHS[iBG];
+  })();
+  let endBg=null,endLoaded=false,iEBG=0;
+  (function loadEndBG(){
+    if(iEBG>=END_BG_PATHS.length) return;
+    const im=new Image();
+    im.onload=()=>{ endBg=im; endLoaded=true; };
+    im.onerror=()=>{ iEBG++; loadEndBG(); };
+    im.src=END_BG_PATHS[iEBG];
+  })();
+
+  // ------------ Rain ------------
+  const rain = {drops:[], max:700};
+  function spawnRain(intensity,w,h){
+    const n = Math.floor(intensity*6);
+    for(let i=0;i<n;i++){
+      rain.drops.push({x:Math.random()*w,y:-10,vy:8+Math.random()*10*intensity,len:10+Math.random()*14});
+      if(rain.drops.length>rain.max) rain.drops.shift();
+    }
+    for(const d of rain.drops){ d.y+=d.vy; if(d.y>h) d.y=-10; }
+  }
+  function drawRain(intensity){
+    if(intensity<=0) return;
+    g.save(); g.strokeStyle='rgba(150,200,255,.35)'; g.lineWidth=1; g.beginPath();
+    for(const d of rain.drops){ g.moveTo(d.x,d.y); g.lineTo(d.x,d.y+d.len); }
+    g.stroke(); g.restore();
+  }
+
+  // ------------ Sprite cache (emoji) ------------
+  const spriteMap = new Map();
+  function spriteFor(emoji){
+    if(spriteMap.has(emoji)) return spriteMap.get(emoji);
+    const size=44, c=document.createElement('canvas');
+    c.width=size*1.4; c.height=size*1.4;
+    const cx=c.getContext('2d');
+    cx.font=`${size}px "Apple Color Emoji","Segoe UI Emoji",system-ui`;
+    cx.textBaseline='alphabetic'; cx.textAlign='left';
+    cx.fillText(emoji, size*0.2, size);
+    const spr={img:c,w:c.width,h:c.height,ox:c.width*0.5,oy:(c.height*0.2)+size*0.75};
+    spriteMap.set(emoji,spr); return spr;
+  }
+
+  // ------------ Helpers ------------
+  const clamp=(v,a,b)=>v<a?a:(v>b?b:v);
+  const rand=(a,b)=>Math.random()*(b-a)+a;
+
+  const CATALOG = [
+    {t:'elephant',e:'\u{1F418}'},{t:'giraffe',e:'\u{1F992}'},{t:'sheep',e:'\u{1F411}'},{t:'tiger',e:'\u{1F405}'},
+    {t:'chicken',e:'\u{1F414}'},{t:'monkey',e:'\u{1F412}'},{t:'zebra',e:'\u{1F993}'},{t:'cow',e:'\u{1F404}'},
+    {t:'horse',e:'\u{1F40E}'},{t:'pig',e:'\u{1F416}'},{t:'dog',e:'\u{1F415}'},{t:'cat',e:'\u{1F408}'},
+    {t:'rabbit',e:'\u{1F407}'},{t:'camel',e:'\u{1F42B}'},{t:'koala',e:'\u{1F428}'},{t:'panda',e:'\u{1F43C}'},
+    {t:'bear',e:'\u{1F43B}'},{t:'fox',e:'\u{1F98A}'},{t:'lion',e:'\u{1F981}'},{t:'hippo',e:'\u{1F99B}'},
+    {t:'rhino',e:'\u{1F98F}'},{t:'boar',e:'\u{1F417}'},{t:'goat',e:'\u{1F410}'},{t:'turkey',e:'\u{1F983}'}
+  ];
+
+  function makeAnimal(spec,w,h,split){
+    const sp=0.16+Math.random()*0.18, ang=Math.random()*Math.PI*2;
+    return {id:spec.t+'-'+Math.random().toString(36).slice(2,6),t:spec.t,e:spec.e,
+      x:rand(24,w-24),y:rand(split+30,h-28),r:28,grab:false,board:false,fly:null,
+      vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,turn:1000+Math.random()*1600};
+  }
+
+  // ------------ Scripture comets ------------
+  const GENESIS = [
+    {ref:'Gen 6:5', txt:'Every imagination of man’s heart was only evil continually.'},
+    {ref:'Gen 6:11',txt:'The earth was corrupt and filled with violence.'},
+    {ref:'Gen 6:12',txt:'All flesh had corrupted his way upon the earth.'},
+    {ref:'Gen 6:13',txt:'The end of all flesh is come before Me.'},
+    {ref:'Gen 6:18',txt:'But with thee will I establish My covenant.'}
+  ];
+  let comets=[], nextCometAt= 5000, cometInterval=5000, verseIdx=0; // start at 5s, a bit more frequent
+
+  // ------------ State ------------
+  let S=null, loopStarted=false, flashT=0, nextFlashAt=8000, shakeX=0, shakeY=0;
+
+  function reset(){
+    const w=canvas.clientWidth,h=canvas.clientHeight,split=Math.floor(h*PLAY_SPLIT);
+    const byType=new Map();
+    for(const s of CATALOG){ byType.set(s.t,[makeAnimal(s,w,h,split),makeAnimal(s,w,h,split)]); }
+    const types=[...byType.keys()];
+    for(let i=types.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [types[i],types[j]]=[types[j],types[i]]; }
+    const animals=[], pool=[];
+    for(const t of types){ const p=byType.get(t); if(animals.length+2<=ACTIVE_CAP) animals.push(p[0],p[1]); else pool.push(p[0],p[1]); }
+    S={w,h,split,animals,pool,
+      noah:{x:w/2,y:h-110,r:24,spd:3.1,carry:null},
+      keys:{},ptr:{act:false,x:w/2,y:h-110},
+      score:0,target:24,meter:{t:0,dur:ROUND_MS},
+      over:false,win:false,last:performance.now(),_warn:false,avgDt:16};
+    document.getElementById('hud').textContent=`Pairs: ${S.score}/${S.target}`;
+    rain.drops.length=0; flashT=0; nextFlashAt=8000; shakeX=shakeY=0;
+    comets.length=0; nextCometAt=5000; verseIdx=0;
+  }
+
+  function refill(){
+    while(S.animals.length<ACTIVE_CAP && S.pool.length){
+      const first=S.pool.shift(); const i=S.pool.findIndex(a=>a.t===first.t);
+      if(i!==-1){ const second=S.pool.splice(i,1)[0]; S.animals.push(first,second); }
+      else { S.pool.push(first); break; }
+    }
+  }
+  function ensureMateActive(type){
+    if(S.animals.some(a=>a.t===type && !a.grab && !a.board)) return;
+    const i=S.pool.findIndex(a=>a.t===type);
+    if(i!==-1){
+      const m=S.pool.splice(i,1)[0];
+      m.x=S.noah.x+(Math.random()*80-40); m.y=S.noah.y+(Math.random()*80-40);
+      m.x=clamp(m.x,24,S.w-24); m.y=clamp(m.y,S.split+20,S.h-24);
+      S.animals.push(m);
+    }
+  }
+
+  // ------------ Toast ------------
+  function toast(t,ms=1200){
+    const el=document.getElementById('toast');
+    el.textContent=t; el.style.display='block';
+    clearTimeout(toast._t); toast._t=setTimeout(()=>el.style.display='none',ms);
+  }
+
+  // ------------ Controls ------------
+  addEventListener('keydown',e=>S&&(S.keys[e.key]=true),{passive:true});
+  addEventListener('keyup',e=>S&&(S.keys[e.key]=false),{passive:true});
+  canvas.addEventListener('pointerdown',e=>{const r=canvas.getBoundingClientRect(); S&&(S.ptr={act:true,x:e.clientX-r.left,y:e.clientY-r.top});},{passive:true});
+  canvas.addEventListener('pointermove',e=>{if(!S)return; const r=canvas.getBoundingClientRect(); S.ptr.x=e.clientX-r.left; S.ptr.y=e.clientY-r.top;},{passive:true});
+  addEventListener('pointerup',()=>S&&(S.ptr.act=false),{passive:true});
+  window.addEventListener('contextmenu',e=>e.preventDefault());
+
+  // ------------ Prologue wiring (Start works here) ------------
+  const prologue=document.getElementById('prologue');
+  const startBtn=document.getElementById('startBtn');
+  function showPrologue(){ prologue.classList.remove('hide'); prologue.style.display='grid'; S=null; }
+  function hidePrologue(){ prologue.classList.add('hide'); setTimeout(()=>{ prologue.style.display='none'; reset(); startLoop(); },260); }
+  startBtn.addEventListener('click', hidePrologue);
+  document.getElementById('restart').addEventListener('click', showPrologue);
+  showPrologue();
+
+  // ------------ Loop ------------
+  function startLoop(){ if(!loopStarted){ loopStarted=true; requestAnimationFrame(step); } }
+  function step(){
+    requestAnimationFrame(step);
+    const now=performance.now(), dt=Math.min(50,(S?now-S.last:16));
+    if(S){
+      S.last=now; if(!S.over) update(dt);
+      S.avgDt = S.avgDt*0.95 + dt*0.05;
+      if(S.avgDt>33){ cometInterval=9000; rain.max=450; }
+      else if(S.avgDt>26){ cometInterval=7000; rain.max=550; }
+      else { cometInterval=5000; rain.max=700; }
+    }
+    draw();
+  }
+
+  // ------------ Comets ------------
+  function spawnComet(){
+    const skyH=Math.floor(S.h*(PLAY_SPLIT-0.05)); const y=rand(40,Math.max(60,skyH-40));
+    const left=Math.random()<0.5;
+    const speed=rand(1.6,2.2); // slower for readability
+    comets.push({x:left?-60:S.w+60,y, vx:(left?1:-1)*speed, life:11000, tail:[], verse:GENESIS[verseIdx++%GENESIS.length]});
+  }
+
+  // ------------ Update ------------
+  function update(dtMs){
+    const dt=dtMs/16.67,s=S;if(!s)return;
+
+    // Noah
+    let vx=0,vy=0;
+    if(s.keys['ArrowLeft']||s.keys['a'])vx-=1;
+    if(s.keys['ArrowRight']||s.keys['d'])vx+=1;
+    if(s.keys['ArrowUp']||s.keys['w'])vy-=1;
+    if(s.keys['ArrowDown']||s.keys['s'])vy+=1;
+    if(vx||vy){ const m=Math.hypot(vx,vy)||1, slow=s.noah.carry?0.9:1; s.noah.x+=(vx/m)*s.noah.spd*dt*3*slow; s.noah.y+=(vy/m)*s.noah.spd*dt*3*slow; }
+    else if(s.ptr.act){ const dx=s.ptr.x-s.noah.x,dy=s.ptr.y-s.noah.y,d=Math.hypot(dx,dy); if(d>1){ s.noah.x+=(dx/d)*s.noah.spd*dt*3; s.noah.y+=(dy/d)*s.noah.spd*dt*3; } }
+    s.noah.x=clamp(s.noah.x,24,s.w-24); s.noah.y=clamp(s.noah.y,s.split+20,s.h-26);
+
+    // Animals
+    for(const a of s.animals){
+      if(a.board||a.grab) continue;
+      a.turn-=dtMs;
+      if(a.turn<=0){ const ang=Math.atan2(a.vy,a.vx)+(Math.random()*1.2-0.6), sp=Math.hypot(a.vx,a.vy); a.vx=Math.cos(ang)*sp; a.vy=Math.sin(ang)*sp; a.turn=1000+Math.random()*1600; }
+      const dx=a.x-s.noah.x, dy=a.y-s.noah.y, d=Math.hypot(dx,dy); if(d<70){ a.vx+=(dx/d||0)*0.02; a.vy+=(dy/d||0)*0.02; }
+      a.x+=a.vx*dt*3; a.y+=a.vy*dt*3;
+      if(a.x<24){a.x=24;a.vx=Math.abs(a.vx);} if(a.x>s.w-24){a.x=s.w-24;a.vx=-Math.abs(a.vx);}
+      if(a.y<s.split+20){a.y=s.split+20;a.vy=Math.abs(a.vy);} if(a.y>s.h-24){a.y=s.h-24;a.vy=-Math.abs(a.vy);}
+    }
+
+    // Grab + Pair
+    for(const a of s.animals){
+      if(a.board) continue;
+      const d=Math.hypot(a.x-s.noah.x,a.y-s.noah.y);
+      if(d < a.r + s.noah.r){
+        if(!s.noah.carry){
+          s.noah.carry=a.t; a.grab=true; ensureMateActive(a.t); toast(`${a.e} Found! Find its pair.`); if(navigator.vibrate) navigator.vibrate(18); break;
+        } else if(s.noah.carry===a.t && !a.grab){
+          const tx=rand(40,s.w-40),ty=rand(40,s.split-30);
+          for(const b of s.animals){ if(b.t===a.t){ b.board=true; b.grab=false; b.fly={x:b.x,y:b.y,tx,ty,t:0}; } }
+          s.noah.carry=null; s.score++; document.getElementById('hud').textContent=`Pairs: ${s.score}/${s.target}`;
+          toast(`Pair boarded! ${a.e}${a.e}`); if(navigator.vibrate) navigator.vibrate([12,20,12]);
+          if(s.score>=s.target){ endRound(true); } else { for(let i=s.animals.length-1;i>=0;i--){ if(s.animals[i].board && !s.animals[i].fly) s.animals.splice(i,1); } refill(); }
+          break;
+        }
+      } else if(s.noah.carry===a.t && !a.board && !a.grab && d < a.r + s.noah.r + 20){
+        const ang=Math.atan2(s.noah.y-a.y,s.noah.x-a.x); a.x+=Math.cos(ang)*0.5; a.y+=Math.sin(ang)*0.5;
+      }
+    }
+
+    // Follow + fly
+    const bob=Math.sin(performance.now()/180)*2;
+    for(const a of s.animals){ if(a.grab && !a.board){ const tx=s.noah.x-30,ty=s.noah.y-12+bob; a.x+=(tx-a.x)*0.35; a.y+=(ty-a.y)*0.35; } }
+    for(const a of s.animals){ if(a.fly){ a.fly.t=Math.min(1,a.fly.t+dtMs/600); a.x=a.fly.x+(a.fly.tx-a.fly.x)*a.fly.t; a.y=a.fly.y+(a.fly.ty-a.fly.y)*a.fly.t; if(a.fly.t>=1) a.fly=null; } }
+
+    // Timer + storm
+    s.meter.t+=dtMs;
+    if(!s._warn && s.meter.t>=RAIN_START){ s._warn=true; toast('Storm Warning! 🌩️',1400); }
+    if(!s.win && s.meter.t>=s.meter.dur){ endRound(false); }
+
+    // Lightning + shake — every ~7–8s after rain begins
+    if(!s.over && s.meter.t>=RAIN_START && s.meter.t>=nextFlashAt){ flashT=120; nextFlashAt=s.meter.t + LIGHTNING_MIN + Math.random()*LIGHTNING_VAR; }
+    if(flashT>0){ flashT-=dtMs; shakeX=(Math.random()-0.5)*3; shakeY=(Math.random()-0.5)*3; } else { shakeX=shakeY=0; }
+
+    // Comets — start at 5s, more frequent, slower
+    if(!s.over && s.meter.t>=nextCometAt){ spawnComet(); nextCometAt+=cometInterval; }
+    for(const c of comets){ c.life-=dtMs; c.x+=c.vx*(dtMs/16.67); c.tail.push({x:c.x,y:c.y,a:1,r:5}); if(c.tail.length>60)c.tail.shift(); for(const t of c.tail){ t.a*=.96; t.r*=.992; } }
+    if(comets.length>10) comets.splice(0,comets.length-10);
+    comets=comets.filter(c=>c.life>0 && c.x>-120 && c.x<s.w+120);
+  }
+
+  function endRound(win){ if(!S||S.over) return; S.over=true; S.win=win; }
+
+  // ------------ Draw ------------
+  function draw(){
+    const w=canvas.clientWidth,h=canvas.clientHeight;
+    g.clearRect(0,0,w,h);
+    g.save(); g.translate(shakeX,shakeY);
+
+    if(!S){ // placeholder before start
+      const sky=g.createLinearGradient(0,0,0,h*.3); sky.addColorStop(0,'#68a9e6'); sky.addColorStop(1,'#94c7f0'); g.fillStyle=sky; g.fillRect(0,0,w,h*.3);
+      g.fillStyle='#2e6a32'; g.fillRect(0,h*.3,w,h*.7); g.restore(); return;
+    }
+
+    if(bgLoaded) g.drawImage(bg,0,0,w,h);
+    else { const sky=g.createLinearGradient(0,0,0,h*.3); sky.addColorStop(0,'#68a9e6'); sky.addColorStop(1,'#94c7f0'); g.fillStyle=sky; g.fillRect(0,0,w,h*.3); g.fillStyle='#2e6a32'; g.fillRect(0,h*.3,w,h*.7); }
+
+    // Progressive darkening: base at 10s, then a small layer every 10s
+    if(S.meter.t >= DARK_BASE_AT){
+      g.fillStyle='rgba(0,0,20,0.35)'; g.fillRect(0,0,w,h); // base moodier layer
+      const extraSteps = Math.max(0, Math.floor((S.meter.t - DARK_BASE_AT) / DARK_STEP_MS));
+      const perStep = 0.06; // small increment per 10s
+      const extraA = Math.min(0.35, extraSteps * perStep); // cap to stay playable
+      if(extraA > 0){ g.fillStyle = `rgba(0,0,20,${extraA.toFixed(3)})`; g.fillRect(0,0,w,h); }
+    }
+
+    // comets
+    for(const c of comets){
+      for(const t of c.tail){ g.fillStyle=`rgba(255,255,255,${0.12*t.a})`; g.beginPath(); g.arc(t.x,t.y,Math.max(1,t.r),0,Math.PI*2); g.fill(); }
+      const grd=g.createRadialGradient(c.x,c.y,0,c.x,c.y,18); grd.addColorStop(0,'rgba(255,255,255,.95)'); grd.addColorStop(1,'rgba(255,255,255,.05)');
+      g.fillStyle=grd; g.beginPath(); g.arc(c.x,c.y,18,0,Math.PI*2); g.fill();
+      const text=c.verse.txt, ref=c.verse.ref; g.save(); g.shadowColor='rgba(0,0,0,.65)'; g.shadowBlur=6;
+      g.fillStyle='#e6edf3'; g.textAlign='left'; g.textBaseline='alphabetic'; g.font='bold 12px system-ui';
+      const tw=Math.min(w*.7,g.measureText(text).width); const x=clamp(c.x-tw-24,8,w-tw-8), y=clamp(c.y-38,10,Math.max(10,S.split-48));
+      g.fillText(text,x,y); g.font='11px system-ui'; g.fillStyle='#b9c7e6'; g.fillText(ref,x,y+14); g.restore();
+    }
+
+    // animals + Noah
+    for(const a of S.animals){ if(a.board && !a.fly) continue; const spr=spriteFor(a.e); g.drawImage(spr.img, a.x-spr.ox, a.y-spr.oy); }
+    drawNoah(S.noah.x,S.noah.y,NOAH_SCALE);
+    if(S.noah.carry){ const em=CATALOG.find(x=>x.t===S.noah.carry)?.e||'❓'; const spr=spriteFor(em); g.drawImage(spr.img,S.noah.x-30-spr.ox,S.noah.y-14-spr.oy); }
+
+    // rain (heavy from 5s onward)
+    const rainInt = (S.meter.t>=RAIN_START)?1:0; spawnRain(rainInt,w,h); drawRain(rainInt);
+
+    // meter
+    const pad=18, meterH=6, meterY=h-18, meterW=w-pad*2, p=Math.min(1,S.meter.t/S.meter.dur);
+    g.fillStyle='#0b1b2c'; g.fillRect(pad,meterY,meterW,meterH);
+    const startC=(S.meter.t>=RAIN_START)?'#0ea5e9':'#2b9cd8', endC=(S.meter.t>=RAIN_START)?'#0369a1':'#004e7a';
+    const grad=g.createLinearGradient(pad,0,pad+meterW,0); grad.addColorStop(0,startC); grad.addColorStop(1,endC);
+    g.fillStyle=grad; g.fillRect(pad,meterY,meterW*p,meterH);
+
+    // end screen + flood flip
+    if(S.over && endLoaded) g.drawImage(endBg,0,0,w,h);
+    if(S.over){ g.fillStyle='rgba(0,0,0,.5)'; g.fillRect(0,0,w,h); g.fillStyle='#e6edf3'; g.textAlign='center'; g.textBaseline='middle'; g.font='bold 28px system-ui'; g.fillText(S.win?'ALL ABOARD!':"TIME'S UP!", w/2,h/2-8); g.font='16px system-ui'; g.fillText('Tap or press Restart', w/2, h/2+20); }
+
+    g.restore();
+
+    // lightning flash overlay
+    if(flashT>0){ const a=Math.min(1,flashT/120); g.fillStyle=`rgba(255,255,255,${0.6*a})`; g.fillRect(0,0,w,h); }
+  }
+
+  function drawNoah(cx,cy,scale){
+    const s=5*scale, ox=Math.round(cx-7*s), oy=Math.round(cy-10*s);
+    const C={robe:'#6b4f2a',tunic:'#c8b18b',skin:'#e8d0b3',beard:'#d7d7d7',hair:'#5a3e22',sandal:'#3a2a18'};
+    function px(x,y,c){ g.fillStyle=c; g.fillRect(ox+x*s,oy+y*s,s,s); }
+    for(let x=5;x<=8;x++){ px(x,2,C.hair);} for(let x=5;x<=8;x++){ px(x,3,C.skin);} for(let x=5;x<=8;x++){ px(x,4,C.skin);} px(6,4,'#000'); px(8,4,'#000');
+    for(let x=5;x<=8;x++){ px(x,5,C.beard);} px(6,6,C.beard); px(7,6,C.beard);
+    for(let y=7;y<=13;y++){ for(let x=6;x<=7;x++){ px(x,y,C.tunic);} }
+    for(let y=7;y<=14;y++){ px(4,y,C.robe); px(9,y,C.robe); px(5,y,C.robe); px(8,y,C.robe);}
+    px(3,10,C.robe); px(10,10,C.robe); px(3,11,C.skin); px(10,11,C.skin);
+    for(let x=5;x<=8;x++){ px(x,14,C.robe);} px(6,15,C.sandal); px(7,15,C.sandal);
+  }
+
+})();
+</script>
+</body>
+</html>
