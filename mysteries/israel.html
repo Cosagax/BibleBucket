@@ -9,7 +9,7 @@
   <style>
     :root{
       --bg:#0b0d10; --fg:#e7e9ee; --muted:#aeb6c5; --accent:#d4af37; --soft:#1a1f27; --line:#222733;
-      --link:#9fdcff; --link-hover:#c7e8ff; --red:#ff6b6b; --green:#8aff9f;
+      --link:#9fdcff; --link-hover:#c7e8ff;
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.6}
@@ -29,26 +29,13 @@
     .pull{border-left:3px solid var(--accent);padding:10px 14px;margin:18px 0;color:#f6f2dc;background:rgba(212,175,55,.08);border-radius:8px}
     .muted{color:var(--muted)}
     a{color:var(--link)}
-    figure{margin:22px 0}
-    figcaption{font-size:.9rem;color:var(--muted);margin-top:6px}
-    .grid-2{display:grid;grid-template-columns:1fr;gap:16px}
-    @media (min-width:840px){.grid-2{grid-template-columns:1.2fr .8fr}}
-    .footer{border-top:1px solid var(--line);padding:22px 0;color:var(--muted);font-size:.9rem}
     .toc{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 20px}
     .toc a{background:var(--soft);border:1px solid var(--line);padding:6px 10px;border-radius:10px;color:var(--muted);text-decoration:none}
     .toc a:hover{color:var(--link-hover);border-color:#2d3442}
-    /* Improved tags for readability */
-    .tag{
-      color:#0b0d10;
-      background:#9fdcff;
-      border-radius:8px;
-      padding:2px 8px;
-      font-size:.75rem;
-      margin-right:8px;
-      font-weight:600;
-    }
-    .warn{color:#fff;background:#45222a;border:1px solid #6a2a36}
-    .ok{color:#05370f;background:#a7ffc2;border:1px solid #3ac06b}
+    /* Readable tag pills */
+    .tag{color:#0b0d10;background:#9fdcff;border-radius:8px;padding:2px 8px;font-size:.75rem;margin-right:8px;font-weight:600}
+    /* Remove colored backgrounds on callouts */
+    .warn,.ok{background:none;border:none;color:var(--fg);padding:0}
     hr{border:none;border-top:1px solid var(--line);margin:26px 0}
   </style>
 </head>
@@ -76,7 +63,7 @@
     <h1>You Are Not Commanded by God to Blindly Follow Israel as a Christian</h1>
     <p class="lead">Many believers hear “Israel” in Scripture and automatically apply it to the modern nation-state. But the Bible never commands <em>blind loyalty</em> to a government—especially when its actions contradict the character of Christ.</p>
 
-    <!-- TABLE OF CONTENTS -->
+    <!-- TOC -->
     <div class="toc">
       <a href="#distinction">Biblical vs. Modern Israel</a>
       <a href="#rejection">Rejection of the Messiah</a>
@@ -169,7 +156,7 @@
         <li>Christ does not delight in suffering.</li>
         <li>Christ does not excuse cruelty.</li>
       </ul>
-      <div class="pull ok">Blind loyalty to a flag is idolatry. Loyalty to Christ is freedom. Pick your side: Christ or Babylon.</div>
+      <div class="pull ok"><strong>Blind loyalty to a flag is idolatry. Loyalty to Christ is freedom. Pick your side: Christ or Babylon.</strong></div>
     </section>
 
     <hr />
