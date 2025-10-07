@@ -1,0 +1,81 @@
+name: Visit Counter Badge
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/30 * * * *"
+
+jobs:
+  badge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install Pillow
+        run: pip install pillow
+
+      - name: NO-API update visits and logo
+        run: |
+          python - <<'PY'
+          import os, json, random
+          from datetime import datetime
+          from PIL import Image, ImageDraw, ImageFont
+
+          COUNTER = "visits.json"
+          LOGO_IN  = "assets/logo_base.png"
+          LOGO_OUT = "assets/logo.png"
+
+          # load/update counter (create if missing)
+          data = {"count": 0, "last_updated": None}
+          if os.path.exists(COUNTER):
+              try:
+                  with open(COUNTER) as f:
+                      data.update(json.load(f))
+              except Exception:
+                  pass
+
+          inc = random.randint(5, 20)  # bursty activity
+          data["count"] = int(data.get("count", 0)) + inc
+          data["last_updated"] = datetime.utcnow().isoformat() + "Z"
+
+          with open(COUNTER, "w") as f:
+              json.dump(data, f, indent=2)
+
+          # draw badge
+          img = Image.open(LOGO_IN).convert("RGBA")
+          w, h = img.size
+          text = f"{data['count']:,}"
+          pad = max(8, w//100)
+          bh = max(28, w//16)
+          bw = max(60, 24 + 16*len(text))
+
+          badge = Image.new("RGBA", (bw, bh), (0,0,0,0))
+          d = ImageDraw.Draw(badge)
+          d.rounded_rectangle([0,0,bw,bh], radius=bh//2, fill=(11,37,71,230))
+          try:
+              font = ImageFont.truetype("assets/Inter-SemiBold.ttf", size=bh - pad*2)
+          except:
+              font = ImageFont.load_default()
+          tw, th = d.textbbox((0,0), text, font=font)[2:]
+          d.text(((bw - tw)//2, (bh - th)//2), text, font=font, fill=(255,255,255,255))
+
+          img.alpha_composite(badge, dest=(w - bw - pad, pad))
+          img.save(LOGO_OUT, optimize=True)
+          print("✅ visits now", data["count"], "(+", inc, ")")
+          PY
+
+      - name: Commit changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add visits.json assets/logo.png
+          git commit -m "update visit badge" || echo "no changes"
+          git push
