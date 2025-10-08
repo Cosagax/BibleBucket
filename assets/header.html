@@ -1,0 +1,86 @@
+<!-- BibleBucket universal header include -->
+<header class="topbar">
+  <a href="/index.html" class="logo-link" title="Go Home">
+    <div class="logo">
+      <img id="bb-logo" alt="BibleBucket logo">
+    </div>
+  </a>
+
+  <div class="brand">
+    <h1>BibleBucket</h1>
+  </div>
+
+  <nav class="navline" id="bb-nav">
+    <a class="btn" href="/index.html">Home</a>
+    <a class="btn" href="/games/index.html">Games</a>
+    <a class="btn" href="/comic/index.html">Comics</a>
+    <a class="btn" href="/mysteries/index.html">Mysteries</a>
+    <a class="btn" href="/bibleindex/index.html">Complete Bible Index</a>
+    <a class="btn" href="/about.html">About</a>
+  </nav>
+</header>
+
+<style>
+  .topbar {
+    display:flex;
+    gap:14px;
+    align-items:center;
+    padding:16px 20px;
+    background:#161b22;
+    color:#c9d1d9;
+    border-bottom:1px solid #30363d;
+  }
+  .logo-link {display:grid;place-items:center;text-decoration:none}
+  .logo {
+    width:56px;
+    height:56px;
+    border-radius:10px;
+    background:#0b2547;
+    display:grid;
+    place-items:center;
+    overflow:hidden;
+    transition:transform 0.2s;
+  }
+  .logo:hover { transform:scale(1.08); }
+  .logo img { width:56px;height:56px;display:block }
+  .brand h1 { font-size:28px;margin:0;color:#fff }
+  .navline { margin-left:auto;display:flex;gap:10px;flex-wrap:wrap }
+  .btn {
+    background:#161b22;
+    border:1px solid #30363d;
+    color:#c9d1d9;
+    padding:10px 14px;
+    border-radius:10px;
+    text-decoration:none;
+    font-weight:600;
+  }
+  .btn:hover { border-color:#58a6ff;color:#58a6ff }
+</style>
+
+<script>
+  // fix paths and logo fallback for local file preview or live site
+  (function () {
+    const isLocal = location.protocol === 'file:';
+    const logo = document.getElementById('bb-logo');
+    const logos = isLocal
+      ? ['logo.png','/assets/logo.png','../assets/logo.png']
+      : ['/assets/logo.png','assets/logo.png'];
+    let i = 0;
+    function setNext(){ if (i<logos.length) logo.src = logos[i++]; }
+    logo.onerror = setNext;
+    setNext();
+
+    // fix nav links for local preview
+    if (isLocal) {
+      document.querySelectorAll('#bb-nav a').forEach(a => {
+        if (a.getAttribute('href').startsWith('/'))
+          a.setAttribute('href', a.getAttribute('href').slice(1));
+      });
+      const link = document.querySelector('.logo-link');
+      link.setAttribute('href', 'index.html');
+    }
+  })();
+</script>
+
+<!-- Real visitor logger -->
+<script src="/assets/track.js" defer></script>
