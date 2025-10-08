@@ -79,8 +79,29 @@
     </div>
   </main>
 
+  <!-- Footer -->
   <footer class="footer">
-    Built by Jake & August • BibleBucket
+    Built by Jake &amp; August • BibleBucket<br>
+    For comments or feedback: <a href="mailto:JakeRogersiii@gmail.com">JakeRogersiii@gmail.com</a><br>
+    <span><span id="bb-total">Loading…</span> views since Oct 2025</span>
+
+    <script>
+      (function(){
+        const el = document.getElementById('bb-total');
+        function set(n){ el.textContent = Number(n||0).toLocaleString(); }
+        function fallback(){
+          // helps when previewing locally (file://) or before /stats exists
+          fetch("https://raw.githubusercontent.com/Cosagax/BibleBucket/main/stats/total_views.json", {cache:"no-store"})
+            .then(r=>r.ok?r.json():Promise.reject())
+            .then(d=>set(d.total))
+            .catch(()=>{ el.textContent = "N/A"; });
+        }
+        fetch("/stats/total_views.json", {cache:"no-store"})
+          .then(r=>r.ok?r.json():Promise.reject())
+          .then(d=>set(d.total))
+          .catch(fallback);
+      })();
+    </script>
   </footer>
 
 </body>
