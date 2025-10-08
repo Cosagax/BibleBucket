@@ -1,0 +1,105 @@
+name: Total Views (Lifetime + Daily CSV)
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"   # every 6 hours
+  workflow_dispatch:
+
+jobs:
+  tally:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install deps
+        run: pip install requests
+
+      - name: Update lifetime total and daily CSV
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+          REPO: Cosagax/BibleBucket
+        run: |
+          python - << 'PY'
+          import os, json, time, pathlib, requests, csv, sys
+
+          REPO  = os.getenv("REPO")
+          TOKEN = os.getenv("GH_PAT")
+          if not TOKEN:
+            print("ERROR: GH_PAT secret missing")
+            sys.exit(1)
+
+          stats = pathlib.Path("stats"); stats.mkdir(exist_ok=True)
+          seen_days = stats / "seen_days.json"
+          total_file = stats / "total_views.json"
+          daily_csv  = stats / "daily.csv"
+          raw_file   = stats / "traffic_raw.json"
+
+          # load caches
+          seen = {}
+          if seen_days.exists():
+            try: seen = json.loads(seen_days.read_text(encoding="utf-8"))
+            except: seen = {}
+          total = 0
+          if total_file.exists():
+            try: total = int(json.loads(total_file.read_text(encoding="utf-8")).get("total", 0))
+            except: total = 0
+
+          # fetch github traffic
+          headers = {
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"Bearer {TOKEN}",
+            "X-GitHub-Api-Version": "2022-11-28",
+          }
+          url = f"https://api.github.com/repos/{REPO}/traffic/views"
+          r = requests.get(url, headers=headers, timeout=25)
+          try:
+            r.raise_for_status()
+          except Exception as e:
+            print("HTTP ERROR from traffic API:", e)
+            print("Response:", r.status_code, r.text[:400])
+            sys.exit(1)
+          payload = r.json()
+          raw_file.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+          # compute new additions
+          new_add = 0
+          for day in payload.get("views", []):
+            d = day.get("timestamp","")[:10]
+            c = int(day.get("count", 0))
+            prev = int(seen.get(d, 0))
+            if c > prev:
+              new_add += (c - prev)
+              seen[d] = c
+            else:
+              seen[d] = max(prev, c)
+
+          if new_add:
+            total += new_add
+
+          # write outputs
+          seen_days.write_text(json.dumps(seen, indent=2, sort_keys=True), encoding="utf-8")
+          total_file.write_text(json.dumps({"total": total, "last_updated": int(time.time())}, indent=2), encoding="utf-8")
+
+          rows = sorted(((d,int(v)) for d,v in seen.items()), key=lambda x: x[0])
+          with daily_csv.open("w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f); w.writerow(["Date","Views"]); w.writerows(rows)
+
+          print(f"[Views] +{new_add} this run | Lifetime total: {total}")
+          print("Wrote:", total_file, daily_csv, seen_days, raw_file)
+          PY
+
+      - name: Commit changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add stats/seen_days.json stats/total_views.json stats/daily.csv stats/traffic_raw.json
+          git commit -m "chore: update lifetime views & daily CSV" || echo "No changes"
+          git push
