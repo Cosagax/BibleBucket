@@ -39,7 +39,7 @@
   #cinOverlay .title{font-size:28px;letter-spacing:6px;color:#eaf4ff;text-shadow:0 0 16px rgba(150,210,255,.6);opacity:.95}
   #cinOverlay .verses{margin-top:14px;color:#eaf4ff;text-shadow:0 0 10px rgba(180,220,255,0.55);font-size:clamp(14px,4.2vw,22px);line-height:1.33;padding:0 16px}
   #cinOverlay .hint{color:#9fb6cc;font-size:12px;margin-top:8px}
-  #cinOverlay .btnRow{margin-top:16px;display:flex;gap:10px;justify-content:center}
+  #cinOverlay .btnRow{margin-top:16px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
   #cinOverlay .center.topRight{left:auto;right:6%;top:calc(32% + env(safe-area-inset-top));transform:translate(0,-50%);text-align:right;width:min(92%,520px);padding-right:max(16px,env(safe-area-inset-right));word-wrap:break-word}
   @media (max-width:520px){#cinOverlay .center.topRight{right:4%;top:calc(30% + env(safe-area-inset-top));width:min(92%,420px)}}
 
@@ -105,7 +105,10 @@
       <div id="cinTitle" class="title">ENOCH</div>
       <div id="verses" class="verses"></div>
       <div class="hint" id="cinHint">Tap or press any key to continue...</div>
-      <div class="btnRow"><button id="againBtn" class="btn" style="pointer-events:auto;display:none">Play Again</button></div>
+      <div class="btnRow">
+  <a id="articleBtn" class="btn" href="#" target="_blank" rel="noopener noreferrer" style="display:none; pointer-events:auto">Read Article</a>
+  <button id="againBtn" class="btn" style="pointer-events:auto;display:none">Play Again</button>
+</div>
     </div>
   </div>
 </div>
@@ -115,11 +118,11 @@
 /*
   Backyard Orbs  -  2.1 Mobile
   Safe mobile tweaks only:
-  • Prevent browser gestures/zoom.
-  • True touch input mirrors mouse.
-  • Auto reduced motion on tiny screens.
-  • Beam visibility scales on high-DPI.
-  • Player still: centered horizontally.
+  Â• Prevent browser gestures/zoom.
+  Â• True touch input mirrors mouse.
+  Â• Auto reduced motion on tiny screens.
+  Â• Beam visibility scales on high-DPI.
+  Â• Player still: centered horizontally.
 */
 (function(){
   // ===== canvas & utils =====
@@ -140,6 +143,7 @@
   const scoreEl=document.getElementById('scoreEl'), timeEl=document.getElementById('timeEl');
   const hitsEl=document.getElementById('hitsEl'), missesEl=document.getElementById('missesEl'), goalEl=document.getElementById('goalEl');
   const overlay=document.getElementById('cinOverlay'), titleText=document.getElementById('cinTitle'), versesBox=document.getElementById('verses'), againBtn=document.getElementById('againBtn'), hintEl=document.getElementById('cinHint');
+  const articleBtn=document.getElementById('articleBtn');
   const overlayCenter = overlay.querySelector('.center');
 
   // Lore toggle
@@ -320,7 +324,7 @@
 
   // ===== whispers & win verses =====
   const WHISPER_GOOD=["Holy watchers stand","Watchers of heaven","Luminaries keep their order","Stars sing together","He counts the stars","The heavens declare","Messengers of Light","Scribe of righteousness","Hosts of heaven praise","Ministering spirits","Sent forth to serve","Lights for signs","Names in heaven","Morning stars rejoice","Obedient stars","Keepers of truth"];
-  const WIN_GOOD=["A watcher, a holy one","The heavens declare His glory","He numbers the stars by name","The morning stars sang together","Ministering spirits sent to serve","Luminaries do not transgress their order","Hosts of heaven worship Him","Signs in the heavens for seasons","Those who are wise shine","Let the righteous be glad"];
+  const WIN_GOOD=[];
 
   // ===== comet watchers =====
   const watchers=[];
@@ -335,9 +339,9 @@
   let laserCD=0, laserSparkTimer=0;
 
   // ===== flow =====
-  function startGame(){try{audio().resume()}catch{} STATE.running=true;STATE.paused=false;STATE.ended=false;STATE.mode='play';STATE.timeLeft=SETTINGS.timeStart;STATE.score=0;STATE.hits=0;STATE.misses=0;STATE.streak=0;entities.length=0;particles.length=0;watchers.length=0;spawnTimer=0;player.x=(canvas.clientWidth - player.w)/2;player.y=player.feetY-player.h;captain.reset();titleEl.style.display='none';pauseBtn.disabled=false;resetBtn.disabled=false;overlay.style.display='none';versesBox.innerHTML='';againBtn.style.display='none';titleText.textContent='ENOCH';hintEl.textContent='Tap or press any key to continue...';starFade=1}
+  function startGame(){try{audio().resume()}catch{} STATE.running=true;STATE.paused=false;STATE.ended=false;STATE.mode='play';STATE.timeLeft=SETTINGS.timeStart;STATE.score=0;STATE.hits=0;STATE.misses=0;STATE.streak=0;entities.length=0;particles.length=0;watchers.length=0;spawnTimer=0;player.x=(canvas.clientWidth - player.w)/2;player.y=player.feetY-player.h;captain.reset();titleEl.style.display='none';pauseBtn.disabled=false;resetBtn.disabled=false;overlay.style.display='none';versesBox.innerHTML='';againBtn.style.display='none';titleText.textContent='ENOCH';hintEl.textContent='';starFade=1}
   function togglePause(){if(!STATE.running||STATE.mode!=='play')return;STATE.paused=!STATE.paused;pauseBtn.textContent=STATE.paused?'Resume':'Pause'}
-  function resetGame(){STATE.running=false;STATE.paused=false;STATE.ended=false;STATE.mode='play';titleEl.style.display='flex';pauseBtn.disabled=true;resetBtn.disabled=true;pauseBtn.textContent='Pause';overlay.style.display='none';versesBox.innerHTML='';againBtn.style.display='none';starFade=1;try{overlayCenter.classList.remove('topRight')}catch{}}
+  function resetGame(){STATE.running=false;STATE.paused=false;STATE.ended=false;STATE.mode='play';titleEl.style.display='flex';pauseBtn.disabled=true;resetBtn.disabled=true;pauseBtn.textContent='Pause';overlay.style.display='none';versesBox.innerHTML='';againBtn.style.display='none'; if(articleBtn){articleBtn.style.display='none'; articleBtn.href='#';} starFade=1;try{overlayCenter.classList.remove('topRight')}catch{}}
   startBtn.addEventListener('click',()=>{if(!STATE.running)startGame()}); tPlay.addEventListener('click',()=>{if(!STATE.running)startGame()});
   pauseBtn.addEventListener('click',togglePause); resetBtn.addEventListener('click',resetGame);
 
@@ -506,9 +510,9 @@
       dots.push({x:s.x,y:s.y, sx:s.x, sy:s.y, tx:t.x,ty:t.y, t:0,dur, edge:t.edge});
     }
 
-    const WIN_GOOD=["A watcher, a holy one","The heavens declare His glory","He numbers the stars by name","The morning stars sang together","Ministering spirits sent to serve","Luminaries do not transgress their order","Hosts of heaven worship Him","Signs in the heavens for seasons","Those who are wise shine","Let the righteous be glad"];
-    const versesThisRun = randomSubset(WIN_GOOD, REDUCED_MOTION ? 3 : 4);
-    versesBox.innerHTML=''; titleText.textContent='ENOCH'; hintEl.textContent=''; againBtn.style.display='none';
+    const WIN_GOOD=[];
+    const versesThisRun = [];
+    versesBox.innerHTML=''; titleText.textContent='ENOCH'; hintEl.textContent=''; againBtn.style.display='none'; if(articleBtn){ articleBtn.textContent='Enoch â†’'; articleBtn.href='https://biblebucket.com/mysteries/enoch.html'; articleBtn.style.display='inline-block'; }
 
     cinWin = {
       t:0, phase:0, done:false, fastForward:false,
@@ -759,9 +763,8 @@
         titleText.textContent='SPOTTED';
         hintEl.textContent='';
         versesBox.innerHTML='';
-        addLine('The drones marked you.');
-        addLine('Agents escorted you away.');
         againBtn.style.display='inline-block';
+        if(articleBtn){ articleBtn.textContent='Babylon 2.0 â†’'; articleBtn.href='https://biblebucket.com/mysteries/babylon2.html'; articleBtn.style.display='inline-block'; }
         againBtn.onclick=()=>resetGame();
         try{overlayCenter.classList.add('topRight')}catch{}; overlay.style.display='block';
         L.done=true;
@@ -818,7 +821,7 @@
     captain.draw(ctx);
   }
 
-  function addLine(line){const p=document.createElement('p');p.textContent=line;p.style.margin='6px 0';p.style.opacity='0';p.style.transition='opacity 600ms ease';versesBox.appendChild(p);requestAnimationFrame(()=>p.style.opacity='1')}
+  function addLine(line){}
 
   // skip-to-final for win overlay
   const bindSkip=()=>{window.addEventListener('keydown',skipOnce,{once:true});window.addEventListener('mousedown',skipOnce,{once:true});window.addEventListener('touchstart',skipOnce,{once:true})};
