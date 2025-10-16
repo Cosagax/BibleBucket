@@ -32,25 +32,30 @@
   .backlink{display:block;margin-top:12px;font-size:13px;color:#9fb3d9;text-decoration:none}
   .backlink:hover{text-decoration:underline;color:#cdd9f9}
 
-  /* Outcome overlay */
+  /* Outcome overlay (now a single CTA button) */
   .noah-overlay{
     position:fixed;
     left:50%; transform:translateX(-50%);
     bottom:12%;
     display:flex; flex-direction:column; align-items:center;
-    text-align:center; pointer-events:none; z-index:9999;
+    text-align:center; z-index:9999;
     padding:4px 8px; max-width:var(--overlay-max);
+    pointer-events:none; /* container off; button will be clickable */
   }
-  .noah-line{
-    opacity:0; font-size:clamp(13px,2vw,17px); line-height:1.35;
-    text-shadow:0 1px 2px rgba(0,0,0,.35);
-    word-wrap:break-word; overflow-wrap:anywhere; hyphens:auto;
+  .cta-btn{
+    pointer-events:auto;
+    padding:12px 16px;
+    border-radius:14px;
+    border:1px solid #3b82f6;
+    background:#1e3a8a;
+    color:#e6edf3;
+    font-weight:800;
+    text-decoration:none;
+    box-shadow:0 2px 0 #0008;
+    display:inline-block;
+    min-width:160px;
   }
-  .noah-line .ref{opacity:.85;font-weight:600;margin-right:.35em}
-  .noah-win .noah-line{color:#fff}
-  .noah-loss .noah-line{color:#9ca3af}
-  @keyframes noahFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-  .noah-in{animation:noahFadeIn .8s ease forwards}
+  .cta-btn:hover{filter:brightness(1.08)}
 </style>
 </head>
 <body>
@@ -83,35 +88,27 @@ function syncOverlayToCanvas(){
 }
 window.addEventListener('resize', syncOverlayToCanvas);
 
-/* ===== Outcome Overlay: random verse ===== */
+/* ===== Outcome Overlay: CTA button only ===== */
 (function(){
   const STYLE_CLASS="noah-overlay";
-  const WIN=[
-    {ref:"Genesis 7:16",text:"Then the Lord shut him in."},
-    {ref:"Genesis 7:17",text:"As the waters increased they lifted the ark above the earth."},
-    {ref:"Genesis 7:24",text:"The waters flooded the earth for a hundred and fifty days."}
-  ];
-  const LOSS=[
-    {ref:"Genesis 7:22",text:"Everything on dry land that had the breath of life died."},
-    {ref:"Genesis 7:23",text:"Only Noah was left, and those with him in the ark."},
-    {ref:"Genesis 6:12",text:"All flesh had corrupted their way upon the earth."}
-  ];
-  const pickOne = arr => arr[(Math.random()*arr.length)|0];
-  function create(line,mode){
+  function createCTA(){
     document.querySelectorAll("."+STYLE_CLASS).forEach(el=>el.remove());
     const root=document.createElement("div");
-    root.className=`${STYLE_CLASS} ${mode==="loss"?"noah-loss":"noah-win"}`;
-    const p=document.createElement("p");
-    p.className="noah-line noah-in";
-    p.innerHTML=`<span class="ref">${line.ref}</span>— ${line.text}`;
-    root.appendChild(p);
+    root.className=STYLE_CLASS;
+    const a=document.createElement("a");
+    a.className="cta-btn";
+    a.textContent="The Flood";
+    a.href="https://biblebucket.com/mysteries/flood.html";
+    a.target="_self"; // open in same tab
+    a.rel="noopener";
+    root.appendChild(a);
     document.body.appendChild(root);
     syncOverlayToCanvas();
     return root;
   }
   window.NoahOutcomeOverlay={
-    showWin(){return create(pickOne(WIN),"win");},
-    showLoss(){return create(pickOne(LOSS),"loss");},
+    showWin(){return createCTA();},
+    showLoss(){return createCTA();},
     clear(){document.querySelectorAll("."+STYLE_CLASS).forEach(el=>el.remove());}
   };
 })();
@@ -328,7 +325,7 @@ window.addEventListener('resize', syncOverlayToCanvas);
       if(a.y<s.split+20){a.y=s.split+20;a.vy=Math.abs(a.vy);} if(a.y>s.h-24){a.y=s.h-24;a.vy=-Math.abs(a.vy);}
     }
 
-    // Grab + Pair (toasts removed)
+    // Grab + Pair (no gameplay toasts)
     for(const a of s.animals){
       if(a.board) continue;
       const d=Math.hypot(a.x-s.noah.x,a.y-s.noah.y);
