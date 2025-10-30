@@ -60,7 +60,23 @@
     }
 
     footer{opacity:.85;font-size:13px;padding:28px 12px 50px}
-  </style>
+  
+/* === Bright <span class="xmas-badge">Merry Christmas</span> badge === */
+.xmas-badge{
+  display:inline-block;
+  padding:.35rem .65rem;
+  font-size:.85rem;
+  line-height:1;
+  font-weight:700;
+  border-radius:999px;
+  color:#fff;
+  background: linear-gradient(90deg,#00e676 0%, #00c853 45%, #ff1744 55%, #ff3b30 100%);
+  box-shadow:0 4px 18px rgba(0,0,0,.25), inset 0 0 0 1px rgba(255,255,255,.12);
+  letter-spacing:.2px;
+  white-space:nowrap;
+}
+.card .xmas-badge{ position:relative; top:-2px; }
+</style>
 </head>
 <body>
   <header>
@@ -84,7 +100,7 @@
     <section class="grid" aria-label="Quick links">
       <!-- Christmas feature -->
       <a class="tile" href="games/jesus-birth/index.html">
-        <div class="badge-xmas">Merry Christmas</div>
+        <div class="badge-xmas"><span class="xmas-badge">Merry Christmas</span></div>
         <h3>A Wise Man&#39;s Journey</h3>
         <p>It&#39;s Christmas and the Christ has been born! Follow His star to find Him. Playtime: ~1 min &mdash; Input: tap/click.</p>
         <span class="go">Play &rarr;</span>
