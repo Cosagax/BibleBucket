@@ -4,12 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Games — BibleBucket</title>
-  <meta name="description" content="Tiny Bible arcade — quick plays with big themes. Play Backyard Orbs, Noah’s Ark, and A Wise Man’s Journey." />
+  <meta name="description" content="Tiny Bible arcade — quick plays with big themes. Play A Wise Man’s Journey, Backyard Orbs, and Noah’s Ark." />
   <link rel="icon" type="image/png" href="../assets/logo.png" />
   <style>
     :root{
       --bg:#0d1117; --bg2:#161b22; --fg:#c9d1d9; --accent:#58a6ff;
       --rule:#30363d; --muted:#9ca3af; --radius:12px;
+      --red:#ef4444; --green:#22c55e;
     }
     html,body{background:var(--bg);color:var(--fg);margin:0;font-family:ui-sans-serif,system-ui,Segoe UI,Helvetica,Arial,sans-serif}
     a{color:inherit}
@@ -41,7 +42,13 @@
     .desc{opacity:.9;margin:0}
     .meta{color:var(--muted);font-size:12px}
     .cta{margin-top:auto;color:var(--accent);font-weight:600}
-    .badge{position:absolute;top:12px;right:12px;background:#223;border:1px solid var(--rule);color:#e2e8f0;padding:4px 10px;border-radius:999px;font-size:12px}
+    .badge-xmas{
+      position:absolute;top:12px;right:12px;
+      background:linear-gradient(90deg, var(--green), var(--red));
+      color:#fff;font-weight:700;
+      padding:4px 10px;border-radius:999px;font-size:12px;
+      letter-spacing:.2px;box-shadow:0 0 6px rgba(0,0,0,.4);
+    }
 
     .footer{border-top:1px solid var(--rule);color:var(--muted);padding:14px 20px;text-align:center;margin-top:28px}
 
@@ -84,9 +91,18 @@
   <main class="wrap">
     <div class="grid">
 
+      <!-- A Wise Man’s Journey -->
+      <a class="card link" href="./jesus-birth/index.html">
+        <span class="badge-xmas">Merry Christmas</span>
+        <div class="kicker">Arcade</div>
+        <h3 class="title">A Wise Man’s Journey</h3>
+        <p class="desc">It’s Christmas and the Christ has been born! Follow “His star” to find Him.</p>
+        <div class="meta">Playtime: ~1 min • Input: tap/click</div>
+        <span class="cta">Play →</span>
+      </a>
+
       <!-- Backyard Orbs -->
       <a class="card link" href="./orbs/index.html">
-        <span class="badge">New</span>
         <div class="kicker">Arcade</div>
         <h3 class="title">Backyard Orbs</h3>
         <p class="desc">Collect the glowing orbs to score points and avoid the drones that drain them. Touch-friendly, quick play.</p>
@@ -96,21 +112,10 @@
 
       <!-- Noah's Ark -->
       <a class="card link" href="./noah/index.html">
-        <span class="badge">New</span>
         <div class="kicker">Survival</div>
         <h3 class="title">Noah’s Ark</h3>
         <p class="desc">Play as Noah and gather the animals before the Flood begins.</p>
         <div class="meta">Playtime: ~1 min • Input: swipe/keys</div>
-        <span class="cta">Play →</span>
-      </a>
-
-      <!-- A Wise Man's Journey -->
-      <a class="card link" href="./jesus-birth/index.html">
-        <span class="badge">New</span>
-        <div class="kicker">Arcade</div>
-        <h3 class="title">A Wise Man’s Journey</h3>
-        <p class="desc">It’s Christmas and the Christ has been born! Follow “His star” to find Him.</p>
-        <div class="meta">Playtime: ~1 min • Input: tap/click</div>
         <span class="cta">Play →</span>
       </a>
 
