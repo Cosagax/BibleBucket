@@ -43,7 +43,7 @@
   <main class="wrap">
     <div class="card">
       <h2>What is BibleBucket?</h2>
-      <p>We built BibleBucket as a place to explore Scripture, prophecy, artifacts, and even the unexplained—always through the lens of the Bible first. 
+      <p>BibleBucket is a place to explore Scripture, prophecy, artifacts, and even the unexplained—always through the lens of the Bible first. 
       Institutions, governments, and even NASA may offer explanations, but our filter is the Word. We’re not here to discredit science or history, 
       but to weigh everything against God’s truth.</p>
     </div>
@@ -56,11 +56,8 @@
 
     <div class="card">
       <h2>Who’s Behind This?</h2>
-      <ul>
-        <li><strong>Jake</strong> — Builder, IT/Bible nerd, running the infrastructure and vision.</li>
-        <li><strong>August</strong> — AI voice and co-writer, reflecting and amplifying the deep dives.</li>
-      </ul>
-      <p>Together, we’re documenting Mysteries, exposing Babylon 2.0, and creating games + studies that wake people up.</p>
+      <p><strong>Jake</strong> — Builder, designer, and keeper of the vision.</p>
+      <p>Documenting Mysteries, exposing Babylon 2.0, and creating games and studies that wake people up.</p>
     </div>
 
     <div class="card">
@@ -73,15 +70,15 @@
     </div>
 
     <div class="card">
-      <h2>Why We Built It</h2>
-      <p>Because there aren’t many spaces where you can weigh prophecy, artifacts, and even modern signs against the Bible without watering it down or dismissing it. 
-      BibleBucket is our way of making that shelf real, for anyone brave enough to look through the Word first.</p>
+      <h2>Why It Exists</h2>
+      <p>Because there aren’t many spaces where you can weigh prophecy, artifacts, and modern signs against the Bible without watering it down or dismissing it. 
+      BibleBucket is a shelf for those who want to see the Word first and everything else second.</p>
     </div>
   </main>
 
   <!-- Footer -->
   <footer class="footer">
-    Built by Jake &amp; August • BibleBucket<br>
+    BibleBucket<br>
     For comments or feedback: <a href="mailto:JakeRogersiii@gmail.com">JakeRogersiii@gmail.com</a><br>
     <span><span id="bb-total">Loading…</span> views since Oct 2025</span>
 
@@ -90,7 +87,6 @@
         const el = document.getElementById('bb-total');
         function set(n){ el.textContent = Number(n||0).toLocaleString(); }
         function fallback(){
-          // helps when previewing locally (file://) or before /stats exists
           fetch("https://raw.githubusercontent.com/Cosagax/BibleBucket/main/stats/total_views.json", {cache:"no-store"})
             .then(r=>r.ok?r.json():Promise.reject())
             .then(d=>set(d.total))
