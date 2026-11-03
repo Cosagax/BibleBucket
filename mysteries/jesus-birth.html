@@ -49,7 +49,7 @@
 <body>
   <!-- Standard BibleBucket Header (Mysteries link omitted on article pages) -->
   <header class="topbar">
-    <div class="logo"><img id="siteLogo" src="../assets/logo.png" alt="BibleBucket logo" /></div>
+    <a class="logo" href="https://biblebucket.net/" aria-label="Go to BibleBucket home"><img id="siteLogo" src="../assets/logo.png" alt="BibleBucket logo" /></a>
     <div class="brand">
       <h1>BibleBucket</h1>
       <div class="sub">Mysteries & Rabbit Holes</div>
@@ -153,11 +153,6 @@
     addFallback(imgOpening, openingPaths);
     addFallback(imgManger, mangerPaths);
 
-    // Ensure href on logo returns to site root
-    document.querySelector('.logo').addEventListener('click', () => {
-      window.location.href = 'https://biblebucket.net/';
-    });
-    document.querySelector('.logo').style.cursor = 'pointer';
   </script>
 </body>
 </html>
