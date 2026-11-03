@@ -321,23 +321,79 @@ const Sky=(()=>{ let shooting=[], nextStarT=5, angel=null, angelAt=45;
     ctx.restore(); }
   function spawnAngel(){ const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1); angel={x:W*.5,y:H*.18,vy:28,t:0,phase:'down',s:Math.min(W,H)*.0010}; SFX.celesta(); }
   function updateAngel(dt){ if(!angel) return; angel.t+=dt; if(angel.phase==='down'){ angel.y+=angel.vy*dt; if(angel.t>2){ angel.phase='up'; angel.vy=-18; } } else if(angel.phase==='up'){ angel.y+=angel.vy*dt; if(angel.t>4){ angel=null; } } }
-  function drawAngel(){ if(!angel) return; const s=angel.s*100,x=angel.x,y=angel.y;
-    ctx.save(); ctx.globalCompositeOperation='lighter'; const a=Math.min(1,Math.max(0,1-angel.t/4)); const g=ctx.createRadialGradient(x,y,0,x,y,90);
-    g.addColorStop(0,`rgba(255,245,210,${0.18*a})`); g.addColorStop(1,'rgba(255,245,210,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,90,0,Math.PI*2); ctx.fill(); ctx.restore();
-    ctx.save(); ctx.translate(x,y); ctx.scale(s/100,s/100); ctx.lineWidth=2;
-    ctx.fillStyle='#f1b432'; ctx.strokeStyle='rgba(0,0,0,0.15)';
-    const wing=(side)=>{ ctx.save(); ctx.scale(side,1); ctx.beginPath();
-      ctx.moveTo(0,24); ctx.bezierCurveTo(70,0,120,10,130,60); ctx.bezierCurveTo(135,85,115,105,95,110);
-      ctx.bezierCurveTo(80,90,60,80,40,78); ctx.bezierCurveTo(60,70,65,55,50,48); ctx.bezierCurveTo(55,40,40,32,0,24);
-      ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore(); };
-    ctx.globalAlpha=.95; wing(-1); wing(1); ctx.globalAlpha=1;
-    const grad=ctx.createLinearGradient(0,40,0,180); grad.addColorStop(0,'#2b7bb0'); grad.addColorStop(1,'#0f4a7a');
-    ctx.fillStyle=grad; ctx.beginPath(); ctx.moveTo(-40,40); ctx.quadraticCurveTo(0,70,40,40); ctx.lineTo(60,150); ctx.quadraticCurveTo(0,180,-60,150); ctx.closePath(); ctx.fill();
-    ctx.fillStyle='#5fb0e1'; ctx.beginPath(); ctx.moveTo(-38,65); ctx.quadraticCurveTo(-70,90,-34,110); ctx.quadraticCurveTo(-20,100,-22,78); ctx.closePath(); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(38,65); ctx.quadraticCurveTo(70,90,34,110); ctx.quadraticCurveTo(20,100,22,78); ctx.closePath(); ctx.fill();
-    ctx.fillStyle='#f5cc9c'; ctx.beginPath(); ctx.arc(0,30,22,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='#e5732a'; ctx.beginPath(); ctx.arc(0,24,22,Math.PI,0); ctx.quadraticCurveTo(6,32,0,36); ctx.quadraticCurveTo(-6,32,-22,24); ctx.closePath(); ctx.fill();
-    ctx.strokeStyle='#f1d26b'; ctx.lineWidth=6; ctx.beginPath(); ctx.ellipse(0,0,26,10,0,0,Math.PI*2); ctx.stroke(); ctx.restore(); }
+  function drawAngel(){
+    if(!angel) return;
+    const s=angel.s*100,x=angel.x,y=angel.y;
+    const a=Math.min(1,Math.max(0,1-angel.t/4));
+    ctx.save(); ctx.globalCompositeOperation='lighter';
+    const g=ctx.createRadialGradient(x,y,0,x,y,90);
+    g.addColorStop(0,`rgba(255,245,220,${0.24*a})`); g.addColorStop(1,'rgba(255,245,220,0)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,90,0,Math.PI*2); ctx.fill(); ctx.restore();
+
+    ctx.save(); ctx.translate(x,y); ctx.scale(s/100,s/100); ctx.globalAlpha=a; ctx.lineJoin='round'; ctx.lineCap='round';
+    const wing=(side)=>{
+      ctx.save(); ctx.scale(side,1);
+      ctx.fillStyle='#fff2d2'; ctx.strokeStyle='rgba(212,174,111,.62)'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(3,24);
+      ctx.bezierCurveTo(32,2,79,-5,119,18); ctx.bezierCurveTo(137,29,143,52,128,68);
+      ctx.bezierCurveTo(112,84,88,88,66,76); ctx.bezierCurveTo(45,65,25,49,3,42);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Soft, overlapping feather shapes keep the wings readable at cameo size.
+      for(let i=0;i<4;i++){
+        const yy=30+i*10;
+        ctx.fillStyle=i%2?'#f5dfb8':'#fff8e8';
+        ctx.beginPath(); ctx.moveTo(12,yy); ctx.quadraticCurveTo(48,yy-12,91+i*4,yy+1);
+        ctx.quadraticCurveTo(60,yy+14,23,yy+8); ctx.closePath(); ctx.fill();
+      }
+      ctx.restore();
+    };
+    wing(-1); wing(1);
+
+    // A fine warm halo, set behind her hair.
+    ctx.strokeStyle='#f2cf78'; ctx.lineWidth=5; ctx.beginPath(); ctx.ellipse(0,2,27,10,0,0,Math.PI*2); ctx.stroke();
+    ctx.strokeStyle='rgba(255,246,210,.8)'; ctx.lineWidth=1.4; ctx.beginPath(); ctx.ellipse(0,2,31,13,0,0,Math.PI*2); ctx.stroke();
+
+    // Long, softly waved auburn hair falling over the shoulders.
+    const hair=ctx.createLinearGradient(-25,12,24,112); hair.addColorStop(0,'#9f351f'); hair.addColorStop(.48,'#d45a2c'); hair.addColorStop(1,'#8e2c20');
+    ctx.fillStyle=hair; ctx.beginPath(); ctx.moveTo(-20,18);
+    ctx.bezierCurveTo(-30,31,-28,55,-24,73); ctx.bezierCurveTo(-22,88,-35,101,-25,110);
+    ctx.bezierCurveTo(-14,107,-10,91,-8,80); ctx.quadraticCurveTo(0,89,5,80);
+    ctx.bezierCurveTo(12,96,13,108,25,110); ctx.bezierCurveTo(35,99,22,83,25,68);
+    ctx.bezierCurveTo(30,48,25,25,16,16); ctx.closePath(); ctx.fill();
+
+    // Face and ears: warm, gentle features with a small, friendly smile.
+    ctx.fillStyle='#f2bd91'; ctx.beginPath(); ctx.ellipse(0,34,19,25,0,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(-18,37,4,7,0,0,Math.PI*2); ctx.ellipse(18,37,4,7,0,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(196,91,73,.26)'; ctx.beginPath(); ctx.ellipse(-12,43,5,2.7,0,0,Math.PI*2); ctx.ellipse(12,43,5,2.7,0,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#53332d'; ctx.lineWidth=1.8;
+    ctx.beginPath(); ctx.moveTo(-12,29); ctx.quadraticCurveTo(-8,26,-4,29); ctx.moveTo(4,29); ctx.quadraticCurveTo(8,26,12,29); ctx.stroke();
+    ctx.fillStyle='#382b2b'; ctx.beginPath(); ctx.ellipse(-8,33,1.6,2.4,0,0,Math.PI*2); ctx.ellipse(8,33,1.6,2.4,0,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='rgba(138,78,57,.85)'; ctx.lineWidth=1.4; ctx.beginPath(); ctx.moveTo(0,34); ctx.quadraticCurveTo(-1,40,2,41); ctx.stroke();
+    ctx.fillStyle='#a8433d'; ctx.beginPath(); ctx.ellipse(0,48,4.2,1.6,0,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#9e4c42'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(-7,52); ctx.quadraticCurveTo(0,58,7,52); ctx.stroke();
+
+    // Side-parted fringe frames her face; one soft lock falls across the brow.
+    ctx.fillStyle=hair; ctx.beginPath(); ctx.moveTo(-20,33);
+    ctx.bezierCurveTo(-23,9,-6,8,6,12); ctx.bezierCurveTo(23,15,25,27,20,42);
+    ctx.quadraticCurveTo(16,33,10,27); ctx.bezierCurveTo(1,24,-5,21,-11,17);
+    ctx.bezierCurveTo(-10,25,-14,31,-20,33); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='rgba(255,178,104,.7)'; ctx.lineWidth=2; ctx.beginPath();
+    ctx.moveTo(-12,16); ctx.quadraticCurveTo(-1,10,10,17); ctx.moveTo(17,25); ctx.quadraticCurveTo(23,48,20,66); ctx.stroke();
+
+    // Flowing ivory robe with gathered neckline and light gold accents.
+    const robe=ctx.createLinearGradient(-30,55,30,160); robe.addColorStop(0,'#fff9ed'); robe.addColorStop(.65,'#f3e5cd'); robe.addColorStop(1,'#d9c8aa');
+    ctx.fillStyle=robe; ctx.beginPath(); ctx.moveTo(-22,57); ctx.quadraticCurveTo(0,69,22,57);
+    ctx.lineTo(39,145); ctx.quadraticCurveTo(0,164,-39,145); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#fffdf6'; ctx.beginPath(); ctx.moveTo(-22,57); ctx.quadraticCurveTo(-49,66,-53,94);
+    ctx.quadraticCurveTo(-41,106,-29,97); ctx.lineTo(-17,72); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(22,57); ctx.quadraticCurveTo(49,66,53,94);
+    ctx.quadraticCurveTo(41,106,29,97); ctx.lineTo(17,72); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='#d7b970'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(-16,64); ctx.quadraticCurveTo(0,76,16,64); ctx.stroke();
+    ctx.strokeStyle='rgba(190,161,116,.55)'; ctx.lineWidth=1.4; ctx.beginPath();
+    ctx.moveTo(0,77); ctx.quadraticCurveTo(-4,109,0,145); ctx.moveTo(-25,145); ctx.quadraticCurveTo(0,153,25,145); ctx.stroke();
+    ctx.fillStyle='#e6c877'; ctx.beginPath(); ctx.arc(0,68,3,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
   function tick(el,dt){ if(!inFinale && el>=nextStarT){ spawnStar(); nextStarT+=5; } if(el>angelAt && !angel) spawnAngel();
     if(el>=nextRipple){ spawnRipple(); nextRipple+=5; } updateStars(dt); updateAngel(dt); updateRipples(dt); }
   return { reset, tick, renderStars:drawStars, renderRipples:drawRipples, renderAngel:drawAngel, spawnRipple };
