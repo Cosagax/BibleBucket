@@ -37,9 +37,11 @@
     .hero{padding:40px 12px 16px}
     .card{background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0)); border:1px solid rgba(255,255,255,.06); border-radius:var(--radius); padding:22px; box-shadow:0 10px 40px rgba(0,0,0,.25)}
     .hero-card{position:relative;min-height:164px;padding-right:300px}
-    .christmas{position:absolute;right:22px;top:50%;transform:translateY(-50%);white-space:nowrap;font-size:clamp(16px,2vw,24px);font-weight:800;letter-spacing:.2px}
-    .christmas span:nth-child(3n+1),.christmas span:nth-child(3n+2){color:#22c55e}
-    .christmas span:nth-child(3n){color:#ef4444}
+    .christmas{position:absolute;right:28px;top:50%;transform:translateY(-50%);text-align:center;font-size:clamp(18px,2.2vw,25px);font-weight:800;letter-spacing:.1px;color:var(--ink)}
+    .christmas-title{white-space:nowrap}
+    .christmas-title .holly{color:#22c55e}
+    .christmas-title .berry{color:#ef4444}
+    .christmas-note{margin-top:7px;color:var(--muted);font-size:13px;font-weight:500;letter-spacing:0}
     .headline{font-size:clamp(28px,5vw,46px); line-height:1.05; margin:6px 0 10px}
     .sub{color:var(--muted)}
     .cta-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
@@ -50,7 +52,7 @@
     .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
     @media (max-width: 980px){.grid{grid-template-columns:repeat(2,1fr)}}
     @media (max-width: 640px){.grid{grid-template-columns:1fr}}
-    @media (max-width: 700px){.hero-card{padding-right:22px;padding-bottom:56px}.christmas{top:auto;bottom:16px;right:22px;transform:none;font-size:18px}}
+    @media (max-width: 700px){.hero-card{padding-right:22px;padding-bottom:82px}.christmas{top:auto;bottom:17px;right:22px;left:22px;transform:none;font-size:18px}.christmas-note{font-size:12px}}
     .tile{background:linear-gradient(180deg, var(--card), var(--card2)); border:1px solid var(--line); border-radius:var(--radius); padding:16px; display:flex; flex-direction:column; gap:8px}
     .tile h3{margin:0}
     .tile p{margin:0;color:var(--muted)}
@@ -72,7 +74,7 @@
     <section class="card hero-card">
       <h1 class="headline">Explore the Bible&#39;s mysteries.</h1>
       <p class="sub">Built with Bible Games, Bible Study, and a Prophecy Watch on Current Events.</p>
-      <div class="christmas" aria-label="Merry Christmas 2026"><span>M</span><span>e</span><span>r</span><span>r</span><span>y</span><span> </span><span>C</span><span>h</span><span>r</span><span>i</span><span>s</span><span>t</span><span>m</span><span>a</span><span>s</span><span> </span><span>2</span><span>0</span><span>2</span><span>6</span></div>
+      <div class="christmas" aria-label="Merry Christmas 2026 — BibleBucket is coming back to life"><div class="christmas-title"><span class="holly">Merry</span> Christmas <span class="berry">2026</span></div><div class="christmas-note">BibleBucket is coming back to life</div></div>
       <div class="cta-row">
         <a class="btn" href="games/index.html">Explore Games</a>
         <a class="btn" href="mysteries/index.html">Explore Mysteries</a>
