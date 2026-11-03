@@ -11,7 +11,7 @@
   html,body{margin:0;height:100%;background:#000;color:var(--ink);
     font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
   #wrap{position:relative;overflow:hidden}
-  canvas{display:block;width:100%;height:100%}
+  canvas{display:block;width:100%;height:100%;touch-action:none}
 
   .hud{position:absolute;inset:0;pointer-events:none}
   .row{position:absolute;left:0;right:0;display:flex;justify-content:space-between;gap:8px;
@@ -32,6 +32,8 @@
   }
   .big{font-size:clamp(22px,5vw,36px);font-weight:800;letter-spacing:.3px;text-shadow:0 2px 8px #000}
   .small{color:var(--muted);max-width:min(92vw,720px);padding:0 12px}
+  .backlink{color:#dbeafe;font-weight:700;padding:10px 12px;border:1px solid #ffffff55;border-radius:10px}
+  @media(max-height:520px){#start,#end{overflow:auto;padding:12px 0}.big{font-size:22px}}
 
   /* END overlay */
   #end{position:absolute;inset:0;display:none;align-items:center;justify-content:center;
@@ -59,7 +61,8 @@
   <div id="start">
     <div class="big">Following His Star</div>
     <div class="small">Tap / click to jump. Survive 60 seconds. Each hit pushes you back! Don&#8217;t lose sight of the Star.</div>
-    <div style="display:flex;gap:10px;margin-top:10px">
+    <a class="backlink" href="../index.html">← All Games</a>
+    <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;justify-content:center">
       <button id="btnStart" type="button">Start</button>
       <a href="../../mysteries/jesus-birth.html" target="_blank" rel="noopener">
         <button type="button">Read the Story</button>
@@ -75,7 +78,7 @@
     <div class="big" id="endTitle"></div>
     <div id="endBtns" class="">
       <button id="btnAgain" type="button">Replay</button>
-      <a href="https://biblebucket.net/" target="_blank" rel="noopener"><button type="button">Home</button></a>
+      <a href="../index.html"><button type="button">All Games</button></a>
       <a href="https://biblebucket.net/mysteries/jesus-birth.html" target="_blank" rel="noopener"><button type="button">The Real Christmas Story</button></a>
     </div>
   </div>

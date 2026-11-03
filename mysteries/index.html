@@ -31,6 +31,10 @@
     .nav{display:flex;align-items:center;gap:14px;padding:12px 8px}
     .logo{width:64px;height:64px;object-fit:contain}
     .brand{font-weight:800;letter-spacing:.4px;font-size:30px}
+    .navlinks{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+    .navlinks a{padding:9px 11px;border:1px solid var(--line);border-radius:10px;font-weight:600}
+    .navlinks a:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+    @media(max-width:640px){.navlinks{flex-basis:100%;margin-left:0}.navlinks a{padding:10px 11px}}
 
     .hero{padding:30px 10px 10px}
     .title{font-size:clamp(28px,5vw,44px);line-height:1.05;margin:0 0 6px}
@@ -61,7 +65,8 @@
       <a href="https://biblebucket.net/" class="home-link" aria-label="Go to BibleBucket Home">
         <img class="logo" src="../assets/logo.png" alt="BibleBucket logo" />
       </a>
-      <a href="https://biblebucket.net/" class="brand">BibleBucket</a>
+      <a href="../index.html" class="brand">BibleBucket</a>
+      <nav class="navlinks" aria-label="Primary navigation"><a href="../index.html">Home</a><a href="../games/index.html">Games</a><a href="../comic/index.html">Comics</a><a href="../bibleindex/index.html">Bible Index</a><a href="../about.html">About</a></nav>
     </div>
   </header>
 
@@ -137,7 +142,7 @@
     </section>
 
     <footer class="wrap">
-      <div class="sub">© <span id="year"></span> BibleBucket </div>
+      <div class="sub">© 2026 BibleBucket </div>
     </footer>
   </main>
 
