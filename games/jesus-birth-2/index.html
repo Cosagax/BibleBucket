@@ -653,42 +653,67 @@ function draw(){
 function drawWiseManVariant(x,y,w,h,t,grounded,scale=1,pal,tilt=0){
   const P = pal || { robeTop:'#1a6b79', robeBot:'#0f3f48', hat:'#d74a2a', beard:'#2a2a2a', skin:'#f5cc9c', sash:'#0f3f48', jar:'#d59b2b' };
   const walk=Math.sin(t*1.05), bob=Math.sin(t*2.1)*1.8, weight=(1-Math.cos(t*2.1))*0.8;
-  const base=y+h, topY=y+h*.12, strideX=7*walk, frontBias=.65, frontGain=.8, liftF=Math.max(0,Math.sin(t*1.05))*3.0, liftB=Math.max(0,-Math.sin(t*1.05))*2.4;
-
+  const bobT=bob+weight, base=y+h, stride=7*walk, liftF=Math.max(0,Math.sin(t*1.05))*3, liftB=Math.max(0,-Math.sin(t*1.05))*2.4;
+  const cx=x+w*.46, headY=y+h*.145+bobT*.22, hem=grounded?walk*2.5:0;
+  const gold='#efc66c', goldShade='#a8752a', dark='#18232a';
+  const path=(commands,fill,stroke=null,width=1)=>{
+    ctx.beginPath(); for(const c of commands){ const [op,...v]=c; ctx[op](...v); }
+    if(fill){ctx.fillStyle=fill;ctx.fill();} if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.stroke();}
+  };
+  const roundRect=(rx,ry,rw,rh,r,fill,stroke=null,line=1)=>{
+    if(ctx.roundRect){ctx.beginPath();ctx.roundRect(rx,ry,rw,rh,r);}
+    else {ctx.beginPath();ctx.moveTo(rx+r,ry);ctx.arcTo(rx+rw,ry,rx+rw,ry+rh,r);ctx.arcTo(rx+rw,ry+rh,rx,ry+rh,r);ctx.arcTo(rx,ry+rh,rx,ry,r);ctx.arcTo(rx,ry,rx+rw,ry,r);}
+    if(fill){ctx.fillStyle=fill;ctx.fill();} if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=line;ctx.stroke();}
+  };
   ctx.save();
-  const shoe=(cx,cy,ang,wx,wy,col)=>{ ctx.save(); ctx.translate(cx,cy); ctx.rotate(ang); ctx.fillStyle=col; ctx.beginPath(); ctx.ellipse(6,0,wx,wy,0,0,Math.PI*2); ctx.fill(); ctx.restore(); };
-  const fX=x+w*frontBias+strideX*frontGain, bX=x+w*.30-strideX, footY=base-6; shoe(bX,footY-liftB,-.06,w*.15*scale,6*scale,'#0a1720'); shoe(fX,footY-liftF,.10,w*.15*scale,6*scale,'#0c1c26');
+  // Walk cycle: two visible sandals alternate beneath the robe.
+  const shoe=(sx,sy,angle,lift)=>{ctx.save();ctx.translate(sx,sy-lift);ctx.rotate(angle);ctx.fillStyle=dark;ctx.beginPath();ctx.ellipse(0,0,w*.105*scale,h*.025*scale,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle=goldShade;ctx.lineWidth=1.5*scale;ctx.beginPath();ctx.moveTo(-w*.055,0);ctx.lineTo(w*.05,0);ctx.stroke();ctx.restore();};
+  shoe(x+w*.34-stride*.48,base-4,-.10,liftB); shoe(x+w*.68+stride*.42,base-4,.08,liftF);
 
-  const bobT=bob+weight; const g=ctx.createLinearGradient(0,topY,0,base); g.addColorStop(0,P.robeTop); g.addColorStop(1,P.robeBot); ctx.fillStyle=g;
-  const hem=grounded? (walk*3):0; ctx.beginPath();
-  ctx.moveTo(x+w*.18, topY + bobT*.25);
-  ctx.lineTo(x+w*.64, topY + bobT*.25);
-  ctx.lineTo(x+w*.72, y+h*.96 + bobT*.35 - hem*.1);
-  ctx.quadraticCurveTo(x+w*.40, base + bobT*.35 - hem*.2,
-                       x+w*.22, y+h*.96 + bobT*.35 + hem*.1);
-  ctx.closePath(); ctx.fill();
+  // Sleeves sit behind the body and swing gently with each step.
+  const armSwing=walk*.045;
+  ctx.save();ctx.translate(x+w*.23,y+h*.34+bobT*.24);ctx.rotate(-.10-armSwing);
+  path([['moveTo',-w*.035,-h*.025],['quadraticCurveTo',w*.02,-h*.07,w*.095,-h*.02],['lineTo',w*.16,h*.12],['quadraticCurveTo',w*.12,h*.19,w*.055,h*.15],['lineTo',-w*.035,h*.045],['closePath']],P.robeTop);
+  ctx.restore();
+  ctx.save();ctx.translate(x+w*.64,y+h*.34+bobT*.24);ctx.rotate(.08+armSwing);
+  path([['moveTo',-w*.035,-h*.025],['quadraticCurveTo',w*.02,-h*.07,w*.095,-h*.02],['lineTo',w*.16,h*.11],['quadraticCurveTo',w*.12,h*.18,w*.055,h*.15],['lineTo',-w*.035,h*.045],['closePath']],P.robeTop);
+  ctx.restore();
 
-  ctx.fillStyle='rgba(0,0,0,.20)'; ctx.beginPath();
-  ctx.moveTo(x+w*.52, topY + bobT*.25);
-  ctx.lineTo(x+w*.66, topY + bobT*.25);
-  ctx.lineTo(x+w*.70, y+h*.95 + bobT*.35);
-  ctx.quadraticCurveTo(x+w*.60, base + bobT*.35,
-                       x+w*.48, y+h*.92 + bobT*.35);
-  ctx.closePath(); ctx.fill();
+  // Full layered robe, with shaped shoulders, curved hem, and a shaded side panel.
+  const robe=ctx.createLinearGradient(x,y+h*.27,x+w,y+h*.93);robe.addColorStop(0,P.robeTop);robe.addColorStop(.55,P.robeTop);robe.addColorStop(1,P.robeBot);
+  path([['moveTo',x+w*.27,y+h*.285+bobT*.2],['quadraticCurveTo',x+w*.46,y+h*.245+bobT*.2,x+w*.64,y+h*.285+bobT*.2],['lineTo',x+w*.73,y+h*.92+bobT*.3-hem*.08],['quadraticCurveTo',x+w*.50,base+bobT*.3-hem*.16,x+w*.21,y+h*.92+bobT*.3+hem*.08],['closePath']],robe);
+  path([['moveTo',x+w*.51,y+h*.30+bobT*.2],['lineTo',x+w*.64,y+h*.29+bobT*.2],['lineTo',x+w*.72,y+h*.91+bobT*.3],['quadraticCurveTo',x+w*.66,base+bobT*.28,x+w*.51,y+h*.92+bobT*.3],['closePath']],'rgba(0,0,0,.20)');
+  // Gold hem and front stole add clean readable detail at game scale.
+  ctx.strokeStyle=gold;ctx.lineWidth=Math.max(1.3,w*.018);ctx.beginPath();ctx.moveTo(x+w*.23,y+h*.90+bobT*.3);ctx.quadraticCurveTo(x+w*.48,base-1+bobT*.3,x+w*.71,y+h*.90+bobT*.3);ctx.stroke();
+  path([['moveTo',x+w*.40,y+h*.29+bobT*.2],['lineTo',x+w*.52,y+h*.31+bobT*.2],['lineTo',x+w*.57,y+h*.89+bobT*.3],['lineTo',x+w*.45,y+h*.90+bobT*.3],['closePath']],'rgba(238,218,166,.88)');
+  ctx.strokeStyle='rgba(255,255,255,.24)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x+w*.31,y+h*.48);ctx.quadraticCurveTo(x+w*.38,y+h*.58,x+w*.30,y+h*.78);ctx.moveTo(x+w*.60,y+h*.46);ctx.quadraticCurveTo(x+w*.55,y+h*.61,x+w*.64,y+h*.78);ctx.stroke();
+  // Waist sash and small clasp.
+  roundRect(x+w*.27,y+h*.49+bobT*.22,w*.42,h*.055,3,P.sash,goldShade,1);
+  ctx.fillStyle=gold;ctx.beginPath();ctx.arc(x+w*.49,y+h*.518+bobT*.22,w*.035,0,Math.PI*2);ctx.fill();
 
-  ctx.fillStyle='rgba(0,0,0,.25)'; const sashY=y+h*.48 + (bobT*.2); ctx.fillRect(x+w*.24, sashY, w*.44, h*.05);
+  // Face, ears, and beard are drawn in layers so the expression reads clearly.
+  ctx.fillStyle=P.skin;ctx.beginPath();ctx.ellipse(cx,headY,w*.137,h*.095,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(cx-w*.14,headY+h*.005,w*.027,h*.035,0,0,Math.PI*2);ctx.ellipse(cx+w*.14,headY+h*.005,w*.027,h*.035,0,0,Math.PI*2);ctx.fill();
+  path([['moveTo',cx-w*.115,headY+h*.045],['quadraticCurveTo',cx,headY+h*.085,cx+w*.115,headY+h*.045],['lineTo',cx+w*.083,headY+h*.205],['quadraticCurveTo',cx,headY+h*.30,cx-w*.083,headY+h*.205],['closePath']],P.beard);
+  // Moustache and subtle eyes/nose.
+  ctx.fillStyle=P.beard;ctx.beginPath();ctx.ellipse(cx-w*.035,headY+h*.082,w*.045,h*.022,-.15,Math.PI,Math.PI*2);ctx.ellipse(cx+w*.035,headY+h*.082,w*.045,h*.022,.15,Math.PI,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(48,34,28,.8)';ctx.beginPath();ctx.arc(cx-w*.045,headY+h*.005,Math.max(.8,w*.012),0,Math.PI*2);ctx.arc(cx+w*.045,headY+h*.005,Math.max(.8,w*.012),0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='rgba(92,53,35,.7)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx,headY+h*.015);ctx.lineTo(cx-w*.008,headY+h*.055);ctx.stroke();
 
-  ctx.fillStyle=P.skin; ctx.beginPath(); ctx.ellipse(x+w*.46, y+h*.10 + bobT*.25, w*.12, h*.10, 0, 0, Math.PI*2); ctx.fill();
-  ctx.fillStyle=P.beard; ctx.beginPath(); ctx.ellipse(x+w*.52, y+h*.14 + bobT*.25, w*.10, h*.08, 0, 0, Math.PI*2); ctx.fill();
-  ctx.fillStyle=P.hat; ctx.beginPath(); ctx.ellipse(x+w*.45, y+h*.04 + bobT*.2, w*.16, h*.06, 0, 0, Math.PI*2); ctx.fill();
+  // Wrapped turban with a raised crown, crossing band, and jewel.
+  path([['moveTo',cx-w*.17,headY-h*.035],['quadraticCurveTo',cx-w*.18,headY-h*.15,cx-w*.07,headY-h*.17],['quadraticCurveTo',cx,headY-h*.23,cx+w*.08,headY-h*.16],['quadraticCurveTo',cx+w*.18,headY-h*.12,cx+w*.17,headY-h*.035],['quadraticCurveTo',cx,headY+h*.005,cx-w*.17,headY-h*.035],['closePath']],P.hat);
+  ctx.strokeStyle=gold;ctx.lineWidth=Math.max(1.5,w*.025);ctx.beginPath();ctx.moveTo(cx-w*.15,headY-h*.075);ctx.quadraticCurveTo(cx,headY-h*.025,cx+w*.15,headY-h*.075);ctx.stroke();
+  ctx.strokeStyle='rgba(255,226,157,.65)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx-w*.075,headY-h*.155);ctx.quadraticCurveTo(cx,headY-h*.105,cx+w*.10,headY-h*.14);ctx.stroke();
+  ctx.fillStyle=gold;ctx.beginPath();ctx.arc(cx+w*.075,headY-h*.085,w*.033,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#66c5df';ctx.beginPath();ctx.arc(cx+w*.075,headY-h*.085,w*.019,0,Math.PI*2);ctx.fill();
 
-  ctx.fillStyle=P.sash; if(ctx.roundRect){ ctx.beginPath(); ctx.roundRect(x+w*.54, y+h*.36 + bobT*.2, w*.22, h*.10, 4); ctx.fill(); }
-  else{ ctx.fillRect(x+w*.54, y+h*.36 + bobT*.2, w*.22, h*.10); }
-
-  ctx.fillStyle=P.jar; const gx=x+w*.75, gy=y+h*.42 + bobT*.2;
-  ctx.beginPath(); ctx.ellipse(gx,gy,w*.09,h*.05,0,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(gx,gy-h*.05,w*.05,h*.04,0,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(gx,gy-h*.10,2,0,Math.PI*2); ctx.fill();
+  // Forearm and gift: a small golden vessel remains visible during the walk cycle.
+  ctx.strokeStyle=P.skin;ctx.lineWidth=Math.max(3,w*.055);ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x+w*.67,y+h*.39+bobT*.2);ctx.lineTo(x+w*.77,y+h*.43+bobT*.2);ctx.stroke();
+  const gx=x+w*.78, gy=y+h*.435+bobT*.2, gw=w*.18, gh=h*.12;
+  roundRect(gx-gw*.5,gy-gh*.22,gw,gh*.72,3,P.jar,goldShade,1);
+  roundRect(gx-gw*.56,gy-gh*.34,gw*1.12,gh*.20,2,'#f2ca68',goldShade,1);
+  ctx.strokeStyle='#fff0b2';ctx.lineWidth=Math.max(1,w*.018);ctx.beginPath();ctx.moveTo(gx,gy-gh*.30);ctx.lineTo(gx,gy+gh*.48);ctx.moveTo(gx-gw*.49,gy-gh*.04);ctx.lineTo(gx+gw*.49,gy-gh*.04);ctx.stroke();
+  ctx.fillStyle=P.skin;ctx.beginPath();ctx.arc(gx-w*.035,gy-gh*.02,w*.035,0,Math.PI*2);ctx.fill();
   ctx.restore();
 }
 
