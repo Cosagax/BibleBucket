@@ -458,6 +458,8 @@ const Cameo = (() => {
     {x:0.56,y:0.55,s:0.95,flip:false},{x:0.72,y:0.55,s:0.96,flip:true }
   ].map(f => ({...f, seed: Math.random()*Math.PI*2 }));
 
+  // Sheep, camels, and the child retain this shared distant-silhouette color.
+  const tone = 'rgba(10,20,40,0.55)';
   const robeTones = ['#51465a','#65524a','#3f5360','#78624d','#594d42','#475252'];
   const skinTones = ['#9a6848','#bd8963','#d0a17a','#80583f'];
 
