@@ -472,6 +472,9 @@ const Cameo = (() => {
     const skin=skinTones[Math.floor(seed*19+skinTones.length*2)%skinTones.length];
 
     ctx.save();
+    // The travelers are on the far ridge; keep them legible but visually behind
+    // the nearer landmarks that pass through the foreground.
+    ctx.globalAlpha=0.78;
     ctx.translate(px, py + bob);
     ctx.scale(flip?-s:s, s);
     ctx.rotate(lean);
@@ -635,22 +638,28 @@ function drawBethlehemApproach(elapsed){
   const landmarkA=landmarkIn*landmarkOut;
   if(landmarkA>0){
     const travel=Math.max(0,Math.min(1,(elapsed-12)/29));
-    const drift=W*.53*travel, ground=H*.625, scale=Math.min(W,H)/700;
-    ctx.save(); ctx.globalAlpha=landmarkA*.82;
-    // Wind-shaped olive crown and slender trunk, silhouetted against the warm ridge.
+    const drift=W*.53*travel, ground=H*.65, scale=Math.min(W,H)/700*1.12;
+    ctx.save(); ctx.globalAlpha=landmarkA*.94;
+    // Nearer olive tree: muted leaf color and warm trunk separate it from the
+    // distant blue ridge without making it brighter than the traveler.
     const tx=W*.62-drift;
-    ctx.fillStyle='#172337'; ctx.fillRect(tx-2.2*scale,ground-26*scale,4.4*scale,27*scale);
-    ctx.beginPath(); ctx.ellipse(tx,ground-32*scale,15*scale,9*scale,-.18,0,Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(tx-9*scale,ground-27*scale,9*scale,6*scale,.25,0,Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(tx+10*scale,ground-28*scale,9*scale,6*scale,-.22,0,Math.PI*2); ctx.fill();
-    // A small stone well with a simple crossbeam—kept low and away from the runner.
+    ctx.fillStyle='#594735'; ctx.fillRect(tx-2.2*scale,ground-27*scale,4.4*scale,28*scale);
+    ctx.fillStyle='#35483b';
+    ctx.beginPath(); ctx.ellipse(tx,ground-34*scale,16*scale,9*scale,-.18,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(tx-10*scale,ground-29*scale,10*scale,6*scale,.25,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(tx+11*scale,ground-30*scale,10*scale,6*scale,-.22,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='rgba(151,157,111,.48)'; ctx.lineWidth=1.2*scale;
+    ctx.beginPath(); ctx.arc(tx-2*scale,ground-36*scale,11*scale,3.45,5.5); ctx.stroke();
+    // A foreground stone well with a readable rim, shadowed opening, and beam.
     const wx=W*.84-drift, wy=ground;
-    ctx.fillStyle='#263044'; ctx.fillRect(wx-10*scale,wy-13*scale,20*scale,13*scale);
-    ctx.fillStyle='#394052'; ctx.beginPath(); ctx.ellipse(wx,wy-13*scale,10*scale,4*scale,0,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='#101827'; ctx.beginPath(); ctx.ellipse(wx,wy-13*scale,6*scale,2.2*scale,0,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='#333d50'; ctx.fillRect(wx-11*scale,wy-21*scale,2*scale,10*scale);
-    ctx.fillRect(wx+9*scale,wy-21*scale,2*scale,10*scale);
-    ctx.fillRect(wx-13*scale,wy-22*scale,26*scale,2*scale);
+    ctx.fillStyle='#596071'; ctx.fillRect(wx-11*scale,wy-14*scale,22*scale,14*scale);
+    ctx.fillStyle='#89909a'; ctx.beginPath(); ctx.ellipse(wx,wy-14*scale,11*scale,4.5*scale,0,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#182235'; ctx.beginPath(); ctx.ellipse(wx,wy-14*scale,6.5*scale,2.5*scale,0,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#737b88'; ctx.fillRect(wx-12*scale,wy-23*scale,2.5*scale,11*scale);
+    ctx.fillRect(wx+9.5*scale,wy-23*scale,2.5*scale,11*scale);
+    ctx.fillStyle='#a2a5a5'; ctx.fillRect(wx-14*scale,wy-24*scale,28*scale,2.5*scale);
+    ctx.strokeStyle='rgba(211,190,148,.46)'; ctx.lineWidth=1*scale;
+    ctx.beginPath(); ctx.moveTo(wx-9*scale,wy-10*scale); ctx.lineTo(wx-9*scale,wy-2*scale); ctx.stroke();
     ctx.restore();
   }
 
