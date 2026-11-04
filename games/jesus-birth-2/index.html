@@ -503,11 +503,6 @@ const Cameo = (() => {
     ctx.beginPath(); ctx.moveTo(-6,-30); ctx.lineTo(6,-30); ctx.lineTo(10,-3); ctx.quadraticCurveTo(0,0,-10,-3); ctx.closePath(); ctx.fill();
     ctx.fillStyle='#bc8964'; ctx.beginPath(); ctx.arc(0,-36,5,-Math.PI,Math.PI); ctx.fill();
     ctx.fillStyle='#d4c49e'; ctx.beginPath(); ctx.arc(0,-38,6,Math.PI,Math.PI*2); ctx.fill();
-    ctx.save(); ctx.translate(10,-30); ctx.rotate(0.05);
-    ctx.strokeStyle='#493e35'; ctx.lineWidth=2.6;
-    ctx.beginPath(); ctx.moveTo(0,-23); ctx.lineTo(0,15); ctx.stroke();
-    ctx.beginPath(); ctx.arc(0,-24,8,Math.PI*0.1,Math.PI*1.3); ctx.lineWidth=3; ctx.strokeStyle='#c9b98e'; ctx.stroke();
-    ctx.restore();
     ctx.restore();
   }
 
