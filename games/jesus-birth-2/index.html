@@ -606,6 +606,7 @@ const Cameo = (() => {
 function drawBethlehemApproach(elapsed){
   const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1);
   const approach=Math.max(0,Math.min(1,(elapsed-8)/42));
+  const dawn=Math.max(0,Math.min(1,(elapsed-43)/17));
   if(approach<=0) return;
   // A restrained amber veil makes the same night feel increasingly welcoming.
   ctx.save();
@@ -613,6 +614,19 @@ function drawBethlehemApproach(elapsed){
   glow.addColorStop(0,`rgba(255,190,92,${.015+.10*approach})`);
   glow.addColorStop(1,'rgba(255,190,92,0)');
   ctx.fillStyle=glow; ctx.fillRect(0,0,W,H);
+
+  // Let the horizon gently warm during the final stretch; keep the sky night-blue.
+  if(dawn>0){
+    const horizon=ctx.createLinearGradient(0,H*.38,0,H*.76);
+    horizon.addColorStop(0,'rgba(255,174,105,0)');
+    horizon.addColorStop(.48,`rgba(255,174,105,${.08*dawn})`);
+    horizon.addColorStop(1,`rgba(255,174,105,${.015*dawn})`);
+    ctx.fillStyle=horizon; ctx.fillRect(0,H*.34,W,H*.44);
+    const bloom=ctx.createRadialGradient(W*.70,H*.60,0,W*.70,H*.60,W*.46);
+    bloom.addColorStop(0,`rgba(255,180,104,${.11*dawn})`);
+    bloom.addColorStop(1,'rgba(255,180,104,0)');
+    ctx.fillStyle=bloom; ctx.fillRect(0,H*.36,W,H*.40);
+  }
 
   // Bethlehem appears as a small, layered ridge settlement, not a sudden shack.
   const baseY=H*.615, townX=W*.69, scale=Math.min(W,H)/700;
@@ -630,6 +644,22 @@ function drawBethlehemApproach(elapsed){
     ctx.fillStyle=i%3===0?'#d79b4b':'#f2c56d';
     ctx.globalAlpha=approach*(.18+.48*Math.max(0,(approach-.45)/.55));
     ctx.fillRect(x,baseY-bh+8*scale,2.3*scale,3.2*scale);
+  }
+  // A softly lit path widens toward the traveler as the destination draws near.
+  if(dawn>0){
+    const groundY=H-groundH, pathEndY=Math.min(H,groundY+26*scale), pathEndX=W*.52;
+    ctx.fillStyle=`rgba(235,190,127,${.10+.20*dawn})`;
+    ctx.beginPath();
+    ctx.moveTo(townX-3*scale,baseY+5*scale);
+    ctx.lineTo(townX+3*scale,baseY+5*scale);
+    ctx.lineTo(pathEndX+W*.095,pathEndY);
+    ctx.lineTo(pathEndX-W*.095,pathEndY);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle=`rgba(255,220,160,${.10+.18*dawn})`;
+    ctx.lineWidth=Math.max(1,scale*1.4);
+    ctx.beginPath(); ctx.moveTo(townX,baseY+7*scale);
+    ctx.quadraticCurveTo((townX+pathEndX)*.5,groundY-8*scale,pathEndX,pathEndY);
+    ctx.stroke();
   }
   ctx.restore();
 }
