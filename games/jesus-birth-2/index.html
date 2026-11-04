@@ -662,7 +662,7 @@ function drawBethlehemApproach(elapsed){
   const landmarkA=landmarkIn*landmarkOut;
   if(landmarkA>0){
     const travel=Math.max(0,Math.min(1,(elapsed-12)/29));
-    const drift=W*.53*travel, ground=H*.65, scale=Math.min(W,H)/700*1.12;
+    const drift=W*.53*travel, ground=H*.67, scale=Math.min(W,H)/700*1.12;
     ctx.save(); ctx.globalAlpha=landmarkA*.94;
     // Nearer olive tree: muted leaf color and warm trunk separate it from the
     // distant blue ridge without making it brighter than the traveler.
@@ -684,6 +684,77 @@ function drawBethlehemApproach(elapsed){
     ctx.fillStyle='#a2a5a5'; ctx.fillRect(wx-14*scale,wy-24*scale,28*scale,2.5*scale);
     ctx.strokeStyle='rgba(211,190,148,.46)'; ctx.lineWidth=1*scale;
     ctx.beginPath(); ctx.moveTo(wx-9*scale,wy-10*scale); ctx.lineTo(wx-9*scale,wy-2*scale); ctx.stroke();
+
+    // Small roadside travelers and supplies pass below the distant gathering.
+    const cameoAlpha=(start,end)=>Math.min(1,(elapsed-start)/1.5, (end-elapsed)/1.5);
+    const passX=(fraction)=>W*fraction-drift;
+    const foot=ground+4*scale;
+    ctx.globalAlpha=landmarkA*.88;
+
+    // Two loaded camels make a compact Magi's caravan.
+    const camel=(x,y,s)=>{
+      ctx.save(); ctx.translate(x,y); ctx.scale(s*scale,s*scale); ctx.fillStyle='#79634d';
+      ctx.beginPath(); ctx.ellipse(0,-14,17,8,0,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(-3,-22,7,6,0,0,Math.PI*2); ctx.ellipse(7,-21,6,6,0,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(11,-17); ctx.quadraticCurveTo(15,-31,19,-35); ctx.lineTo(22,-34); ctx.lineTo(19,-14); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(23,-34,4,2.5,0,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='#493d33'; ctx.lineWidth=2.2; ctx.beginPath();
+      ctx.moveTo(-11,-9); ctx.lineTo(-13,0); ctx.moveTo(-3,-8); ctx.lineTo(-4,0);
+      ctx.moveTo(9,-9); ctx.lineTo(10,0); ctx.moveTo(14,-10); ctx.lineTo(16,0); ctx.stroke();
+      ctx.fillStyle='#a78357'; ctx.fillRect(-5,-29,14,9); ctx.fillStyle='#bd9d63'; ctx.fillRect(-3,-31,10,3);
+      ctx.restore();
+    };
+    let cameoA=cameoAlpha(12,24);
+    if(cameoA>0){ ctx.globalAlpha=landmarkA*.88*cameoA; camel(passX(.88),foot,1.05); camel(passX(.97),foot,0.88); }
+
+    // A donkey with tied bundles follows the caravan.
+    cameoA=cameoAlpha(18,30);
+    if(cameoA>0){
+      const x=passX(.91), y=foot;
+      ctx.globalAlpha=landmarkA*.88*cameoA; ctx.fillStyle='#64584b';
+      ctx.beginPath(); ctx.ellipse(x,y-13*scale,13*scale,7*scale,0,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(x+11*scale,y-22*scale,5*scale,6*scale,0,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x+9*scale,y-27*scale); ctx.lineTo(x+7*scale,y-38*scale); ctx.lineTo(x+11*scale,y-29*scale);
+      ctx.moveTo(x+13*scale,y-27*scale); ctx.lineTo(x+16*scale,y-37*scale); ctx.lineTo(x+15*scale,y-27*scale); ctx.fill();
+      ctx.strokeStyle='#40392f'; ctx.lineWidth=2*scale; ctx.beginPath();
+      for(const lx of [-8,-2,7,11]){ctx.moveTo(x+lx*scale,y-9*scale);ctx.lineTo(x+(lx-1)*scale,y); } ctx.stroke();
+      ctx.fillStyle='#9b7854'; ctx.fillRect(x-11*scale,y-25*scale,7*scale,10*scale); ctx.fillRect(x-4*scale,y-27*scale,7*scale,12*scale);
+    }
+
+    // A shepherd leads one sheep along the road.
+    cameoA=cameoAlpha(23,35);
+    if(cameoA>0){
+      const x=passX(.91), y=foot; ctx.globalAlpha=landmarkA*.88*cameoA;
+      ctx.fillStyle='#786149'; ctx.beginPath(); ctx.moveTo(x-5*scale,y-28*scale); ctx.lineTo(x+5*scale,y-28*scale);
+      ctx.lineTo(x+8*scale,y); ctx.quadraticCurveTo(x,y+2*scale,x-8*scale,y); ctx.closePath(); ctx.fill();
+      ctx.fillStyle='#b98964'; ctx.beginPath(); ctx.arc(x,y-34*scale,4.5*scale,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='#a98b61'; ctx.lineWidth=1.6*scale; ctx.beginPath(); ctx.moveTo(x+8*scale,y-25*scale); ctx.lineTo(x+12*scale,y-2*scale); ctx.stroke();
+      ctx.fillStyle='#d4cbbb'; ctx.beginPath(); ctx.ellipse(x+24*scale,y-5*scale,10*scale,6*scale,0,0,Math.PI*2); ctx.arc(x+32*scale,y-9*scale,3.5*scale,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#514c48'; ctx.fillRect(x+19*scale,y,2*scale,4*scale); ctx.fillRect(x+26*scale,y,2*scale,4*scale);
+    }
+
+    // A handcart carries provisions, with visible wheels and a small load.
+    cameoA=cameoAlpha(28,40);
+    if(cameoA>0){
+      const x=passX(.91), y=foot; ctx.globalAlpha=landmarkA*.88*cameoA;
+      ctx.strokeStyle='#806748'; ctx.lineWidth=2.5*scale; ctx.beginPath();
+      ctx.moveTo(x-15*scale,y-10*scale); ctx.lineTo(x+13*scale,y-10*scale); ctx.moveTo(x+12*scale,y-9*scale); ctx.lineTo(x+22*scale,y-2*scale); ctx.stroke();
+      ctx.fillStyle='#665441'; ctx.fillRect(x-12*scale,y-22*scale,22*scale,11*scale);
+      ctx.fillStyle='#92734f'; ctx.fillRect(x-9*scale,y-27*scale,9*scale,7*scale); ctx.fillRect(x+1*scale,y-24*scale,8*scale,4*scale);
+      ctx.strokeStyle='#493f35'; ctx.lineWidth=2*scale; ctx.beginPath(); ctx.arc(x-7*scale,y-3*scale,4*scale,0,Math.PI*2); ctx.arc(x+8*scale,y-3*scale,4*scale,0,Math.PI*2); ctx.stroke();
+    }
+
+    // A final traveler carries a warm lantern as the road grows quieter.
+    cameoA=cameoAlpha(33,43);
+    if(cameoA>0){
+      const x=passX(.91), y=foot; ctx.globalAlpha=landmarkA*.88*cameoA;
+      ctx.fillStyle='#665449'; ctx.beginPath(); ctx.moveTo(x-5*scale,y-29*scale); ctx.lineTo(x+5*scale,y-29*scale);
+      ctx.lineTo(x+8*scale,y); ctx.quadraticCurveTo(x,y+2*scale,x-8*scale,y); ctx.closePath(); ctx.fill();
+      ctx.fillStyle='#bc8964'; ctx.beginPath(); ctx.arc(x,y-35*scale,4.5*scale,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='#b49a71'; ctx.lineWidth=2*scale; ctx.beginPath(); ctx.moveTo(x+6*scale,y-25*scale); ctx.lineTo(x+15*scale,y-18*scale); ctx.stroke();
+      ctx.fillStyle='#f6c66e'; ctx.beginPath(); ctx.arc(x+17*scale,y-17*scale,3*scale,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='rgba(255,196,98,.18)'; ctx.beginPath(); ctx.arc(x+17*scale,y-17*scale,9*scale,0,Math.PI*2); ctx.fill();
+    }
     ctx.restore();
   }
 
