@@ -607,6 +607,7 @@ function drawBethlehemApproach(elapsed){
   const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1);
   const approach=Math.max(0,Math.min(1,(elapsed-8)/42));
   const dawn=Math.max(0,Math.min(1,(elapsed-43)/17));
+  const nearer=Math.max(0,Math.min(1,(elapsed-22)/34));
   if(approach<=0) return;
   // A restrained amber veil makes the same night feel increasingly welcoming.
   ctx.save();
@@ -628,8 +629,34 @@ function drawBethlehemApproach(elapsed){
     ctx.fillStyle=bloom; ctx.fillRect(0,H*.36,W,H*.40);
   }
 
-  // Bethlehem appears as a small, layered ridge settlement, not a sudden shack.
-  const baseY=H*.615, townX=W*.69, scale=Math.min(W,H)/700;
+  // A lone olive tree and an old roadside well drift past during the desert leg.
+  const landmarkIn=Math.max(0,Math.min(1,(elapsed-12)/3));
+  const landmarkOut=1-Math.max(0,Math.min(1,(elapsed-34)/7));
+  const landmarkA=landmarkIn*landmarkOut;
+  if(landmarkA>0){
+    const travel=Math.max(0,Math.min(1,(elapsed-12)/29));
+    const drift=W*.53*travel, ground=H*.625, scale=Math.min(W,H)/700;
+    ctx.save(); ctx.globalAlpha=landmarkA*.82;
+    // Wind-shaped olive crown and slender trunk, silhouetted against the warm ridge.
+    const tx=W*.62-drift;
+    ctx.fillStyle='#172337'; ctx.fillRect(tx-2.2*scale,ground-26*scale,4.4*scale,27*scale);
+    ctx.beginPath(); ctx.ellipse(tx,ground-32*scale,15*scale,9*scale,-.18,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(tx-9*scale,ground-27*scale,9*scale,6*scale,.25,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(tx+10*scale,ground-28*scale,9*scale,6*scale,-.22,0,Math.PI*2); ctx.fill();
+    // A small stone well with a simple crossbeam—kept low and away from the runner.
+    const wx=W*.84-drift, wy=ground;
+    ctx.fillStyle='#263044'; ctx.fillRect(wx-10*scale,wy-13*scale,20*scale,13*scale);
+    ctx.fillStyle='#394052'; ctx.beginPath(); ctx.ellipse(wx,wy-13*scale,10*scale,4*scale,0,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#101827'; ctx.beginPath(); ctx.ellipse(wx,wy-13*scale,6*scale,2.2*scale,0,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#333d50'; ctx.fillRect(wx-11*scale,wy-21*scale,2*scale,10*scale);
+    ctx.fillRect(wx+9*scale,wy-21*scale,2*scale,10*scale);
+    ctx.fillRect(wx-13*scale,wy-22*scale,26*scale,2*scale);
+    ctx.restore();
+  }
+
+  // Bethlehem gradually grows from a distant ridge into the edge of town.
+  const baseY=H*(.615+.012*nearer), townX=W*(.69-.045*nearer);
+  const scale=(Math.min(W,H)/700)*(1+.48*nearer);
   ctx.globalAlpha=.12+.88*approach;
   ctx.fillStyle='#17243a';
   ctx.beginPath(); ctx.moveTo(townX-W*.19,baseY+8);
@@ -644,6 +671,16 @@ function drawBethlehemApproach(elapsed){
     ctx.fillStyle=i%3===0?'#d79b4b':'#f2c56d';
     ctx.globalAlpha=approach*(.18+.48*Math.max(0,(approach-.45)/.55));
     ctx.fillRect(x,baseY-bh+8*scale,2.3*scale,3.2*scale);
+  }
+  // A modest gate and low stone wall become readable as the town draws near.
+  if(nearer>.28){
+    const gateA=Math.min(1,(nearer-.28)/.5), gx=townX+W*.075, gy=baseY+5*scale;
+    ctx.globalAlpha=gateA*.84; ctx.fillStyle='#20283a';
+    ctx.fillRect(gx-W*.055,gy-16*scale,W*.11,17*scale);
+    ctx.beginPath(); ctx.moveTo(gx-W*.020,gy); ctx.lineTo(gx-W*.020,gy-7*scale);
+    ctx.quadraticCurveTo(gx,gy-15*scale,gx+W*.020,gy-7*scale); ctx.lineTo(gx+W*.020,gy); ctx.closePath(); ctx.fill();
+    ctx.fillRect(gx-W*.16,gy-6*scale,W*.095,6*scale);
+    ctx.fillRect(gx+W*.065,gy-6*scale,W*.09,6*scale);
   }
   // A softly lit path widens toward the traveler as the destination draws near.
   if(dawn>0){
@@ -660,6 +697,30 @@ function drawBethlehemApproach(elapsed){
     ctx.beginPath(); ctx.moveTo(townX,baseY+7*scale);
     ctx.quadraticCurveTo((townX+pathEndX)*.5,groundY-8*scale,pathEndX,pathEndY);
     ctx.stroke();
+  }
+  // At the outskirts, a few close rooftops frame an open street and the lit path.
+  const outskirts=Math.max(0,Math.min(1,(elapsed-45)/11));
+  if(outskirts>0){
+    const floor=H-groundH+12*scale, edgeH=Math.min(H*.18,112*scale), leftW=W*.18, rightW=W*.19;
+    ctx.globalAlpha=outskirts*.92; ctx.fillStyle='#171d2a';
+    // Keep the center lane clear for the traveler and the existing gathering.
+    ctx.fillRect(-W*.025,floor-edgeH,leftW,edgeH+groundH);
+    ctx.fillRect(W-rightW+W*.025,floor-edgeH,rightW,edgeH+groundH);
+    ctx.fillStyle='#222a39';
+    ctx.beginPath(); ctx.moveTo(-W*.025,floor-edgeH); ctx.lineTo(leftW*.72,floor-edgeH);
+    ctx.lineTo(leftW,floor-edgeH+12*scale); ctx.lineTo(-W*.025,floor-edgeH+12*scale); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(W-rightW+W*.025,floor-edgeH); ctx.lineTo(W-rightW*.25,floor-edgeH);
+    ctx.lineTo(W-rightW,floor-edgeH+12*scale); ctx.lineTo(W,floor-edgeH+12*scale); ctx.closePath(); ctx.fill();
+    // Small warm windows and quiet doorways suggest arrival without crowding the scene.
+    ctx.fillStyle=`rgba(255,202,112,${.22+.52*outskirts})`;
+    const win=5*scale, gap=13*scale;
+    for(let row=0;row<2;row++){
+      ctx.fillRect(8*scale+row*gap,floor-edgeH+20*scale,win,7*scale);
+      ctx.fillRect(W-19*scale-row*gap,floor-edgeH+31*scale,win,7*scale);
+    }
+    ctx.fillStyle='#111722';
+    ctx.fillRect(leftW*.43,floor-31*scale,13*scale,31*scale);
+    ctx.fillRect(W-rightW+rightW*.45,floor-34*scale,13*scale,34*scale);
   }
   ctx.restore();
 }
