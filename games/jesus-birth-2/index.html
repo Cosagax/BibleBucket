@@ -872,7 +872,7 @@ function draw(){
 
 /* ===== Character draw ===== */
 function drawWiseManVariant(x,y,w,h,t,grounded,scale=1,pal,tilt=0){
-  const P = pal || { robeTop:'#1a6b79', robeBot:'#0f3f48', hat:'#d74a2a', beard:'#2a2a2a', skin:'#f5cc9c', sash:'#0f3f48', jar:'#d59b2b' };
+  const P = pal || { robeTop:'#1a6b79', robeBot:'#0f3f48', hat:'#d74a2a', beard:'#2a2a2a', skin:'#b9825c', sash:'#0f3f48', jar:'#d59b2b' };
   const walk=Math.sin(t*1.05), bob=Math.sin(t*2.1)*1.8, weight=(1-Math.cos(t*2.1))*0.8;
   const bobT=bob+weight, base=y+h, stride=7*walk, liftF=Math.max(0,Math.sin(t*1.05))*3, liftB=Math.max(0,-Math.sin(t*1.05))*2.4;
   const cx=x+w*.46, headY=y+h*.145+bobT*.22, hem=grounded?walk*2.5:0;
