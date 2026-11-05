@@ -113,7 +113,12 @@ const btnAgain  = document.getElementById('btnAgain');
 
 /* ===== Assets ===== */
 const Img=s=>{const i=new Image(); i.src=s; return i;};
-const bg=Img('background.png');
+const bg=Img('background.png'); // preserved as the original-scene fallback
+const journeyBackgrounds=[
+  Img('background-far.png'),
+  Img('background-approach.png'),
+  Img('background-arrival.png')
+];
 const WIN_A='ending_scene_merry_christmas.png';
 const WIN_B='ending_scene_reason_for_season.png';
 const LOSE ='lose_bg_tall.png';
@@ -644,32 +649,33 @@ const Cameo = (() => {
   return { render, reset: resetSpeech };
 })();
 
-function drawBethlehemApproach(elapsed){
-  const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1);
-  const approach=Math.max(0,Math.min(1,(elapsed-8)/42));
-  const dawn=Math.max(0,Math.min(1,(elapsed-43)/17));
-  const nearer=Math.max(0,Math.min(1,(elapsed-22)/34));
-  if(approach<=0) return;
-  // A restrained amber veil makes the same night feel increasingly welcoming.
-  ctx.save();
-  const glow=ctx.createRadialGradient(W*.72,H*.53,0,W*.72,H*.53,Math.max(W,H)*.78);
-  glow.addColorStop(0,`rgba(255,190,92,${.015+.10*approach})`);
-  glow.addColorStop(1,'rgba(255,190,92,0)');
-  ctx.fillStyle=glow; ctx.fillRect(0,0,W,H);
-
-  // Let the horizon gently warm during the final stretch; keep the sky night-blue.
-  if(dawn>0){
-    const horizon=ctx.createLinearGradient(0,H*.38,0,H*.76);
-    horizon.addColorStop(0,'rgba(255,174,105,0)');
-    horizon.addColorStop(.48,`rgba(255,174,105,${.08*dawn})`);
-    horizon.addColorStop(1,`rgba(255,174,105,${.015*dawn})`);
-    ctx.fillStyle=horizon; ctx.fillRect(0,H*.34,W,H*.44);
-    const bloom=ctx.createRadialGradient(W*.70,H*.60,0,W*.70,H*.60,W*.46);
-    bloom.addColorStop(0,`rgba(255,180,104,${.11*dawn})`);
-    bloom.addColorStop(1,'rgba(255,180,104,0)');
-    ctx.fillStyle=bloom; ctx.fillRect(0,H*.36,W,H*.40);
+function drawJourneyBackground(elapsed,W,H){
+  const [far,approach,arrival]=journeyBackgrounds;
+  const drawImage=(img,alpha=1)=>{
+    const source=img.complete&&img.naturalWidth?img:bg;
+    ctx.globalAlpha=alpha;
+    ctx.drawImage(source,0,0,W,H);
+    ctx.globalAlpha=1;
+  };
+  const blend=(value,start,end)=>Math.max(0,Math.min(1,(value-start)/(end-start)));
+  if(elapsed<18){ drawImage(far); return; }
+  if(elapsed<22){
+    drawImage(far);
+    drawImage(approach,blend(elapsed,18,22));
+    return;
   }
+  if(elapsed<38){ drawImage(approach); return; }
+  if(elapsed<42){
+    drawImage(approach);
+    drawImage(arrival,blend(elapsed,38,42));
+    return;
+  }
+  drawImage(arrival);
+  ctx.globalAlpha=1;
+}
 
+function drawRoadsidePassBy(elapsed){
+  const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1);
   // A lone olive tree and an old roadside well drift past during the desert leg.
   const landmarkIn=Math.max(0,Math.min(1,(elapsed-12)/3));
   const landmarkOut=1-Math.max(0,Math.min(1,(elapsed-34)/7));
@@ -771,105 +777,6 @@ function drawBethlehemApproach(elapsed){
     }
     ctx.restore();
   }
-
-  // Bethlehem gradually grows from a distant ridge into the edge of town.
-  const baseY=H*(.615+.012*nearer), townX=W*(.69-.045*nearer);
-  const scale=(Math.min(W,H)/700)*(1+.76*nearer);
-  ctx.globalAlpha=.12+.88*approach;
-  // A faint amber haze separates Bethlehem from the ridge while keeping it
-  // firmly in silhouette beneath the star.
-  const cityGlow=ctx.createRadialGradient(townX,baseY-19*scale,0,townX,baseY-19*scale,W*.24);
-  cityGlow.addColorStop(0,`rgba(255,181,94,${.025+.075*approach})`);
-  cityGlow.addColorStop(1,'rgba(255,181,94,0)');
-  ctx.fillStyle=cityGlow; ctx.fillRect(townX-W*.25,baseY-H*.22,W*.5,H*.28);
-
-  // Low, soft-edged rear rooftops add depth behind the main town silhouette.
-  ctx.fillStyle='#202c43'; ctx.globalAlpha=approach*.58;
-  for(let i=0;i<9;i++){
-    const x=townX-W*.19+i*W*.043, bw=(25+(i%3)*5)*scale, bh=(13+((i*11)%17))*scale;
-    ctx.fillRect(x,baseY-bh,bw,bh+8*scale);
-    ctx.fillRect(x+4*scale,baseY-bh-3*scale,Math.max(3,bw-8*scale),3*scale);
-  }
-  ctx.globalAlpha=.12+.88*approach;
-  ctx.fillStyle='#17243a';
-  ctx.beginPath(); ctx.moveTo(townX-W*.19,baseY+8);
-  for(let i=0;i<12;i++){
-    const x=townX-W*.19+i*W*.035, bw=(18+(i%3)*5)*scale, bh=(18+((i*7)%22))*scale;
-    const roof=i%4;
-    ctx.lineTo(x,baseY-bh);
-    if(roof===0){ ctx.lineTo(x+bw*.5,baseY-bh-7*scale); ctx.lineTo(x+bw,baseY-bh); }
-    else if(roof===1){ ctx.lineTo(x,baseY-bh-4*scale); ctx.lineTo(x+bw*.18,baseY-bh-4*scale); ctx.lineTo(x+bw*.18,baseY-bh-10*scale); ctx.lineTo(x+bw*.82,baseY-bh-10*scale); ctx.lineTo(x+bw*.82,baseY-bh-4*scale); ctx.lineTo(x+bw,baseY-bh); }
-    else { ctx.lineTo(x+bw,baseY-bh); }
-    ctx.lineTo(x+bw,baseY+8);
-  }
-  ctx.lineTo(townX+W*.23,baseY+8); ctx.closePath(); ctx.fill();
-  // Tower, tiny roof caps, and varied warm windows give the shadowed town
-  // recognizable texture without turning it into a bright foreground object.
-  ctx.globalAlpha=approach*.76; ctx.fillStyle='#1a263d';
-  const towerX=townX-W*.015, towerW=13*scale, towerH=48*scale;
-  ctx.fillRect(towerX,baseY-towerH,towerW,towerH+6*scale);
-  ctx.beginPath(); ctx.moveTo(towerX-3*scale,baseY-towerH); ctx.lineTo(towerX+towerW*.5,baseY-towerH-9*scale); ctx.lineTo(towerX+towerW+3*scale,baseY-towerH); ctx.closePath(); ctx.fill();
-  ctx.fillRect(towerX+towerW*.44,baseY-towerH-14*scale,1.5*scale,7*scale);
-  for(let i=0;i<14;i++){
-    const x=townX-W*.17+i*W*.026, bh=(17+((i*7)%24))*scale;
-    const lit=.12+.58*Math.max(0,(approach-.35)/.65);
-    ctx.fillStyle=i%4===0?`rgba(255,190,99,${lit*.72})`:`rgba(255,216,139,${lit})`;
-    const wx=2.5*scale, wy=3.6*scale;
-    ctx.fillRect(x,baseY-bh+8*scale,wx,wy);
-    if(i%3!==1) ctx.fillRect(x+8*scale,baseY-bh+17*scale,wx,wy);
-    if(i%5===0) ctx.fillRect(x+15*scale,baseY-bh+7*scale,wx,wy);
-  }
-  // A modest gate and low stone wall become readable as the town draws near.
-  if(nearer>.28){
-    const gateA=Math.min(1,(nearer-.28)/.5), gx=townX+W*.075, gy=baseY+5*scale;
-    ctx.globalAlpha=gateA*.84; ctx.fillStyle='#20283a';
-    ctx.fillRect(gx-W*.055,gy-16*scale,W*.11,17*scale);
-    ctx.beginPath(); ctx.moveTo(gx-W*.020,gy); ctx.lineTo(gx-W*.020,gy-7*scale);
-    ctx.quadraticCurveTo(gx,gy-15*scale,gx+W*.020,gy-7*scale); ctx.lineTo(gx+W*.020,gy); ctx.closePath(); ctx.fill();
-    ctx.fillRect(gx-W*.16,gy-6*scale,W*.095,6*scale);
-    ctx.fillRect(gx+W*.065,gy-6*scale,W*.09,6*scale);
-  }
-  // A softly lit path widens toward the traveler as the destination draws near.
-  if(dawn>0){
-    const groundY=H-groundH, pathEndY=Math.min(H,groundY+26*scale), pathEndX=W*.52;
-    ctx.fillStyle=`rgba(235,190,127,${.10+.20*dawn})`;
-    ctx.beginPath();
-    ctx.moveTo(townX-3*scale,baseY+5*scale);
-    ctx.lineTo(townX+3*scale,baseY+5*scale);
-    ctx.lineTo(pathEndX+W*.095,pathEndY);
-    ctx.lineTo(pathEndX-W*.095,pathEndY);
-    ctx.closePath(); ctx.fill();
-    ctx.strokeStyle=`rgba(255,220,160,${.10+.18*dawn})`;
-    ctx.lineWidth=Math.max(1,scale*1.4);
-    ctx.beginPath(); ctx.moveTo(townX,baseY+7*scale);
-    ctx.quadraticCurveTo((townX+pathEndX)*.5,groundY-8*scale,pathEndX,pathEndY);
-    ctx.stroke();
-  }
-  // At the outskirts, a few close rooftops frame an open street and the lit path.
-  const outskirts=Math.max(0,Math.min(1,(elapsed-45)/11));
-  if(outskirts>0){
-    const floor=H-groundH+12*scale, edgeH=Math.min(H*.18,112*scale), leftW=W*.18, rightW=W*.19;
-    ctx.globalAlpha=outskirts*.92; ctx.fillStyle='#171d2a';
-    // Keep the center lane clear for the traveler and the existing gathering.
-    ctx.fillRect(-W*.025,floor-edgeH,leftW,edgeH+groundH);
-    ctx.fillRect(W-rightW+W*.025,floor-edgeH,rightW,edgeH+groundH);
-    ctx.fillStyle='#222a39';
-    ctx.beginPath(); ctx.moveTo(-W*.025,floor-edgeH); ctx.lineTo(leftW*.72,floor-edgeH);
-    ctx.lineTo(leftW,floor-edgeH+12*scale); ctx.lineTo(-W*.025,floor-edgeH+12*scale); ctx.closePath(); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(W-rightW+W*.025,floor-edgeH); ctx.lineTo(W-rightW*.25,floor-edgeH);
-    ctx.lineTo(W-rightW,floor-edgeH+12*scale); ctx.lineTo(W,floor-edgeH+12*scale); ctx.closePath(); ctx.fill();
-    // Small warm windows and quiet doorways suggest arrival without crowding the scene.
-    ctx.fillStyle=`rgba(255,202,112,${.22+.52*outskirts})`;
-    const win=5*scale, gap=13*scale;
-    for(let row=0;row<2;row++){
-      ctx.fillRect(8*scale+row*gap,floor-edgeH+20*scale,win,7*scale);
-      ctx.fillRect(W-19*scale-row*gap,floor-edgeH+31*scale,win,7*scale);
-    }
-    ctx.fillStyle='#111722';
-    ctx.fillRect(leftW*.43,floor-31*scale,13*scale,31*scale);
-    ctx.fillRect(W-rightW+rightW*.45,floor-34*scale,13*scale,34*scale);
-  }
-  ctx.restore();
 }
 
 /* ===== Loop ===== */
@@ -943,12 +850,12 @@ function loop(now){
 
 function draw(){
   const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1);
-  ctx.clearRect(0,0,W,H); ctx.drawImage(bg,0,0,W,H);
+  ctx.clearRect(0,0,W,H);
+  drawJourneyBackground(elapsed,W,H);
 
-  // Distant travelers are painted first; the nearer landmarks and growing town
-  // are then layered over them so the crowd naturally slips behind Bethlehem.
+  // Travelers, crowd, and roadside pass-bys stay code-driven above the art.
   Cameo.render(elapsed);
-  drawBethlehemApproach(elapsed);
+  drawRoadsidePassBy(elapsed);
 
   // Starfield
   for(const s of stars){ const a=s.a0+s.amp*Math.sin((starT+s.phase)*(Math.PI*2/s.period));
