@@ -462,7 +462,11 @@ const Cameo = (() => {
     {x:0.82,y:0.59,s:1.02,flip:false},{x:0.86,y:0.60,s:0.98,flip:true },
     // Keep the later-arriving figures on the same distant ridge as the crowd.
     {x:0.20,y:0.59,s:0.92,flip:false},{x:0.28,y:0.59,s:0.94,flip:true },
-    {x:0.56,y:0.59,s:0.95,flip:false},{x:0.72,y:0.59,s:0.96,flip:true }
+    {x:0.56,y:0.59,s:0.95,flip:false},{x:0.72,y:0.59,s:0.96,flip:true },
+    {x:0.12,y:0.62,s:0.88,flip:true },{x:0.24,y:0.62,s:0.91,flip:false},
+    {x:0.38,y:0.62,s:0.93,flip:true },{x:0.46,y:0.62,s:0.90,flip:false},
+    {x:0.64,y:0.62,s:0.92,flip:true },{x:0.76,y:0.62,s:0.89,flip:false},
+    {x:0.84,y:0.62,s:0.91,flip:true },{x:0.90,y:0.59,s:0.90,flip:false}
   ].map(f => ({...f, seed: Math.random()*Math.PI*2 }));
 
   // Sheep and the child retain this shared distant-silhouette color.
@@ -501,16 +505,16 @@ const Cameo = (() => {
   function resetSpeech(){
     const phraseOrder = shuffled(sayings);
     const availableSpeakers = figs.map((_, index)=>index);
-    let nextAt = 9;
+    let nextAt = 6;
     speechEvents = phraseOrder.map((text,index)=>{
       const cap = Math.min(nextAt, 50);
-      const revealed = Math.min(figs.length, Math.floor((cap - 5)/2.1) + 1);
+      const revealed = Math.min(figs.length, Math.floor((cap - 5)/1.45) + 1);
       const eligible = availableSpeakers.filter(speaker=>speaker < revealed);
       const pool = eligible.length ? eligible : availableSpeakers;
       const speaker = pool.splice(Math.floor(Math.random()*pool.length),1)[0];
       availableSpeakers.splice(availableSpeakers.indexOf(speaker),1);
-      const event = { text, speaker, at: nextAt, until: nextAt + 2.8 };
-      nextAt = event.until + 2.2 + Math.random()*2.2;
+      const event = { text, speaker, at: nextAt, until: nextAt + 2.2 };
+      nextAt = event.until + 0.7 + Math.random()*0.4;
       return event;
     });
   }
@@ -626,7 +630,7 @@ const Cameo = (() => {
   function render(elapsed){
     if(elapsed < 5) return;
     const cap = Math.min(elapsed, 50);
-    const reveal = Math.min(figs.length, Math.floor((cap - 5)/2.1) + 1);
+    const reveal = Math.min(figs.length, Math.floor((cap - 5)/1.45) + 1);
     const dpr = Math.max(1, devicePixelRatio||1);
     const W = cvs.width/dpr, H = cvs.height/dpr;
     const ridgeY = H*0.58;
