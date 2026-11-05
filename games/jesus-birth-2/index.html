@@ -119,6 +119,9 @@ const journeyBackgrounds=[
   Img('background-approach.png'),
   Img('background-arrival.png')
 ];
+// This game is a 60-second journey: Bethlehem comes into view at 10s and 25s.
+// The final background then stays put for the remaining 35 seconds and finale.
+const JOURNEY_BACKGROUND_TIMING={ approachAt:10, arrivalAt:25, fadeSeconds:1 };
 const WIN_A='ending_scene_merry_christmas.png';
 const WIN_B='ending_scene_reason_for_season.png';
 const LOSE ='lose_bg_tall.png';
@@ -651,6 +654,7 @@ const Cameo = (() => {
 
 function drawJourneyBackground(elapsed,W,H){
   const [far,approach,arrival]=journeyBackgrounds;
+  const {approachAt,arrivalAt,fadeSeconds}=JOURNEY_BACKGROUND_TIMING;
   const drawImage=(img,alpha=1)=>{
     const source=img.complete&&img.naturalWidth?img:bg;
     ctx.globalAlpha=alpha;
@@ -658,16 +662,19 @@ function drawJourneyBackground(elapsed,W,H){
     ctx.globalAlpha=1;
   };
   const blend=(value,start,end)=>Math.max(0,Math.min(1,(value-start)/(end-start)));
-  if(elapsed<18){ drawImage(far); return; }
-  if(elapsed<22){
+  const approachFadeStart=approachAt-fadeSeconds;
+  const arrivalFadeStart=arrivalAt-fadeSeconds;
+
+  if(elapsed<approachFadeStart){ drawImage(far); return; }
+  if(elapsed<approachAt){
     drawImage(far);
-    drawImage(approach,blend(elapsed,18,22));
+    drawImage(approach,blend(elapsed,approachFadeStart,approachAt));
     return;
   }
-  if(elapsed<38){ drawImage(approach); return; }
-  if(elapsed<42){
+  if(elapsed<arrivalFadeStart){ drawImage(approach); return; }
+  if(elapsed<arrivalAt){
     drawImage(approach);
-    drawImage(arrival,blend(elapsed,38,42));
+    drawImage(arrival,blend(elapsed,arrivalFadeStart,arrivalAt));
     return;
   }
   drawImage(arrival);
