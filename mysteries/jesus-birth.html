@@ -37,7 +37,9 @@
     /* Figure styles */
     figure{margin:22px 0;background:var(--card);border:1px solid #1a2030;border-radius:12px;overflow:hidden}
     figure img{display:block;width:100%;height:auto}
+    figure.article-illustration{width:50%;margin:22px auto}
     figcaption{padding:10px 12px;color:var(--muted);font-size:13px}
+    @media(max-width:640px){figure.article-illustration{width:85%}}
 
     .divider{height:1px;background:#161d2b;margin:30px 0}
 
@@ -74,8 +76,8 @@
     </blockquote>
 
     <!-- Opening Image: His Star over Bethlehem -->
-    <figure>
-      <img id="imgOpening" src="../assets/christmas01.png" alt="An artistic depiction of a bright star above Bethlehem"/>
+    <figure class="article-illustration">
+      <img id="imgOpening" src="../assets/christmas01-bethlehem.png" alt="Bethlehem beneath a brilliant star in the night sky"/>
       <figcaption>An artistic portrayal of the star in Matthew’s account, which the Magi followed while seeking the child born King of the Jews (Matthew 2:1–2, <a href="https://www.biblegateway.com/passage/?search=Matthew%202%3A1-2&amp;version=NIV">NIV</a>).</figcaption>
     </figure>
 
@@ -108,8 +110,8 @@
     </blockquote>
 
     <!-- Artistic Nativity image; the Gospels describe the shepherds and Magi in separate accounts -->
-    <figure>
-      <img id="imgManger" src="../assets/christmas02.png" alt="An artistic Nativity scene with Mary and Joseph beside the manger under a starry sky" />
+    <figure class="article-illustration">
+      <img id="imgManger" src="../assets/christmas02-nativity.png" alt="Mary and Joseph gathered around newborn Jesus in a humble manger beneath the starry sky" />
       <figcaption>Heaven touches Earth — an artistic Nativity scene. Luke tells of the manger and shepherds; Matthew separately tells of the Magi and the star.</figcaption>
     </figure>
 
@@ -142,8 +144,8 @@
     }
 
     const logoPaths = ["../assets/logo.png", "/assets/logo.png", "assets/logo.png"];    
-    const openingPaths = ["../assets/christmas01.png", "/assets/christmas01.png", "assets/christmas01.png"]; 
-    const mangerPaths  = ["../assets/christmas02.png", "/assets/christmas02.png", "assets/christmas02.png"]; 
+    const openingPaths = ["../assets/christmas01-bethlehem.png", "/assets/christmas01-bethlehem.png", "assets/christmas01-bethlehem.png", "../assets/christmas01.png", "/assets/christmas01.png", "assets/christmas01.png"];
+    const mangerPaths  = ["../assets/christmas02-nativity.png", "/assets/christmas02-nativity.png", "assets/christmas02-nativity.png", "../assets/christmas02.png", "/assets/christmas02.png", "assets/christmas02.png"];
 
     const siteLogo = document.getElementById('siteLogo');
     const imgOpening = document.getElementById('imgOpening');
