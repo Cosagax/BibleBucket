@@ -875,12 +875,12 @@ function drawWiseManVariant(x,y,w,h,t,grounded,scale=1,pal,tilt=0){
   ctx.fillStyle=P.skin;ctx.beginPath();ctx.ellipse(cx,headY,w*.137,h*.095,0,0,Math.PI*2);ctx.fill();
   ctx.beginPath();ctx.ellipse(cx-w*.14,headY+h*.005,w*.027,h*.035,0,0,Math.PI*2);ctx.ellipse(cx+w*.14,headY+h*.005,w*.027,h*.035,0,0,Math.PI*2);ctx.fill();
   path([['moveTo',cx-w*.115,headY+h*.045],['quadraticCurveTo',cx,headY+h*.085,cx+w*.115,headY+h*.045],['lineTo',cx+w*.083,headY+h*.205],['quadraticCurveTo',cx,headY+h*.30,cx-w*.083,headY+h*.205],['closePath']],P.beard);
-  // Curled moustache, wide bright eyes, and brows give him the intro's warmth.
+  // Curled moustache and gently expressive, natural-sized eyes.
   ctx.fillStyle=P.beard;ctx.beginPath();ctx.ellipse(cx-w*.037,headY+h*.084,w*.052,h*.027,-.15,Math.PI,Math.PI*2);ctx.ellipse(cx+w*.037,headY+h*.084,w*.052,h*.027,.15,Math.PI,Math.PI*2);ctx.fill();
   for(const side of [-1,1]){
-    ctx.fillStyle='#fff0d8';ctx.beginPath();ctx.ellipse(cx+side*w*.047,headY+h*.002,w*.027,h*.025,side*.12,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='#30231d';ctx.beginPath();ctx.arc(cx+side*w*.05,headY+h*.004,Math.max(1,w*.012),0,Math.PI*2);ctx.fill();
-    ctx.strokeStyle=P.beard;ctx.lineWidth=Math.max(1,w*.012);ctx.beginPath();ctx.moveTo(cx+side*w*.02,headY-h*.03);ctx.quadraticCurveTo(cx+side*w*.075,headY-h*.035,cx+side*w*.025,headY-h*.027);ctx.stroke();
+    ctx.fillStyle='#fff0d8';ctx.beginPath();ctx.ellipse(cx+side*w*.047,headY+h*.002,w*.021,h*.018,side*.08,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#30231d';ctx.beginPath();ctx.arc(cx+side*w*.049,headY+h*.003,Math.max(.8,w*.008),0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=P.beard;ctx.lineWidth=Math.max(.8,w*.009);ctx.beginPath();ctx.moveTo(cx+side*w*.02,headY-h*.025);ctx.quadraticCurveTo(cx+side*w*.065,headY-h*.03,cx+side*w*.025,headY-h*.024);ctx.stroke();
   }
   ctx.fillStyle=P.skin;ctx.beginPath();ctx.ellipse(cx+w*.012,headY+h*.046,w*.021,h*.032,.2,0,Math.PI*2);ctx.fill();
   ctx.strokeStyle='rgba(92,53,35,.7)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx+w*.02,headY+h*.065);ctx.lineTo(cx+w*.06,headY+h*.075);ctx.stroke();
