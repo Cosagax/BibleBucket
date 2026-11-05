@@ -407,7 +407,7 @@ function reset(){
   elapsed=0; timer=60; hits=0; groundX=0; rocks.length=0; man.vy=0; man.t=0; man.scale=1; dust.length=0; wasAir=false;
   companions.length=0; const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1);
   targetX=W*settleFrac; man.x=-man.w; man.y=H-groundH-man.h;
-  comets.length=0; resetVerseQueue(); scheduleComet(); Sky.reset();
+  comets.length=0; resetVerseQueue(); scheduleComet(); Sky.reset(); Cameo.reset();
   inFinale=false; finaleTriggered=false; finaleRippleFired=false; starPopActive=false; starPopT=0; endDelay=0;
   megaPulseFired=false; megaPulseT=0;
   endBG1.classList.remove('show'); endBG2.classList.remove('show'); endBtns.classList.add('is-hidden');
@@ -478,26 +478,43 @@ const Cameo = (() => {
     'Come and see the child!'
   ];
 
-  // Shuffle each full set so every phrase is heard once before the cycle repeats.
-  function shuffledSayings(){
-    const shuffled = [...sayings];
-    for(let i=shuffled.length-1;i>0;i--){
+  // Give each phrase a different traveler and a slightly varied speaking time.
+  // The crowd should feel like individuals, not a repeating announcement loop.
+  function shuffled(values){
+    const result = [...values];
+    for(let i=result.length-1;i>0;i--){
       const j=Math.floor(Math.random()*(i+1));
-      [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];
+      [result[i],result[j]]=[result[j],result[i]];
     }
-    return shuffled;
+    return result;
   }
-  let speechOrder = shuffledSayings();
+  let speechEvents = [];
+  function resetSpeech(){
+    const phraseOrder = shuffled(sayings);
+    const availableSpeakers = figs.map((_, index)=>index);
+    let nextAt = 9;
+    speechEvents = phraseOrder.map((text,index)=>{
+      const cap = Math.min(nextAt, 50);
+      const revealed = Math.min(figs.length, Math.floor((cap - 5)/2.1) + 1);
+      const eligible = availableSpeakers.filter(speaker=>speaker < revealed);
+      const pool = eligible.length ? eligible : availableSpeakers;
+      const speaker = pool.splice(Math.floor(Math.random()*pool.length),1)[0];
+      availableSpeakers.splice(availableSpeakers.indexOf(speaker),1);
+      const event = { text, speaker, at: nextAt, until: nextAt + 2.8 };
+      nextAt = event.until + 2.2 + Math.random()*2.2;
+      return event;
+    });
+  }
+  resetSpeech();
 
   function drawSpeech(elapsed, W, H, reveal){
-    if(elapsed < 7 || reveal < 2) return;
-    const lineIndex = Math.floor((elapsed - 7) / 7) % sayings.length;
-    if(lineIndex === 0 && Math.floor((elapsed - 7) / 7) > 0) speechOrder = shuffledSayings();
-    const speakerIndex = (lineIndex * 4 + 2) % Math.min(reveal, figs.length);
-    const f = figs[speakerIndex];
+    if(reveal < 2) return;
+    const event = speechEvents.find(item=>elapsed >= item.at && elapsed < item.until);
+    if(!event || event.speaker >= reveal) return;
+    const f = figs[event.speaker];
     const px = f.x * W, py = H * 0.58 + (f.y - 0.60) * H;
     const bob = 2 * Math.sin(elapsed*0.35 + f.seed*1.3);
-    const text = speechOrder[lineIndex];
+    const text = event.text;
     const fontSize = Math.max(11, Math.min(15, W * 0.014));
     const padX = 10, padY = 7, maxWidth = W * 0.42;
     ctx.save();
@@ -624,7 +641,7 @@ const Cameo = (() => {
       boy(W*0.50, ridgeY-2, 0.95, elapsed);
     }
   }
-  return { render };
+  return { render, reset: resetSpeech };
 })();
 
 function drawBethlehemApproach(elapsed){
