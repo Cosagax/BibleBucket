@@ -369,16 +369,16 @@ const Sky=(()=>{ let shooting=[], nextStarT=5, angel=null, angelAt=45;
     ctx.save(); ctx.globalCompositeOperation='lighter';
     // The star opens into a tapering ray that travels down with her.
     if(column>.01){
-      const top=H*.205, endY=y-22, width=7+column*W*.035;
+      const top=H*.205, endY=y-22, width=12+column*W*.075;
       const beam=ctx.createLinearGradient(0,top,0,endY);
-      beam.addColorStop(0,`rgba(255,247,212,${.03+.12*column})`);
-      beam.addColorStop(.58,`rgba(255,232,170,${.10+.22*column})`);
-      beam.addColorStop(1,`rgba(255,252,226,${.08+.18*column})`);
+      beam.addColorStop(0,`rgba(255,247,212,${.018+.055*column})`);
+      beam.addColorStop(.58,`rgba(255,232,170,${.045+.11*column})`);
+      beam.addColorStop(1,`rgba(255,252,226,${.04+.10*column})`);
       ctx.fillStyle=beam; ctx.beginPath(); ctx.moveTo(W*.5-width*.22,top); ctx.lineTo(W*.5+width*.22,top);
       ctx.lineTo(x+width,endY); ctx.lineTo(x-width,endY); ctx.closePath(); ctx.fill();
       const source=ctx.createRadialGradient(W*.5,top,0,W*.5,top,width*2.8);
-      source.addColorStop(0,`rgba(255,255,240,${.35*column})`); source.addColorStop(1,'rgba(255,225,150,0)');
-      ctx.fillStyle=source; ctx.beginPath(); ctx.arc(W*.5,top,width*2.8,0,Math.PI*2); ctx.fill();
+      source.addColorStop(0,`rgba(255,255,240,${.20*column})`); source.addColorStop(1,'rgba(255,225,150,0)');
+      ctx.fillStyle=source; ctx.beginPath(); ctx.arc(W*.5,top,width*3.6,0,Math.PI*2); ctx.fill();
     }
     for(const q of particles){ const a=Math.max(0,q.life/.8);
       ctx.fillStyle=`rgba(255,246,204,${.7*a})`; ctx.beginPath(); ctx.arc(q.x,q.y,1+2*a,0,Math.PI*2); ctx.fill();
