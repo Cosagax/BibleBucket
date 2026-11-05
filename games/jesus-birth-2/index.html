@@ -43,7 +43,8 @@
   .endBG{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.96);opacity:0;transition:opacity .8s ease}
   .endBG.show{opacity:1}
   #end .big{display:none!important;}
-  #endBtns{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;justify-content:center}
+  #endBtns{position:absolute;top:70%;left:50%;transform:translate(-50%,-50%);display:flex;gap:10px;
+    width:min(94vw,700px);flex-wrap:wrap;justify-content:center}
   #endBtns.is-hidden{display:none}
 </style>
 </head>
@@ -113,9 +114,8 @@ const btnAgain  = document.getElementById('btnAgain');
 /* ===== Assets ===== */
 const Img=s=>{const i=new Image(); i.src=s; return i;};
 const bg=Img('background.png');
-const WIN_A='win_bg_tall.png';
-const WIN_B='win_bg_tall_01.png';
-const WIN_C='win_bg_tall_02.png';
+const WIN_A='ending_scene_merry_christmas.png';
+const WIN_B='ending_scene_reason_for_season.png';
 const LOSE ='lose_bg_tall.png';
 
 /* ===== Audio (working build) ===== */
@@ -414,7 +414,7 @@ function reset(){
 }
 async function start(){ reset(); running=true; startPane.style.display='none'; endPane.style.display='none'; last=0; initAudio(); if(AC && AC.state==='suspended'){ try{ await AC.resume(); }catch{} } requestAnimationFrame(loop); }
 
-/* --- Win/Lose panels with timed 3-image sequence for WIN --- */
+/* --- Win/Lose panels with timed 2-image sequence for WIN --- */
 function playWinSequence(){
   setTimeout(() => {
     endPane.style.display='flex';
@@ -423,11 +423,8 @@ function playWinSequence(){
       endBG2.src=WIN_B;
       endBG2.onload = () => endBG2.classList.add('show');
       setTimeout(() => {
-        endBG1.src=WIN_C;
-        setTimeout(() => {
-          endBG2.classList.remove('show');
-          setTimeout(() => endBtns.classList.remove('is-hidden'), 900);
-        }, 50);
+        endBG1.classList.remove('show');
+        setTimeout(() => endBtns.classList.remove('is-hidden'), 900);
       }, 3000);
     }, 3000);
   }, 1000);
