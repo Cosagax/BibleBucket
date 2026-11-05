@@ -831,7 +831,7 @@ function draw(){
 
 /* ===== Character draw ===== */
 function drawWiseManVariant(x,y,w,h,t,grounded,scale=1,pal,tilt=0){
-  const P = pal || { robeTop:'#1a6b79', robeBot:'#0f3f48', hat:'#d74a2a', beard:'#2a2a2a', skin:'#b9825c', sash:'#0f3f48', jar:'#d59b2b' };
+  const P = pal || { robeTop:'#087783', robeBot:'#07515b', hat:'#c83220', beard:'#30201b', skin:'#bd8056', sash:'#a92524', jar:'#d59b2b' };
   const walk=Math.sin(t*1.05), bob=Math.sin(t*2.1)*1.8, weight=(1-Math.cos(t*2.1))*0.8;
   const bobT=bob+weight, base=y+h, stride=7*walk, liftF=Math.max(0,Math.sin(t*1.05))*3, liftB=Math.max(0,-Math.sin(t*1.05))*2.4;
   const cx=x+w*.46, headY=y+h*.145+bobT*.22, hem=grounded?walk*2.5:0;
@@ -875,17 +875,25 @@ function drawWiseManVariant(x,y,w,h,t,grounded,scale=1,pal,tilt=0){
   ctx.fillStyle=P.skin;ctx.beginPath();ctx.ellipse(cx,headY,w*.137,h*.095,0,0,Math.PI*2);ctx.fill();
   ctx.beginPath();ctx.ellipse(cx-w*.14,headY+h*.005,w*.027,h*.035,0,0,Math.PI*2);ctx.ellipse(cx+w*.14,headY+h*.005,w*.027,h*.035,0,0,Math.PI*2);ctx.fill();
   path([['moveTo',cx-w*.115,headY+h*.045],['quadraticCurveTo',cx,headY+h*.085,cx+w*.115,headY+h*.045],['lineTo',cx+w*.083,headY+h*.205],['quadraticCurveTo',cx,headY+h*.30,cx-w*.083,headY+h*.205],['closePath']],P.beard);
-  // Moustache and subtle eyes/nose.
-  ctx.fillStyle=P.beard;ctx.beginPath();ctx.ellipse(cx-w*.035,headY+h*.082,w*.045,h*.022,-.15,Math.PI,Math.PI*2);ctx.ellipse(cx+w*.035,headY+h*.082,w*.045,h*.022,.15,Math.PI,Math.PI*2);ctx.fill();
-  ctx.fillStyle='rgba(48,34,28,.8)';ctx.beginPath();ctx.arc(cx-w*.045,headY+h*.005,Math.max(.8,w*.012),0,Math.PI*2);ctx.arc(cx+w*.045,headY+h*.005,Math.max(.8,w*.012),0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle='rgba(92,53,35,.7)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx,headY+h*.015);ctx.lineTo(cx-w*.008,headY+h*.055);ctx.stroke();
+  // Curled moustache, wide bright eyes, and brows give him the intro's warmth.
+  ctx.fillStyle=P.beard;ctx.beginPath();ctx.ellipse(cx-w*.037,headY+h*.084,w*.052,h*.027,-.15,Math.PI,Math.PI*2);ctx.ellipse(cx+w*.037,headY+h*.084,w*.052,h*.027,.15,Math.PI,Math.PI*2);ctx.fill();
+  for(const side of [-1,1]){
+    ctx.fillStyle='#fff0d8';ctx.beginPath();ctx.ellipse(cx+side*w*.047,headY+h*.002,w*.027,h*.025,side*.12,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#30231d';ctx.beginPath();ctx.arc(cx+side*w*.05,headY+h*.004,Math.max(1,w*.012),0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=P.beard;ctx.lineWidth=Math.max(1,w*.012);ctx.beginPath();ctx.moveTo(cx+side*w*.02,headY-h*.03);ctx.quadraticCurveTo(cx+side*w*.075,headY-h*.035,cx+side*w*.025,headY-h*.027);ctx.stroke();
+  }
+  ctx.fillStyle=P.skin;ctx.beginPath();ctx.ellipse(cx+w*.012,headY+h*.046,w*.021,h*.032,.2,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='rgba(92,53,35,.7)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx+w*.02,headY+h*.065);ctx.lineTo(cx+w*.06,headY+h*.075);ctx.stroke();
 
   // Wrapped turban with a raised crown, crossing band, and jewel.
   path([['moveTo',cx-w*.17,headY-h*.035],['quadraticCurveTo',cx-w*.18,headY-h*.15,cx-w*.07,headY-h*.17],['quadraticCurveTo',cx,headY-h*.23,cx+w*.08,headY-h*.16],['quadraticCurveTo',cx+w*.18,headY-h*.12,cx+w*.17,headY-h*.035],['quadraticCurveTo',cx,headY+h*.005,cx-w*.17,headY-h*.035],['closePath']],P.hat);
   ctx.strokeStyle=gold;ctx.lineWidth=Math.max(1.5,w*.025);ctx.beginPath();ctx.moveTo(cx-w*.15,headY-h*.075);ctx.quadraticCurveTo(cx,headY-h*.025,cx+w*.15,headY-h*.075);ctx.stroke();
-  ctx.strokeStyle='rgba(255,226,157,.65)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx-w*.075,headY-h*.155);ctx.quadraticCurveTo(cx,headY-h*.105,cx+w*.10,headY-h*.14);ctx.stroke();
-  ctx.fillStyle=gold;ctx.beginPath();ctx.arc(cx+w*.075,headY-h*.085,w*.033,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#66c5df';ctx.beginPath();ctx.arc(cx+w*.075,headY-h*.085,w*.019,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='rgba(255,226,157,.72)';ctx.lineWidth=Math.max(1,w*.012);ctx.beginPath();ctx.moveTo(cx-w*.075,headY-h*.155);ctx.quadraticCurveTo(cx,headY-h*.105,cx+w*.10,headY-h*.14);ctx.stroke();
+  // Broad folded tail and ruby brooch echo the red-and-gold intro turban.
+  path([['moveTo',cx-w*.13,headY-h*.06],['quadraticCurveTo',cx-w*.20,headY+h*.09,cx-w*.13,headY+h*.20],['lineTo',cx-w*.04,headY+h*.12],['lineTo',cx-w*.055,headY+h*.015],['closePath']],P.hat,goldShade,Math.max(1,w*.012));
+  ctx.fillStyle=gold;ctx.beginPath();ctx.ellipse(cx+w*.075,headY-h*.085,w*.048,h*.042,-.25,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#b71820';ctx.beginPath();ctx.ellipse(cx+w*.075,headY-h*.085,w*.031,h*.029,-.25,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(255,232,196,.85)';ctx.beginPath();ctx.arc(cx+w*.065,headY-h*.098,Math.max(.8,w*.008),0,Math.PI*2);ctx.fill();
 
   // Forearm and gift: a small golden vessel remains visible during the walk cycle.
   ctx.strokeStyle=P.skin;ctx.lineWidth=Math.max(3,w*.055);ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x+w*.67,y+h*.39+bobT*.2);ctx.lineTo(x+w*.77,y+h*.43+bobT*.2);ctx.stroke();
