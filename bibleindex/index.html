@@ -720,7 +720,7 @@
             <div class="badge ${b.status}" title="${labelStatus(b.status)}">${ICON[b.status]}</div>
             <div>
               <div class="topline">
-                <span class="title"><span class="book-number" aria-label="Audio book ${b.number}">Book ${b.number}</span>${b.title}${b.audioParts ? ` <span class="meta">(${b.audioParts})</span>` : ''}</span>
+                <span class="title"><span class="book-number" aria-label="Book ${b.number}">Book ${b.number}</span>${b.title}${b.audioParts ? ` <span class="meta">(${b.audioParts})</span>` : ''}</span>
                 <span class="meta">• ${labelStatus(b.status)}</span>
               </div>
               <div class="${clampClass}">${htmlParas}</div>
