@@ -113,7 +113,7 @@
 
   <main>
     <div class="legend">
-      <span><strong>About this guide.</strong> This index follows <em>The Complete Ethiopian Bible in English</em> from Solomon’s Gate Press, using the 1–88 order of its accompanying audio edition. A number identifies a book; repeated audio tracks under one number are parts of that book, not extra entries. Titles and arrangements differ among Ethiopian and other Bible editions, so use this alongside the edition you are reading. The notes are brief reading companions, not a substitute for the text.</span>
+      <span><strong>About this guide.</strong> This index follows the titles and sequence shown in <em>The Complete Ethiopian Bible in English</em> from Solomon’s Gate Press. The audio’s numbered “books” are volumes, and a volume may contain one Bible book or a part of one; for example, audio Book 11 is 1 Kings (Parts 1 and 2), while audio Book 12 is 2 Kings (Parts 1 and 2). The volume number is shown separately from the Bible title, so a split book is not mistaken for several distinct books. Titles and arrangements differ among Ethiopian and other Bible editions, so use this alongside the edition you are reading. The notes are brief reading companions, not a substitute for the text.</span>
     </div>
 
     <div class="toolbar">
@@ -151,7 +151,9 @@
     const paras = (...arr) => arr.join("\n\n");
 
     // ===== Data model =====
-    // Guide to this English edition. "INTER" is a display group for other
+    // Guide to this English edition. "audioBook" is the volume number shown
+    // by the accompanying recording; it is not necessarily a distinct Bible
+    // title. "INTER" is a display group for other
     // included books, not a claim about when a text was written or its status
     // in every Ethiopian church or edition.
     // era: "OT" | "NT" | "INTER"; status is retained for existing rendering.
@@ -204,31 +206,31 @@
           "The story lands in a genealogy—Ruth becomes great-grandmother to David. Hidden faithfulness becomes the hinge of history."
         )
       },
-      { order:9, number:9, era:"OT", status:"canon", title:"1 Samuel", summary: paras(
+      { order:9, number:9, audioBook:9, audioParts:"Parts 1–2", era:"OT", status:"canon", title:"1 Samuel", summary: paras(
           "Hannah’s prayer births Samuel, a prophet who becomes midwife to monarchy. Israel demands a king to be like nations; God grants Saul, who looks the part but lacks the heart.",
           "David is anointed in obscurity, slays Goliath, and learns kingship in caves and exile. Friendship with Jonathan, songs in the wilderness, and restraint toward an enemy king form his character.",
           "1 Samuel contrasts appearances with reality: God weighs hearts. Leadership without obedience collapses; humility under pressure prepares a shepherd for a throne."
         )
       },
-      { order:10, number:10, era:"OT", status:"canon", title:"2 Samuel", summary: paras(
+      { order:10, number:10, audioBook:10, era:"OT", status:"canon", title:"2 Samuel", summary: paras(
           "David unites tribes, captures Jerusalem, and brings the ark near. God pledges an everlasting house, anchoring hope in a promise bigger than one man.",
           "But the king’s sin with Bathsheba fractures the house. Swords rise within—Amnon, Absalom, and a throne rocked by grief. Still, mercy and covenant do not fail.",
           "Songs, laments, and last words close the arc. The best of David points beyond David to a king whose throne is righteousness itself."
         )
       },
-      { order:11, number:11, era:"OT", status:"canon", title:"1 Kings", summary: paras(
+      { order:11, number:11, audioBook:11, audioParts:"Parts 1–2", era:"OT", status:"canon", title:"1 Kings", summary: paras(
           "Solomon’s wisdom builds a house for God, and glory fills the temple. Nations stream to hear; Israel’s golden age gleams.",
           "Yet hearts drift. Foreign alliances and many wives pull devotion sideways. After Solomon, the kingdom tears—north and south, Jeroboam and Rehoboam.",
           "Prophets arise—Elijah confronts Baal, fire falls, and a still small voice sustains a weary servant. The story warns: splendor without faithfulness rots from within."
         )
       },
-      { order:12, number:12, era:"OT", status:"canon", title:"2 Kings", summary: paras(
+      { order:12, number:12, audioBook:12, audioParts:"Parts 1–2", era:"OT", status:"canon", title:"2 Kings", summary: paras(
           "Successive kings toggle between reform and ruin while prophets plead. The northern kingdom falls to Assyria; Judah lingers, revived under Hezekiah and Josiah, then declines.",
           "Babylon finally levels Jerusalem and burns the temple. Exile is the catastrophic ‘curse’ Deuteronomy warned about, a moral verdict on centuries of compromise.",
           "The book ends with a cracked-open door—Jehoiachin released in Babylon. Judgment is not the last word; the Davidic promise still flickers."
         )
       },
-      { order:13, number:13, era:"OT", status:"canon", title:"1 Chronicles", summary: paras(
+      { order:13, number:13, audioBook:13, audioParts:"Parts 1–2", era:"OT", status:"canon", title:"1 Chronicles", summary: paras(
           'The book retells Israel’s history through genealogies, the reign of David, and the preparations for worship in Jerusalem. It traces family lines from Adam onward, then follows David’s rise, his gathering of the tribes, and his care in preparing a place for the ark and temple.',
           'Its portrait of David emphasizes worship, the Levites, and the continuity of Israel’s calling. The long genealogies are a reminder that the story belongs to generations of people, not only to kings and battles.'
         )
@@ -718,7 +720,7 @@
             <div class="badge ${b.status}" title="${labelStatus(b.status)}">${ICON[b.status]}</div>
             <div>
               <div class="topline">
-                <span class="title"><span class="book-number" aria-label="Book ${b.number}">#${b.number}</span>${b.title}</span>
+                <span class="title">${b.audioBook ? `<span class="book-number" aria-label="Audio volume ${b.audioBook}">Audio ${b.audioBook}</span>` : ''}${b.title}${b.audioParts ? ` <span class="meta">(${b.audioParts})</span>` : ''}</span>
                 <span class="meta">• ${labelStatus(b.status)}</span>
               </div>
               <div class="${clampClass}">${htmlParas}</div>
