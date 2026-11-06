@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>BibleBucket – Ethiopian Bible Book Guide</title>
+  <title>BibleBucket – Ethiopian Bible: Book Guide</title>
   <style>
     :root{
       --bg:#0d1117; --bg2:#161b22; --fg:#c9d1d9; --accent:#58a6ff;
@@ -105,7 +105,7 @@
       </a>
       <div class="brand">
         <div class="brand-name">BibleBucket</div>
-        <div class="page-name">Ethiopian Bible Book Index</div>
+        <div class="page-name">A guide to the books in this edition</div>
       </div>
       <a class="home-link" href="../">Home</a>
     </div>
@@ -113,36 +113,36 @@
 
   <main>
     <div class="legend">
-      <span>📖 This is a study guide to <em>The Complete Ethiopian Bible in English</em> (Solomon’s Gate Press). The numbers follow the 88-book sequence in the accompanying audio edition; audio parts repeat the same number and are not additional books. Ethiopian biblical traditions and English editions may group or name books differently. KJV comparisons are only for orientation, not a judgment about which books belong in Scripture. This page is an index and guide, not the biblical text.</span>
+      <span><strong>About this guide.</strong> This index follows <em>The Complete Ethiopian Bible in English</em> from Solomon’s Gate Press, using the 1–88 order of its accompanying audio edition. A number identifies a book; repeated audio tracks under one number are parts of that book, not extra entries. Titles and arrangements differ among Ethiopian and other Bible editions, so use this alongside the edition you are reading. The notes are brief reading companions, not a substitute for the text.</span>
     </div>
 
     <div class="toolbar">
-      <input id="q" type="search" placeholder="Search a book or theme… (e.g., Enoch, covenant, David, exile)">
+      <input id="q" type="search" placeholder="Find a book or theme… (e.g., Enoch, covenant, David, exile)" aria-label="Find a book or theme">
       <div class="chips" id="statusChips">
         <button type="button" class="chip active" data-status="all" aria-pressed="true">All books</button>
       </div>
       <div class="chips" id="eraChips">
-        <button type="button" class="chip active" data-era="all" aria-pressed="true">All books</button>
+        <button type="button" class="chip active" data-era="all" aria-pressed="true">Every section</button>
         <button type="button" class="chip" data-era="OT" aria-pressed="false">Old Testament</button>
         <button type="button" class="chip" data-era="NT" aria-pressed="false">New Testament</button>
-        <button type="button" class="chip" data-era="INTER" aria-pressed="false">Additional in this edition</button>
+        <button type="button" class="chip" data-era="INTER" aria-pressed="false">Other books in this edition</button>
       </div>
       <span class="count" id="count"></span>
     </div>
 
     <!-- OT ERA -->
     <h2>📜 Old Testament</h2>
-    <p class="era-note">From creation and the ancestors of Israel through law, kingdom, wisdom, prophecy, exile, and return.</p>
+    <p class="era-note">Israel’s story: creation, ancestors, exodus, land, kingdoms, wisdom, prophets, exile, and return.</p>
     <section><ul id="list-OT"></ul></section>
 
     <!-- NT ERA -->
     <h2>✝️ New Testament</h2>
-    <p class="era-note">The life and teaching of Jesus, the apostolic mission, letters to the early churches, and the hope of Revelation.</p>
+    <p class="era-note">The four accounts of Jesus, Acts, letters to early Christian communities, and Revelation.</p>
     <section><ul id="list-NT"></ul></section>
 
-    <!-- ETHIOPIAN BOOKS NOT IN KJV -->
-    <h2>📚 Additional books and writings in this edition</h2>
-    <p class="era-note">Entries in this edition that are not part of the King James Version’s 66-book table of contents.</p>
+    <!-- OTHER BOOKS IN THIS ENGLISH EDITION -->
+    <h2>📚 Other books in this edition</h2>
+    <p class="era-note">These entries are included in the Solomon’s Gate Press edition and are listed here under its audio numbering. Other Ethiopian editions may arrange or name them differently.</p>
     <section><ul id="list-INTER"></ul></section>
   </main>
 
@@ -151,9 +151,9 @@
     const paras = (...arr) => arr.join("\n\n");
 
     // ===== Data model =====
-    // Study guide based on the Ethiopian Bible. "INTER" here means Ethiopian
-    // additional books in this edition, not a claim about when the texts were written.
-    // Compare titles and groupings with the reader's own edition.
+    // Guide to this English edition. "INTER" is a display group for other
+    // included books, not a claim about when a text was written or its status
+    // in every Ethiopian church or edition.
     // era: "OT" | "NT" | "INTER"; status is retained for existing rendering.
     const BOOKS = [
       { order:1, number:1, era:"OT", status:"canon", title:"Genesis", summary: paras(
@@ -729,7 +729,7 @@
     }
 
     function labelStatus(s){
-      return "Ethiopian Bible reading guide";
+      return s === "extra" ? "Other book in this edition" : "Book in this edition";
     }
 
     function escapeHTML(s){
