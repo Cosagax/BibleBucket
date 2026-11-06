@@ -104,7 +104,7 @@
       </a>
       <div class="brand">
         <div class="brand-name">BibleBucket</div>
-        <div class="page-name">The Ethiopian Bible · 88-book reading companion</div>
+        <div class="page-name">Ethiopian Bible Book Index</div>
       </div>
       <a class="home-link" href="../">Home</a>
     </div>
@@ -112,7 +112,7 @@
 
   <main>
     <div class="legend">
-      <span>📖 A study companion to the Ethiopian Bible Jake reads and loves. English editions vary in book names, groupings, and count; use this guide alongside the titles and divisions in your copy.</span>
+      <span>📖 This index is based on the Ethiopian Bible. It is organized as Old Testament, New Testament, and Ethiopian books not included in the KJV. English editions may group or name some books differently, so use your copy as the final reference.</span>
     </div>
 
     <div class="toolbar">
@@ -121,10 +121,10 @@
         <button type="button" class="chip active" data-status="all" aria-pressed="true">All books</button>
       </div>
       <div class="chips" id="eraChips">
-        <button type="button" class="chip active" data-era="all" aria-pressed="true">Whole Bible</button>
+        <button type="button" class="chip active" data-era="all" aria-pressed="true">All books</button>
         <button type="button" class="chip" data-era="OT" aria-pressed="false">Old Testament</button>
-        <button type="button" class="chip" data-era="INTER" aria-pressed="false">Ethiopian books</button>
         <button type="button" class="chip" data-era="NT" aria-pressed="false">New Testament</button>
+        <button type="button" class="chip" data-era="INTER" aria-pressed="false">Ethiopian books not in KJV</button>
       </div>
       <span class="count" id="count"></span>
     </div>
@@ -134,15 +134,15 @@
     <p class="era-note">From creation and the ancestors of Israel through law, kingdom, wisdom, prophecy, exile, and return.</p>
     <section><ul id="list-OT"></ul></section>
 
-    <!-- ETHIOPIAN BOOKS -->
-    <h2>✝️ Ethiopian Canon Books</h2>
-    <p class="era-note">Books especially associated with the wider Ethiopian collection, including ancient histories, wisdom, and church-order writings.</p>
-    <section><ul id="list-INTER"></ul></section>
-
     <!-- NT ERA -->
     <h2>✝️ New Testament</h2>
     <p class="era-note">The life and teaching of Jesus, the apostolic mission, letters to the early churches, and the hope of Revelation.</p>
     <section><ul id="list-NT"></ul></section>
+
+    <!-- ETHIOPIAN BOOKS NOT IN KJV -->
+    <h2>📚 Ethiopian Books Not Included in the KJV</h2>
+    <p class="era-note">Books in the Ethiopian collection that are not part of the King James Version’s 66-book table of contents.</p>
+    <section><ul id="list-INTER"></ul></section>
   </main>
 
   <script>
@@ -150,10 +150,10 @@
     const paras = (...arr) => arr.join("\n\n");
 
     // ===== Data model =====
-    // This is a reader's guide, not a claim that every Ethiopian edition numbers
-    // or groups its books identically. The three display groups provide a practical reading path; compare names/order
-    // with the reader's own edition, since English lists combine books differently.
-    // era: "OT" | "INTER" | "NT"; status is retained for existing rendering.
+    // Study guide based on the Ethiopian Bible. "INTER" here means Ethiopian
+    // books not included in the KJV, not a claim about when the texts were written.
+    // Compare titles and groupings with the reader's own edition.
+    // era: "OT" | "NT" | "INTER"; status is retained for existing rendering.
     const BOOKS = [
       { order:1, era:"OT", status:"canon", title:"Genesis", summary: paras(
           "Beginnings set the patterns for everything: creation’s goodness, the image of God in humanity, and the tragedy of the fall. The flood becomes both judgment and reset, while the covenant with Noah signals God’s resolve to preserve the world he loves. Babel’s scattering exposes pride’s impulse to build a name apart from God’s name.",
@@ -761,11 +761,11 @@
       for(const b of byEra.OT){
         if(matches.includes(b)) { LISTS.OT.insertAdjacentHTML("beforeend", rowHTML(b)); shown++; }
       }
-      for(const b of byEra.INTER){
-        if(matches.includes(b)) { LISTS.INTER.insertAdjacentHTML("beforeend", rowHTML(b)); shown++; }
-      }
       for(const b of byEra.NT){
         if(matches.includes(b)) { LISTS.NT.insertAdjacentHTML("beforeend", rowHTML(b)); shown++; }
+      }
+      for(const b of byEra.INTER){
+        if(matches.includes(b)) { LISTS.INTER.insertAdjacentHTML("beforeend", rowHTML(b)); shown++; }
       }
       count.textContent = `${shown} shown`;
     }
