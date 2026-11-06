@@ -210,7 +210,7 @@
     if(!byId.has(id))return;
     state.selected=id;
     const e=byId.get(id);
-    if(state.trail)state.era=e.era;
+    state.era=e.era;
     if(state.view==='map' && e.places.length){
       if(!e.places.includes(state.mapPlace))state.mapPlace=e.places[0];
       if(regionForEntry(e)==='mediterranean')state.mapRegion='mediterranean';

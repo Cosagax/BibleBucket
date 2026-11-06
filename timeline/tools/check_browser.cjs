@@ -132,6 +132,8 @@ function check(name,condition){assert(condition,name);results.push(name);}
   await p.locator('#place-card [data-select="paul"]').click();
   await p.locator('#detail-panel [data-select="rome-witness"]').click();
   check('Following a western story while in the map widens its frame',await p.locator('#map-region').inputValue()==='mediterranean'&&await p.locator('#place-select').inputValue()==='rome');
+  await p.locator('[data-view="story"]').click();
+  check('Returning from a mapped story keeps its actual chapter selected',await p.locator('#era-select').inputValue()==='church');
   await p.locator('[data-view="story"]').click();await p.locator('#era-select').selectOption('revelation');
   check('Revelation exposes eight image trails and its reading boundaries',await p.locator('.symbol-links button').count()===8&&/Vision sequence/.test(await p.locator('.story-header').innerText()));
   await p.locator('.symbol-links [data-select="rev-number"]').focus();await p.keyboard.press('Enter');
