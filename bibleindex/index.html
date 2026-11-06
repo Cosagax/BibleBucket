@@ -53,6 +53,10 @@
       background:var(--bg2);border-radius:var(--radius);padding:10px 12px;margin-bottom:20px;
       font-size:.95rem;display:flex;gap:18px;flex-wrap:wrap;align-items:center
     }
+    .legend-copy{flex:1;min-width:0}
+    .edition-cover{flex:0 0 176px;width:176px;margin:0}
+    .edition-cover img{display:block;width:100%;height:auto;border:1px solid var(--rule);border-radius:10px;background:#f5f0df}
+    .edition-cover figcaption{margin-top:5px;color:var(--muted);font-size:.72rem;text-align:center;line-height:1.3}
     .legend .canon::before{content:"✅ ";color:var(--ok)}
     .legend .deut::before{content:"✝️ ";color:var(--warn)}
     .legend .extra::before{content:"📜 ";color:var(--note)}
@@ -88,6 +92,8 @@
     .topline{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
     .era-note{font-size:.8rem;color:var(--muted)}
     @media (max-width:600px){
+      .legend{flex-direction:column;align-items:stretch}
+      .edition-cover{flex:0 0 auto;width:min(220px,65vw);align-self:center}
       .row{flex-direction:column}
       .header-inner{min-height:72px;padding:8px 16px;gap:10px}
       .logo{width:54px;height:54px}
@@ -113,7 +119,11 @@
 
   <main>
     <div class="legend">
-      <span><strong>About this guide.</strong> This index follows the titles and sequence shown in <em>The Complete Ethiopian Bible in English</em> from Solomon’s Gate Press. The audio’s numbered “books” are volumes, and a volume may contain one Bible book or a part of one; for example, audio Book 11 is 1 Kings (Parts 1 and 2), while audio Book 12 is 2 Kings (Parts 1 and 2). The volume number is shown separately from the Bible title, so a split book is not mistaken for several distinct books. Titles and arrangements differ among Ethiopian and other Bible editions, so use this alongside the edition you are reading. The notes are brief reading companions, not a substitute for the text.</span>
+      <span class="legend-copy"><strong>About this guide.</strong> This index follows the titles and sequence shown in <em>The Complete Ethiopian Bible in English</em> from Solomon’s Gate Press. The audio’s numbered “books” are volumes, and a volume may contain one Bible book or a part of one; for example, Book 11 is 1 Kings (Parts 1 and 2), while Book 12 is 2 Kings (Parts 1 and 2). The volume number is shown separately from the Bible title, so a split book is not mistaken for several distinct books. Titles and arrangements differ among Ethiopian and other Bible editions, so use this alongside the edition you are reading. The notes are brief reading companions, not a substitute for the text.</span>
+      <figure class="edition-cover">
+        <img src="../assets/ethiopian-bible-cover.png" alt="Cover of The Complete Ethiopian Bible in English, illustrated and published by Solomon’s Gate Press">
+        <figcaption>Solomon’s Gate Press edition cover</figcaption>
+      </figure>
     </div>
 
     <div class="toolbar">
