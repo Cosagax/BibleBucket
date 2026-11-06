@@ -20,7 +20,7 @@ function checkRef(ref, owner) {
     for (const part of ref.verses.split(',')) {
       const [a, end] = part.trim().split(/[-–]/).map(Number), z = end || a;
       assert(a > 0 && z >= a, `${owner}: malformed verse range`);
-      for (let n = a; n <= z; n++) assert(chapter[String(n)], `${owner}: missing verse ${ref.book} ${ref.chapter}:${n}`);
+      for (let n = a; n <= z; n++) assert(chapter[String(n)] || b.textualNotes?.[String(ref.chapter)]?.[String(n)], `${owner}: missing verse or labeled edition note ${ref.book} ${ref.chapter}:${n}`);
     }
   }
 }
@@ -31,6 +31,11 @@ for (const e of data.entries) {
   for (const id of e.related) assert(ids.has(id) && id !== e.id, `${e.id}: invalid connection ${id}`);
   for (const id of e.places) assert(places.has(id), `${e.id}: unknown place ${id}`);
   for (const ref of e.refs) checkRef(ref,e.id);
+  for (const echo of e.echoes || []) {
+    assert(echo.label && echo.relationship && echo.explanation, `${e.id}: incomplete Scripture echo`);
+    assert(echo.refs.length, `${e.id}: unsourced Scripture echo`);
+    for (const ref of echo.refs) checkRef(ref, `${e.id} echo`);
+  }
   if (['beginnings','patriarchs','exodus','land'].includes(e.era)) assert(e.bce === null, `${e.id}: early narrative must not acquire a fabricated BCE date`);
   if (e.reign) assert(e.reign.start >= e.reign.end, `${e.id}: reversed reign`);
 }
@@ -41,7 +46,7 @@ for (const f of data.families) {
   const children = new Map();
   for(const edge of f.edges) {
     assert(nodes.has(edge.source) && nodes.has(edge.target),`${f.id}: dangling relationship`);
-    assert(['parent','spouse','descendant'].includes(edge.kind));
+    assert(['parent','spouse','descendant','guardian'].includes(edge.kind));
     if(edge.kind !== 'spouse') children.set(edge.source,[...(children.get(edge.source)||[]),edge.target]);
   }
   function walk(id, trail = new Set()) {
@@ -54,7 +59,7 @@ for (const f of data.families) {
 }
 for(const t of data.trails) for(const id of t.steps) assert(ids.has(id),`${t.id}: broken stop`);
 for(const p of data.prophetWindows) assert(ids.has(p.id) && p.start>=p.end,`Bad prophet window ${p.id}`);
-for(const p of data.places) assert(p.lon>=24 && p.lon<=49 && p.lat>=25 && p.lat<=40,`${p.id}: pin outside map`);
+for(const p of data.places) assert(p.lon>=10 && p.lon<=50 && p.lat>=22 && p.lat<=46,`${p.id}: pin outside Mediterranean map`);
 assert.equal(Object.keys(books.get('ENO').chapters).length,108);
 assert.equal(Object.keys(books.get('JUB').chapters).length,50);
 assert(books.get('ENO').chapters['6'].includes('Hermon'));
@@ -77,7 +82,7 @@ for(const file of ['index.html','sources.html']) {
   const html=fs.readFileSync(path.join(root,file),'utf8');
   for(const match of html.matchAll(/(?:src|href)="([^"#]+)"/g)) {
     const url=match[1];if(/^[a-z]+:/i.test(url))continue;
-    assert(fs.existsSync(path.resolve(root,url)),`${file}: broken local asset/link ${url}`);
+    assert(fs.existsSync(path.resolve(root,url.split('#')[0].split('?')[0])),`${file}: broken local asset/link ${url}`);
   }
 }
 assert(fs.readFileSync(path.join(root,'../index.html'),'utf8').includes('href="timeline/"'),'Homepage link missing');

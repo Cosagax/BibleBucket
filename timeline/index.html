@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101b22">
   <title>Interactive Bible Timeline · BibleBucket</title>
-  <meta name="description" content="Connect the people, places, kings, prophets, and family stories of Scripture. Explore Genesis through Kings, with 1 Enoch and Jubilees woven into the journey.">
+  <meta name="description" content="A connected journey from Creation through Jesus, the early church, and Revelation. Explore stories, maps, family trees, and Scripture echoes, with Enoch and Jubilees woven in.">
   <link rel="canonical" href="https://biblebucket.net/timeline/">
   <meta property="og:title" content="The Bible, connected · BibleBucket">
-  <meta property="og:description" content="An interactive journey from Genesis through Kings. Follow the story, compare kings and prophets, explore family trees, and open the atlas.">
+  <meta property="og:description" content="From Creation to new creation, with Jesus at the center. Follow the stories, open the passages, and trace Revelation’s images back through Scripture.">
   <meta property="og:url" content="https://biblebucket.net/timeline/">
   <meta property="og:type" content="website">
   <link rel="icon" href="../favicon.png">
-  <link rel="stylesheet" href="styles.css">
-  <script src="app.js" defer></script>
+  <link rel="stylesheet" href="styles.css?v=2">
+  <script src="app.js?v=2" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#explore">Skip to the explorer</a>
@@ -27,15 +27,28 @@
       <div class="hero-copy"><p class="eyebrow"><span class="small-star" aria-hidden="true">✦</span> BIBLEBUCKET INTERACTIVE BIBLE TIMELINE</p>
         <h1 id="page-title">The Bible,<br><em>connected.</em></h1>
         <p class="hero-description">People become families. Families become kingdoms.<br class="desktop-only"> Follow the threads that bring Scripture together.</p>
-        <div class="hero-meta"><span>GENESIS THROUGH KINGS</span><span class="meta-dot" aria-hidden="true">·</span><span>INCLUDING 1 ENOCH & JUBILEES</span></div>
+        <div class="hero-meta"><span>CREATION TO NEW CREATION</span><span class="meta-dot" aria-hidden="true">·</span><span>INCLUDING 1 ENOCH & JUBILEES</span></div>
         <a class="gold-button" href="#explore">Step into the story <span aria-hidden="true">↓</span></a>
       </div>
       <img class="hero-art" src="assets/story-world.svg" alt="An illustrated journey from a garden tree, across mountains, to an ancient city beneath a sky of connected stars." width="650" height="420">
     </section>
 
+    <section class="shell christ-focus" aria-labelledby="christ-heading">
+      <div class="christ-card">
+        <div class="christ-intro"><p class="eyebrow">THE PROMISE BECOMES A PERSON</p><h2 id="christ-heading">At the center of it all:<br><em>Jesus.</em></h2><p>The Word made flesh. The kingdom drawn near.<br>The cross, the empty tomb, and a world made new.</p><button class="gold-button" data-trail="jesus-story">Walk with Jesus <span aria-hidden="true">↗</span></button><a class="christ-reading" href="#explore" data-open-entry="jesus">Explore His story freely →</a></div>
+        <div class="christ-path" aria-label="Three chapters of Jesus’ story">
+          <button data-open-entry="nativity"><span class="christ-step" aria-hidden="true">✦</span><span><small>THE ARRIVAL</small><strong>God with us.</strong><span>A promise. A mother. A manger.</span></span><span aria-hidden="true">↗</span></button>
+          <button data-open-entry="baptism-jesus"><span class="christ-step" aria-hidden="true">≈</span><span><small>THE MINISTRY</small><strong>Come and see.</strong><span>Meet the people who met Jesus.</span></span><span aria-hidden="true">↗</span></button>
+          <button data-open-entry="empty-tomb"><span class="christ-step" aria-hidden="true">☀</span><span><small>THE CROSS & RESURRECTION</small><strong>Death does not win.</strong><span>The ending that became a beginning.</span></span><span aria-hidden="true">↗</span></button>
+        </div>
+      </div>
+      <p class="calendar-note"><strong>A life at the hinge of our calendar.</strong> BC/AD was devised to count from Christ’s birth; BCE/CE uses the same numbering. There is no year zero, and Jesus’ birth is commonly placed a few years before AD 1. <a href="sources.html#jesus-dates">Why the dates look that way ↗</a></p>
+    </section>
+
     <section class="shell trails-section" aria-labelledby="trail-heading">
-      <div class="section-heading"><div><p class="eyebrow">TAKE THE SCENIC ROUTE</p><h2 id="trail-heading">Start with a thread.</h2></div><button class="text-button" id="show-trails" aria-expanded="false">All six journeys <span aria-hidden="true">↗</span></button></div>
+      <div class="section-heading"><div><p class="eyebrow">TAKE THE SCENIC ROUTE</p><h2 id="trail-heading">Start with a thread.</h2></div><button class="text-button" id="show-trails" aria-expanded="false">All journeys <span aria-hidden="true">↗</span></button></div>
       <div id="trails" class="trail-grid" aria-label="Guided journeys"><p class="muted">Preparing the journeys…</p></div>
+      <div class="new-journeys"><button class="text-button" data-trail="revelation-echoes">✦ Revelation remembers <span aria-hidden="true">↗</span></button><button class="text-button" data-trail="ends-earth">⑂ To the ends of the earth <span aria-hidden="true">↗</span></button><button class="text-button" data-trail="creation-new">⌂ The whole story in one journey <span aria-hidden="true">↗</span></button></div>
     </section>
 
     <section id="explore" class="shell explorer" aria-labelledby="explorer-title">

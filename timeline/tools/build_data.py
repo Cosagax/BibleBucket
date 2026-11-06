@@ -6,6 +6,7 @@ Story order is deliberately distinct from composition date and historical dating
 """
 import json
 from pathlib import Path
+from new_testament import extend
 
 ROOT = Path(__file__).resolve().parents[1]
 ERAS = [
@@ -312,7 +313,8 @@ dict(id='exile',title='How a kingdom unravels',subtitle='Warnings, reform, and a
 ]
 prophet_windows=[
 ('samuel',1080,1010),('nathan',1000,960),('ahijah',940,900),('elijah',875,850),('micaiah',855,850),('elisha',855,795),('jonah',790,750),('amos',770,750),('hosea',755,715),('isaiah',740,685),('micah',740,700),('nahum',660,612),('zephaniah',640,609),('huldah',630,615),('jeremiah',627,580),('habakkuk',620,590),('ezekiel',593,570)]
-data=dict(version=1,title='BibleBucket Interactive Bible Timeline',eras=eras,entries=entries,places=places,families=families,trails=trails,prophetWindows=[dict(id=i,start=s,end=e) for i,s,e in prophet_windows])
+extend(eras, entries, places, families, trails, refs)
+data=dict(version=2,title='BibleBucket Interactive Bible Timeline',eras=eras,entries=entries,places=places,families=families,trails=trails,prophetWindows=[dict(id=i,start=s,end=e) for i,s,e in prophet_windows])
 ids=[e['id'] for e in entries]
 assert len(ids)==len(set(ids)), 'Duplicate entity ID'
 for e in entries:

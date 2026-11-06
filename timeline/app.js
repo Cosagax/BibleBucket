@@ -9,9 +9,9 @@
   const mobile = () => matchMedia('(max-width: 720px)').matches;
   const kindNames = {story:'Story',person:'Person',king:'Ruler',prophet:'Prophet',battle:'Battle',vision:'Vision'};
   const icons = {star:'✦',temple:'⌂',branch:'⑂',crown:'♜',city:'▥'};
-  let data, books, land, byId, placeById, eraById, visibleIds = [], readerToken = 0;
+  let data, books, land, mediterraneanLand, byId, placeById, eraById, visibleIds = [], readerToken = 0;
   const bookCache = new Map();
-  const state = {view:'story',era:'beginnings',selected:'creation',filter:'all',query:'',savedOnly:false,showAllTrails:false,trail:null,year:855,family:'before-flood',mapPlace:'jerusalem',mapZoom:1,familyZoom:1,realm:'all'};
+  const state = {view:'story',era:'beginnings',selected:'creation',filter:'all',query:'',savedOnly:false,showAllTrails:false,trail:null,year:855,family:'before-flood',mapPlace:'jerusalem',mapZoom:1,mapRegion:'heartlands',familyZoom:1,realm:'all'};
   let saved = [], persistentStorage = true;
   try { const value = JSON.parse(localStorage.getItem('bb-atlas-saved-v1') || '[]'); if (Array.isArray(value)) saved = value.filter(x => typeof x === 'string'); } catch { persistentStorage = false; }
 
@@ -40,6 +40,7 @@
     state.era = eraById.has(p.get('era')) || p.get('era') === 'all' ? p.get('era') : byId.get(state.selected).era;
     if (data.families.some(f=>f.id === p.get('family'))) state.family = p.get('family');
     if (placeById.has(p.get('place'))) state.mapPlace = p.get('place');
+    state.mapRegion = p.get('region') === 'mediterranean' ? 'mediterranean' : regionForPlace(state.mapPlace);
     const year = Number(p.get('year'));
     if (year >= 560 && year <= 1050) state.year = year;
     state.trail = data.trails.some(t=>t.id === p.get('trail')) ? p.get('trail') : null;
@@ -48,7 +49,7 @@
     const p = new URLSearchParams({view:state.view,entry:state.selected,era:state.era});
     if (state.view === 'kings') p.set('year',String(state.year));
     if (state.view === 'families') p.set('family',state.family);
-    if (state.view === 'map') p.set('place',state.mapPlace);
+    if (state.view === 'map') { p.set('place',state.mapPlace); p.set('region',state.mapRegion); }
     if (state.trail) p.set('trail',state.trail);
     history[replace ? 'replaceState' : 'pushState'](null,'',`#${p}`);
   }
@@ -56,7 +57,7 @@
     const trails = state.showAllTrails ? data.trails : data.trails.slice(0,3);
     $('#trails').innerHTML = trails.map(t=>`<button class="trail-card" data-trail="${t.id}"><span class="trail-icon" aria-hidden="true">${icons[t.icon]}</span><span><strong>${esc(t.title)}</strong><small>${esc(t.subtitle)}</small></span><span class="trail-arrow" aria-hidden="true">↗</span></button>`).join('');
     $('#show-trails').setAttribute('aria-expanded',String(state.showAllTrails));
-    $('#show-trails').innerHTML = `${state.showAllTrails ? 'Fewer journeys' : 'All six journeys'} <span aria-hidden="true">${state.showAllTrails ? '↑' : '↗'}</span>`;
+    $('#show-trails').innerHTML = `${state.showAllTrails ? 'Fewer journeys' : `All ${data.trails.length} journeys`} <span aria-hidden="true">${state.showAllTrails ? '↑' : '↗'}</span>`;
   }
   function renderTrailBanner() {
     const target = $('#trail-active'), trail = data.trails.find(t=>t.id === state.trail);
@@ -86,12 +87,28 @@
   function eventCard(e) {
     return `<button class="event-card${e.id === state.selected ? ' selected' : ''}" data-select="${e.id}" aria-pressed="${e.id === state.selected}"><span class="card-top"><span class="kind-label">${kindNames[e.kind]}</span>${badge(e)}</span><h4>${esc(e.title)}</h4><p>${esc(e.summary)}</p><span class="card-foot"><span>${esc(refLabel(e.refs[0]))}${e.refs.length > 1 ? ` + ${e.refs.length-1} more` : ''}</span><span class="card-arrow" aria-hidden="true">↗</span></span></button>`;
   }
+  function eraPrelude(era) {
+    if (!era) return '';
+    if (['arrival','ministry','passion'].includes(era.id)) return `<div class="era-invitation"><span class="small-star" aria-hidden="true">✦</span><div><strong>${era.id==='arrival'?'The turning point of the story.':era.id==='ministry'?'Stay close to Jesus.':'Love to the very end.'}</strong><p>${era.id==='arrival'?'The promises have a face. Follow Jesus through His arrival, ministry, cross, and resurrection.':era.id==='ministry'?'Listen to His teaching. Meet the people He welcomes. Open each Gospel in its own voice.':'The table and the garden lead to the cross. The tomb leads to a new beginning.'}</p><button class="text-button" data-trail="${era.id==='passion'?'last-week':'jesus-story'}">Take the guided journey ↗</button></div></div>`;
+    if (era.id !== 'revelation') return '';
+    const symbols = [['rev-lamb','The Lamb'],['rev-seals','The horsemen'],['rev-witnesses','Two witnesses'],['rev-woman-dragon','The dragon'],['rev-number','The mark & 666'],['rev-babylon','Babylon'],['rev-millennium','A thousand years'],['rev-river','The tree of life']];
+    return `<section class="vision-key" aria-labelledby="vision-key-title"><p class="eyebrow">OPEN THE IMAGE. FOLLOW ITS ROOTS.</p><h4 id="vision-key-title">Strange images. Deep roots.</h4><p>Revelation begins with Jesus and ends with His invitation. Its images remember the rest of Scripture. Pick a thread, then open <strong>Scripture echoes</strong> in the story’s details.</p><div class="symbol-links">${symbols.map(([id,label])=>`<button data-select="${id}">${label} <span aria-hidden="true">↗</span></button>`).join('')}</div><details><summary>One book, several ways of reading</summary><p>Some Christians emphasize the first-century setting; others see recurring patterns, the sweep of church history, future fulfillment, or combinations of these. Readers also differ over which visions follow one another and which retell the same conflict. Here, the order is the book’s reading order—not a dated forecast. Explicit explanations, textual echoes, and disputed interpretations are labeled separately.</p></details><button class="text-button" data-trail="revelation-echoes">Take the “Revelation remembers” journey ↗</button></section>`;
+  }
+  function nextChapter(era) {
+    if (!era) return '';
+    const next = data.eras[data.eras.indexOf(era)+1];
+    return next ? `<button class="next-chapter${next.id==='arrival'?' next-jesus':''}" data-next-era="${next.id}"><span><small>THE STORY CONTINUES · CHAPTER ${next.number}</small><strong>${esc(next.title)}</strong><span>${esc(next.subtitle)}</span></span><span aria-hidden="true">→</span></button>` : `<div class="story-homecoming"><span aria-hidden="true">✦</span><h4>The end remembers the beginning.</h4><p>A garden. A cross. A city of light.</p><button class="text-button" data-trail="creation-new">Follow the whole thread ↗</button></div>`;
+  }
+  function renderEchoes(e) {
+    if (!e.echoes?.length) return '';
+    return `<section class="detail-section scripture-echoes"><h4>SCRIPTURE ECHOES</h4><p class="echo-hint">The connection has a source. Open it.</p>${e.echoes.map(echo=>`<details class="echo-card"><summary>${esc(echo.label)}</summary><span class="echo-type">${esc(echo.relationship)}</span><p>${esc(echo.explanation)}</p>${referenceButtons(echo.refs)}</details>`).join('')}</section>`;
+  }
   function renderStory() {
     const entries = storyEntries(); visibleIds = entries.map(e=>e.id);
     const era = eraById.get(state.era), searching = Boolean(state.query.trim());
     const heading = searching ? 'Follow your curiosity.' : state.savedOnly ? 'Your saved connections' : state.trail ? data.trails.find(t=>t.id===state.trail).title : era?.title || 'The whole journey';
-    const subtitle = searching ? `Results for “${state.query.trim()}” across the collection.` : state.savedOnly ? (persistentStorage ? 'Saved on this browser. No account needed.' : 'Saved for this visit only; this browser has disabled persistent storage.') : era?.subtitle || 'From beginnings to the last scene of Kings.';
-    return `<div class="story-layout"><aside class="era-rail" aria-label="Story eras"><p class="rail-label">CHAPTERS OF THE STORY</p><div class="era-buttons">${data.eras.map(e=>`<button class="era-button" data-era="${e.id}" aria-pressed="${state.era===e.id && !searching && !state.trail}"><span class="era-number">${e.number}</span><span>${esc(e.title)}<small>${esc(e.books.split(' · ')[0])}</small></span></button>`).join('')}</div><div class="rail-actions"><button data-era="all" aria-pressed="${state.era==='all' && !state.savedOnly}">☷ &nbsp; All eras</button><button data-saved-only aria-pressed="${state.savedOnly}">☆ &nbsp; Saved (${saved.length})</button></div></aside><div class="story-main"><header class="story-header"><h3>${esc(heading)}</h3><p>${esc(subtitle)}</p>${!searching && !state.savedOnly ? `<div class="date-note">${esc(era?.dating || 'Story order and calendar dates are kept distinct')}</div>` : ''}</header><div class="filter-row" role="group" aria-label="Filter entries">${[['all','Story highlights'],['people','People'],['events','Events & visions'],['ethiopian','Enoch & Jubilees']].map(([id,name])=>`<button data-filter="${id}" aria-pressed="${state.filter===id}">${name}</button>`).join('')}</div><p class="result-note">${entries.length} ${entries.length===1 ? 'entry' : 'entries'}${state.trail ? ' on this journey' : ''} · tap a card to follow its connections</p>${entries.length ? `<div class="event-list">${entries.map(eventCard).join('')}</div>` : `<div class="empty-state"><h3>No threads here yet.</h3><p>${state.savedOnly ? 'Use the star on a story to save it here.' : 'Try another name, a broader era, or a different filter.'}</p><button class="outline-button" data-reset-search>Show the story</button></div>`}</div></div>`;
+    const subtitle = searching ? `Results for “${state.query.trim()}” across the collection.` : state.savedOnly ? (persistentStorage ? 'Saved on this browser. No account needed.' : 'Saved for this visit only; this browser has disabled persistent storage.') : era?.subtitle || 'From Creation to new creation, with Jesus at the center.';
+    return `<div class="story-layout"><aside class="era-rail" aria-label="Story eras"><p class="rail-label">CHAPTERS OF THE STORY</p><label class="era-jump">Jump to a chapter<select id="era-select" aria-label="Jump to a story chapter"><option value="all" ${state.era==='all'?'selected':''}>All eras</option>${data.eras.map(e=>`<option value="${e.id}" ${state.era===e.id?'selected':''}>${e.number} · ${esc(e.title)}</option>`).join('')}</select></label><div class="era-buttons">${data.eras.map(e=>`<button class="era-button${['arrival','ministry','passion'].includes(e.id)?' jesus-era':''}" data-era="${e.id}" aria-pressed="${state.era===e.id && !searching && !state.trail}"><span class="era-number">${e.number}</span><span>${esc(e.title)}<small>${esc(e.books.split(' · ')[0])}</small></span></button>`).join('')}</div><div class="rail-actions"><button data-era="all" aria-pressed="${state.era==='all' && !state.savedOnly}">☷ &nbsp; All eras</button><button data-saved-only aria-pressed="${state.savedOnly}">☆ &nbsp; Saved (${saved.length})</button></div></aside><div class="story-main"><header class="story-header"><h3>${esc(heading)}</h3><p>${esc(subtitle)}</p>${!searching && !state.savedOnly ? `<div class="date-note">${esc(era?.dating || 'Story order and calendar dates are kept distinct')}</div>` : ''}</header>${!searching && !state.savedOnly && !state.trail ? eraPrelude(era) : ''}<div class="filter-row" role="group" aria-label="Filter entries">${[['all','Story highlights'],['people','People'],['events','Events & visions'],['ethiopian','Enoch & Jubilees']].map(([id,name])=>`<button data-filter="${id}" aria-pressed="${state.filter===id}">${name}</button>`).join('')}</div><p class="result-note">${entries.length} ${entries.length===1 ? 'entry' : 'entries'}${state.trail ? ' on this journey' : ''} · tap a card to follow its connections</p>${entries.length ? `<div class="event-list">${entries.map(eventCard).join('')}</div>` : `<div class="empty-state"><h3>No threads here yet.</h3><p>${state.savedOnly ? 'Use the star on a story to save it here.' : 'Try another name, a broader era, or a different filter.'}</p><button class="outline-button" data-reset-search>Show the story</button></div>`}${!searching && !state.savedOnly && !state.trail ? nextChapter(era) : ''}</div></div>`;
   }
   function connectionLink(e) {
     return `<button class="connection-link" data-select="${e.id}"><span>${esc(e.title)}<small>${kindNames[e.kind]} · ${esc(eraName(e.era))}</small></span><span aria-hidden="true">↗</span></button>`;
@@ -99,7 +116,7 @@
   function renderDetail() {
     const e = byId.get(state.selected), related = [...new Set([...e.related,...data.entries.filter(x=>x.related.includes(e.id)).map(x=>x.id)])].filter(id=>id!==e.id).map(id=>byId.get(id)).slice(0,14);
     const index = visibleIds.indexOf(e.id);
-    return `<aside class="detail-panel" id="detail-panel" aria-label="Selected story" tabindex="-1"><div class="detail-mast"><div class="detail-tools"><p class="eyebrow">${kindNames[e.kind].toUpperCase()} · ${esc(eraName(e.era).toUpperCase())}</p><div class="tool-row"><button class="icon-button" data-save="${e.id}" aria-label="${saved.includes(e.id)?'Unsave':'Save'} ${esc(e.title)}" aria-pressed="${saved.includes(e.id)}">${saved.includes(e.id)?'★':'☆'}</button><button class="icon-button" data-share aria-label="Copy a link to this entry">↗</button></div></div><h3>${esc(e.title)}</h3>${badge(e)}<div class="date-note">${esc(e.date)}</div></div><div class="detail-body"><p class="detail-summary">${esc(e.summary)}</p>${e.note ? `<p class="context-note">${esc(e.note)}</p>` : ''}<section class="detail-section"><h4>OPEN THE TEXT</h4>${referenceButtons(e.refs)}</section>${related.length ? `<section class="detail-section"><h4>FOLLOW A CONNECTION</h4><div>${related.map(connectionLink).join('')}</div></section>` : ''}${e.places.length ? `<section class="detail-section"><h4>FIND IT ON THE MAP</h4><div class="place-chips">${e.places.map(id=>`<button class="place-chip" data-map-place="${id}">⌖ ${esc(placeById.get(id).name)}</button>`).join('')}</div></section>` : ''}<div class="detail-bottom"><button data-entry-step="-1" ${index<=0?'disabled':''}>← Previous</button><button data-entry-step="1" ${index<0 || index>=visibleIds.length-1?'disabled':''}>Next connection →</button></div><button class="text-button mobile-detail-link" data-back-list>↑ Back to the explorer</button></div></aside>`;
+    return `<aside class="detail-panel" id="detail-panel" aria-label="Selected story" tabindex="-1"><div class="detail-mast"><div class="detail-tools"><p class="eyebrow">${kindNames[e.kind].toUpperCase()} · ${esc(eraName(e.era).toUpperCase())}</p><div class="tool-row"><button class="icon-button" data-save="${e.id}" aria-label="${saved.includes(e.id)?'Unsave':'Save'} ${esc(e.title)}" aria-pressed="${saved.includes(e.id)}">${saved.includes(e.id)?'★':'☆'}</button><button class="icon-button" data-share aria-label="Copy a link to this entry">↗</button></div></div><h3>${esc(e.title)}</h3>${badge(e)}<div class="date-note">${esc(e.date)}</div></div><div class="detail-body"><p class="detail-summary">${esc(e.summary)}</p>${e.note ? `<p class="context-note">${esc(e.note)}</p>` : ''}<section class="detail-section"><h4>OPEN THE TEXT</h4>${referenceButtons(e.refs)}</section>${renderEchoes(e)}${related.length ? `<section class="detail-section"><h4>FOLLOW A CONNECTION</h4><div>${related.map(connectionLink).join('')}</div></section>` : ''}${e.places.length ? `<section class="detail-section"><h4>FIND IT ON THE MAP</h4><div class="place-chips">${e.places.map(id=>`<button class="place-chip" data-map-place="${id}">⌖ ${esc(placeById.get(id).name)}</button>`).join('')}</div></section>` : ''}<div class="detail-bottom"><button data-entry-step="-1" ${index<=0?'disabled':''}>← Previous</button><button data-entry-step="1" ${index<0 || index>=visibleIds.length-1?'disabled':''}>Next connection →</button></div><button class="text-button mobile-detail-link" data-back-list>↑ Back to the explorer</button></div></aside>`;
   }
   function rulerAt(realm, year) {
     return data.entries.filter(e=>e.reign && e.reign.realm===realm && e.reign.start>=year && e.reign.end<=year);
@@ -150,15 +167,21 @@
       const a=nodes.get(edge.source),b=nodes.get(edge.target);let d;
       if(Math.abs(a.y-b.y)<30)d=`M${a.x+(a.x<b.x?78:-78)} ${a.y}L${b.x+(a.x<b.x?-78:78)} ${b.y}`;
       else {const y=(a.y+b.y)/2;d=`M${a.x} ${a.y+23}C${a.x} ${y},${b.x} ${y},${b.x} ${b.y-23}`;}
-      return `<path class="tree-edge ${edge.kind}" d="${d}"><title>${esc(byId.get(a.id).title)} → ${esc(byId.get(b.id).title)}: ${edge.kind==='parent'?'parent to child':edge.kind==='spouse'?'marriage':'later descendant; generations omitted'}</title></path>`;
+      return `<path class="tree-edge ${edge.kind}" d="${d}"><title>${esc(byId.get(a.id).title)} → ${esc(byId.get(b.id).title)}: ${edge.kind==='parent'?'parent to child':edge.kind==='spouse'?'marriage':edge.kind==='guardian'?'household / guardian; not biological parentage':'later descendant; generations omitted'}</title></path>`;
     }).join('');
-    return `<header class="view-title"><p class="eyebrow">BEHIND EVERY KINGDOM, A FAMILY.</p><h3>Meet the people inside the promise.</h3><p>${esc(f.description)}</p></header><div class="diagram-toolbar"><label>Family<select id="family-select">${data.families.map(x=>`<option value="${x.id}" ${x.id===f.id?'selected':''}>${esc(x.title)}</option>`).join('')}</select></label><div class="diagram-actions"><button class="icon-button" data-family-zoom="-0.25" aria-label="Zoom out of family tree">−</button><button class="icon-button" data-family-zoom="0.25" aria-label="Zoom into family tree">+</button><button class="icon-button" data-family-reset aria-label="Reset family tree zoom">↺</button></div></div><div class="diagram-scroll" data-diagram="${f.id}" tabindex="0" aria-label="Family diagram. Scroll to explore; select a person to read their story."><svg class="family-svg" viewBox="0 0 1220 ${height}" style="width:${state.familyZoom*100}%;max-width:none" role="group" aria-label="${esc(f.title)} family tree"><title>${esc(f.title)}</title>${edges}${f.nodes.map(n=>`<g class="tree-node${n.id===state.selected?' selected':''}" data-select="${n.id}" role="button" tabindex="0" aria-label="Open ${esc(byId.get(n.id).title)}"><rect x="${n.x-78}" y="${n.y-23}" width="156" height="46" rx="8"/>${svgLabel(byId.get(n.id).title,n.x,n.y)}</g>`).join('')}</svg></div><div class="diagram-legend"><span>Parent → child</span><span class="spouse">Marriage</span><span class="descendant">Generations omitted</span></div><p class="map-note">These are selected genealogies, not exhaustive family records. ${f.id==='tribes'?'Each column groups children under their named mother; Jacob is the father of every child shown.':''} Use + to enlarge, and scroll within the diagram.</p>${referenceButtons(f.refs)}<details class="detail-section"><summary>Text version of these relationships</summary><ul>${f.edges.map(e=>`<li class="map-note">${esc(byId.get(e.source).title)} ${e.kind==='parent'?'is a parent of':e.kind==='spouse'?'is married to':'is an ancestor, with intervening generations, of'} ${esc(byId.get(e.target).title)}.</li>`).join('')}</ul></details>`;
+    return `<header class="view-title"><p class="eyebrow">BEHIND EVERY KINGDOM, A FAMILY.</p><h3>Meet the people inside the promise.</h3><p>${esc(f.description)}</p></header><div class="diagram-toolbar"><label>Family<select id="family-select">${data.families.map(x=>`<option value="${x.id}" ${x.id===f.id?'selected':''}>${esc(x.title)}</option>`).join('')}</select></label><div class="diagram-actions"><button class="icon-button" data-family-zoom="-0.25" aria-label="Zoom out of family tree">−</button><button class="icon-button" data-family-zoom="0.25" aria-label="Zoom into family tree">+</button><button class="icon-button" data-family-reset aria-label="Reset family tree zoom">↺</button></div></div><div class="diagram-scroll" data-diagram="${f.id}" tabindex="0" aria-label="Family diagram. Scroll to explore; select a person to read their story."><svg class="family-svg" viewBox="0 0 1220 ${height}" style="width:${state.familyZoom*100}%;max-width:none" role="group" aria-label="${esc(f.title)} family tree"><title>${esc(f.title)}</title>${edges}${f.nodes.map(n=>`<g class="tree-node${n.id===state.selected?' selected':''}" data-select="${n.id}" role="button" tabindex="0" aria-label="Open ${esc(byId.get(n.id).title)}"><rect x="${n.x-78}" y="${n.y-23}" width="156" height="46" rx="8"/>${svgLabel(byId.get(n.id).title,n.x,n.y)}</g>`).join('')}</svg></div><div class="diagram-legend"><span>Parent → child</span><span class="spouse">Marriage</span><span class="descendant">Generations omitted</span>${f.edges.some(e=>e.kind==='guardian')?'<span class="guardian">Household / guardian</span>':''}</div><p class="map-note">These are selected genealogies, not exhaustive family records. ${f.id==='tribes'?'Each column groups children under their named mother; Jacob is the father of every child shown.':''} Use + to enlarge, and scroll within the diagram.</p>${referenceButtons(f.refs)}<details class="detail-section"><summary>Text version of these relationships</summary><ul>${f.edges.map(e=>`<li class="map-note">${esc(byId.get(e.source).title)} ${e.kind==='parent'?'is a parent of':e.kind==='spouse'?'is married to':e.kind==='guardian'?'is a household guardian, not identified here as the biological father, of':'is an ancestor, with intervening generations, of'} ${esc(byId.get(e.target).title)}.</li>`).join('')}</ul></details>`;
   }
-  const project = p => [(p.lon-24)*40,(40-p.lat)*40];
+  const regionForPlace = id => {
+    const p=placeById.get(id);
+    return p && (p.lon<24 || p.lon>49 || p.lat>40 || p.lat<25) ? 'mediterranean' : 'heartlands';
+  };
+  const regionForEntry = e => e.places.some(id=>regionForPlace(id)==='mediterranean') ? 'mediterranean' : regionForPlace(state.mapPlace);
+  const project = p => state.mapRegion==='mediterranean' ? [(p.lon-10)*25,(46-p.lat)*25] : [(p.lon-24)*40,(40-p.lat)*40];
   function mapSvg() {
-    const selected=byId.get(state.selected),related=new Set(selected.places),major=['egypt','jerusalem','samaria','nineveh','babylon','ur','haran'];
+    const selected=byId.get(state.selected),related=new Set(selected.places),wide=state.mapRegion==='mediterranean',shapes=wide?mediterraneanLand:land,major=wide?['rome','athens','antioch','jerusalem','babylon']:['egypt','jerusalem','samaria','nineveh','babylon','ur','haran'];
+    const mappedPlaces=data.places.filter(p=>wide || regionForPlace(p.id)==='heartlands').sort((a,b)=>Number(a.id===state.mapPlace)-Number(b.id===state.mapPlace));
     const route=selected.places.map(id=>project(placeById.get(id)).join(',')).join(' ');
-    return `<svg class="map-svg" viewBox="0 0 1000 600" style="width:${state.mapZoom*100}%;max-width:none" role="group" aria-label="Map of the eastern Mediterranean and Near East; select a place to explore its stories"><title>The Scripture atlas</title><defs><clipPath id="map-clip"><rect width="1000" height="600"/></clipPath></defs><g clip-path="url(#map-clip)"><rect width="1000" height="600" fill="#172d35"/>${Array.from({length:11},(_,i)=>`<path class="map-grid" d="M${i*100} 0V600M0 ${i*100}H1000"/>`).join('')}${land.map(d=>`<path class="map-land" d="${esc(d)}"/>`).join('')}<text class="map-water-label" x="95" y="240" transform="rotate(-18 95 240)">MEDITERRANEAN SEA</text><text class="map-region" x="650" y="275" transform="rotate(25 650 275)">MESOPOTAMIA</text><text class="map-region" x="470" y="480">ARABIAN DESERT</text>${selected.places.length>1?`<polyline class="map-route" points="${route}"/>`:''}${data.places.map(p=>{
+    return `<svg class="map-svg" viewBox="0 0 1000 600" style="width:${state.mapZoom*100}%;max-width:none" role="group" aria-label="Map of the eastern Mediterranean and Near East; select a place to explore its stories"><title>The Scripture atlas</title><defs><clipPath id="map-clip"><rect width="1000" height="600"/></clipPath></defs><g clip-path="url(#map-clip)"><rect width="1000" height="600" fill="#172d35"/>${Array.from({length:11},(_,i)=>`<path class="map-grid" d="M${i*100} 0V600M0 ${i*100}H1000"/>`).join('')}${shapes.map(d=>`<path class="map-land" d="${esc(d)}"/>`).join('')}<text class="map-water-label" x="${wide?210:95}" y="${wide?290:240}" transform="${wide?'':'rotate(-18 95 240)'}">MEDITERRANEAN SEA</text><text class="map-region" x="${wide?780:650}" y="${wide?320:275}" transform="${wide?'':'rotate(25 650 275)'}">MESOPOTAMIA</text><text class="map-region" x="${wide?650:470}" y="${wide?490:480}">ARABIAN DESERT</text>${selected.places.length>1 && selected.places.every(id=>wide || regionForPlace(id)==='heartlands')?`<polyline class="map-route" points="${route}"/>`:''}${mappedPlaces.map(p=>{
       const [x,y]=project(p),active=p.id===state.mapPlace,connected=related.has(p.id),label=active||major.includes(p.id);
       return `<g class="map-pin${active?' active':''}${connected?' related':''}" data-place="${p.id}" tabindex="0" role="button" aria-label="Explore ${esc(p.name)}${p.uncertain?', approximate or debated location':''}"><title>${esc(p.name)}${p.uncertain?' · approximate / debated':''}</title><circle class="pin-halo" cx="${x}" cy="${y}" r="${active?17:12}"/><circle cx="${x}" cy="${y}" r="${active?6:connected?4.5:3.5}"/>${label?`<text x="${x+10}" y="${y+(p.id==='samaria'?-12:4)}">${esc(p.name)}</text>`:''}</g>`;
     }).join('')}<g transform="translate(930 62)" stroke="#cfbc8b" opacity=".8"><circle r="24" fill="#172d35"/><path d="M0-30V30M-30 0H30M0-18L5 0L0 18L-5 0Z"/><text x="0" y="-36" text-anchor="middle" fill="#cfbc8b" stroke="none" font-size="11">N</text></g></g></svg>`;
@@ -170,7 +193,7 @@
   }
   function renderMap() {
     const e=byId.get(state.selected);
-    return `<header class="view-title"><p class="eyebrow">THE STORY HAS A LANDSCAPE.</p><h3>Put a place to the name.</h3><p>Explore the lands around the biblical story. Green pins belong to the selected entry; gold pins open other places.</p></header><div class="diagram-toolbar"><label>Place<select id="place-select">${[...data.places].sort((a,b)=>a.name.localeCompare(b.name)).map(p=>`<option value="${p.id}" ${p.id===state.mapPlace?'selected':''}>${esc(p.name)}${p.uncertain?' ≈':''}</option>`).join('')}</select></label><div class="diagram-actions"><button class="icon-button" data-map-zoom="-0.25" aria-label="Zoom out of map">−</button><button class="icon-button" data-map-zoom="0.25" aria-label="Zoom into map">+</button><button class="icon-button" data-map-reset aria-label="Reset map zoom">↺</button></div></div><div class="diagram-scroll" data-diagram="map" id="map-scroll" tabindex="0" aria-label="Scrollable map">${mapSvg()}</div><div class="map-footer"><span>≈ Approximate or debated identification</span><span>Base map: Natural Earth</span></div><p class="map-note">${e.places.length>1?`Dashed lines connect places named in “${esc(e.title)}.” They are not reconstructed travel routes.`:e.places.length===0?`“${esc(e.title)}” has no securely mapped place in this atlas. Explore another story through the pins.`:'Select a pin to see the stories connected with it.'} No modern political borders are shown.</p><div id="place-card">${placeCard()}</div>`;
+    return `<header class="view-title"><p class="eyebrow">THE STORY HAS A LANDSCAPE.</p><h3>Put a place to the name.</h3><p>Explore the lands around the biblical story. Green pins belong to the selected entry; gold pins open other places.</p></header><div class="diagram-toolbar map-toolbar"><label>Map<select id="map-region"><option value="heartlands" ${state.mapRegion==='heartlands'?'selected':''}>Biblical heartlands</option><option value="mediterranean" ${state.mapRegion==='mediterranean'?'selected':''}>Mediterranean journeys</option></select></label><label>Place<select id="place-select">${[...data.places].sort((a,b)=>a.name.localeCompare(b.name)).map(p=>`<option value="${p.id}" ${p.id===state.mapPlace?'selected':''}>${esc(p.name)}${p.uncertain?' ≈':''}</option>`).join('')}</select></label><div class="diagram-actions"><button class="icon-button" data-map-zoom="-0.25" aria-label="Zoom out of map">−</button><button class="icon-button" data-map-zoom="0.25" aria-label="Zoom into map">+</button><button class="icon-button" data-map-reset aria-label="Reset map zoom">↺</button></div></div><div class="diagram-scroll" data-diagram="map" id="map-scroll" tabindex="0" aria-label="Scrollable map">${mapSvg()}</div><div class="map-footer"><span>≈ Approximate or debated identification</span><span>Base map: Natural Earth</span></div><p class="map-note">${e.places.length>1?`Dashed lines connect places named in “${esc(e.title)}.” They are not reconstructed travel routes.`:e.places.length===0?`“${esc(e.title)}” has no securely mapped place in this atlas. Explore another story through the pins.`:'Select a pin to see the stories connected with it.'} No modern political borders are shown.</p><div id="place-card">${placeCard()}</div>`;
   }
   function render() {
     const oldDiagram=$('.diagram-scroll'),oldScroll=oldDiagram?{key:oldDiagram.dataset.diagram,left:oldDiagram.scrollLeft,top:oldDiagram.scrollTop}:null;
@@ -187,6 +210,11 @@
     if(!byId.has(id))return;
     state.selected=id;
     const e=byId.get(id);
+    if(state.trail)state.era=e.era;
+    if(state.view==='map' && e.places.length){
+      if(!e.places.includes(state.mapPlace))state.mapPlace=e.places[0];
+      if(regionForEntry(e)==='mediterranean')state.mapRegion='mediterranean';
+    }
     if(state.view==='kings' && e.reign && !(e.reign.start>=state.year && e.reign.end<=state.year))state.year=Math.round((e.reign.start+e.reign.end)/2);
     if(state.view==='story' && !state.query && !state.trail){state.era=e.era;state.filter='all';state.savedOnly=false;}
     render();if(history)writeHash();
@@ -200,8 +228,22 @@
     if(view==='map'){
       const p=byId.get(state.selected).places;
       if(p.length)state.mapPlace=p[0];
+      state.mapRegion=regionForEntry(byId.get(state.selected));
     }
     render();writeHash();announce(`${view==='story'?'Story':view==='kings'?'Kings and prophets':view==='families'?'Family trees':'Atlas'} view opened.`);
+  }
+  function openStory(id) {
+    if(!byId.has(id))return;
+    state.view='story';state.trail=null;state.query='';state.filter='all';state.savedOnly=false;$('#search').value='';
+    selectEntry(id);
+    if(!mobile())$('#explore').scrollIntoView({behavior:motion(),block:'start'});
+  }
+  function chooseEra(id) {
+    if(id!=='all' && !eraById.has(id))return;
+    state.view='story';state.era=id;state.query='';$('#search').value='';state.savedOnly=false;state.trail=null;state.filter='all';
+    if(id!=='all' && byId.get(state.selected).era!==id)state.selected=data.entries.find(e=>e.era===id&&e.primary).id;
+    render();writeHash();announce(`${id==='all'?'All eras':eraName(id)}. ${visibleIds.length} entries.`);
+    $('#explore').scrollIntoView({behavior:motion(),block:'start'});
   }
   function startTrail(id) {
     const t=data.trails.find(x=>x.id===id);if(!t)return;
@@ -216,6 +258,8 @@
   function updatePlace(id, push=true) {
     if(!placeById.has(id))return;
     state.mapPlace=id;
+    if(regionForPlace(id)==='mediterranean')state.mapRegion='mediterranean';
+    if($('#map-region'))$('#map-region').value=state.mapRegion;
     const scroll=$('#map-scroll'),left=scroll?.scrollLeft||0,top=scroll?.scrollTop||0;
     if(scroll){scroll.innerHTML=mapSvg();scroll.scrollLeft=left;scroll.scrollTop=top;}
     if($('#place-select'))$('#place-select').value=id;
@@ -280,14 +324,16 @@
   }
   function bind() {
     document.addEventListener('click',event=>{
-      const button=event.target.closest('button,[data-select],[data-place]');if(!button)return;
+      const button=event.target.closest('button,[data-select],[data-place],[data-open-entry]');if(!button)return;
       const d=button.dataset;
+      if(d.openEntry){event.preventDefault();return openStory(d.openEntry);}
+      if(d.nextEra)return chooseEra(d.nextEra);
       if(d.view)return setView(d.view);
       if(d.select)return selectEntry(d.select);
       if(d.trail)return startTrail(d.trail);
       if(d.trailStep)return moveTrail(Number(d.trailStep));
       if('endTrail' in d){state.trail=null;render();writeHash();return;}
-      if(d.era){state.era=d.era;state.query='';$('#search').value='';state.savedOnly=false;state.trail=null;state.filter='all';render();writeHash();return;}
+      if(d.era)return chooseEra(d.era);
       if(d.filter){state.filter=d.filter;state.trail=null;render();announce(`${visibleIds.length} entries shown.`);return;}
       if('savedOnly' in d){state.savedOnly=!state.savedOnly;state.era='all';state.trail=null;state.query='';$('#search').value='';state.filter='all';render();return;}
       if(d.save){
@@ -297,7 +343,7 @@
       }
       if('share' in d)return void share();
       if(d.read)return void openReader(d.read,Number(d.chapter),d.verses||'');
-      if(d.mapPlace){state.view='map';state.mapPlace=d.mapPlace;state.query='';$('#search').value='';render();writeHash();$('#explore').scrollIntoView({behavior:motion(),block:'start'});return;}
+      if(d.mapPlace){state.view='map';state.mapPlace=d.mapPlace;state.mapRegion=regionForEntry(byId.get(state.selected));state.query='';$('#search').value='';render();writeHash();$('#explore').scrollIntoView({behavior:motion(),block:'start'});return;}
       if(d.place)return updatePlace(d.place);
       if(d.year)return updateYear(d.year);
       if(d.entryStep){const i=visibleIds.indexOf(state.selected)+Number(d.entryStep);if(visibleIds[i])selectEntry(visibleIds[i]);return;}
@@ -308,6 +354,8 @@
     });
     document.addEventListener('change',event=>{
       if(event.target.id==='family-select'){state.family=event.target.value;state.familyZoom=1;render();writeHash();}
+      if(event.target.id==='era-select')chooseEra(event.target.value);
+      if(event.target.id==='map-region'){state.mapRegion=event.target.value;state.mapZoom=1;if(state.mapRegion==='heartlands' && regionForPlace(state.mapPlace)==='mediterranean')state.mapPlace='jerusalem';render();writeHash();}
       if(event.target.id==='place-select')updatePlace(event.target.value);
       if(event.target.id==='realm-select'){state.realm=event.target.value;$('#ruler-list').innerHTML=rulerList();}
       if(event.target.id==='reader-book')void openReader(event.target.value,books[event.target.value].chapters[0]);
@@ -335,7 +383,7 @@
   }
   async function init() {
     try {
-      [data,books,land]=await Promise.all([getJson('data.json'),getJson('texts/index.json'),getJson('assets/land.json')]);
+      [data,books,land,mediterraneanLand]=await Promise.all([getJson('data.json?v=2'),getJson('texts/index.json'),getJson('assets/land.json'),getJson('assets/mediterranean-land.json')]);
       byId=new Map(data.entries.map(e=>[e.id,e]));placeById=new Map(data.places.map(p=>[p.id,p]));eraById=new Map(data.eras.map(e=>[e.id,e]));
       saved=saved.filter(id=>byId.has(id));
       $('#reader-book').innerHTML=Object.entries(books).sort(([a,x],[b,y])=>{if(a==='ENO')return -1;if(b==='ENO')return 1;if(a==='JUB')return -1;if(b==='JUB')return 1;return x.title.localeCompare(y.title);}).map(([code,b])=>`<option value="${esc(code)}">${esc(b.title)}</option>`).join('');
