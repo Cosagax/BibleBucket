@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Bible Bucket – Chronological Index (Multi-Paragraph Summaries)</title>
+  <title>BibleBucket – Ethiopian Bible Book Guide</title>
   <style>
     :root{
       --bg:#0d1117; --bg2:#161b22; --fg:#c9d1d9; --accent:#58a6ff;
@@ -104,7 +104,7 @@
       </a>
       <div class="brand">
         <div class="brand-name">BibleBucket</div>
-        <div class="page-name">Complete Bible Index</div>
+        <div class="page-name">The Ethiopian Bible · 88-book reading companion</div>
       </div>
       <a class="home-link" href="../">Home</a>
     </div>
@@ -112,41 +112,36 @@
 
   <main>
     <div class="legend">
-      <span class="canon">Canonical (Protestant Bible)</span>
-      <span class="deut">Deuterocanonical (Catholic/Orthodox only)</span>
-      <span class="extra">Apocrypha / Missing / Other</span>
+      <span>📖 A study companion to the Ethiopian Bible Jake reads and loves. English editions vary in book names, groupings, and count; use this guide alongside the titles and divisions in your copy.</span>
     </div>
 
     <div class="toolbar">
-      <input id="q" type="search" placeholder="Search title or summary… (e.g., Enoch, Watchers, David, Babylon)">
+      <input id="q" type="search" placeholder="Search a book or theme… (e.g., Enoch, covenant, David, exile)">
       <div class="chips" id="statusChips">
-        <button type="button" class="chip active" data-status="all" aria-pressed="true">All</button>
-        <button type="button" class="chip" data-status="canon" aria-pressed="false">✅ Canon</button>
-        <button type="button" class="chip" data-status="deut" aria-pressed="false">✝️ Deut</button>
-        <button type="button" class="chip" data-status="extra" aria-pressed="false">📜 Extra</button>
+        <button type="button" class="chip active" data-status="all" aria-pressed="true">All books</button>
       </div>
       <div class="chips" id="eraChips">
-        <button type="button" class="chip active" data-era="all" aria-pressed="true">All Eras</button>
-        <button type="button" class="chip" data-era="OT" aria-pressed="false">Old Testament Era</button>
-        <button type="button" class="chip" data-era="INTER" aria-pressed="false">Intertestamental</button>
-        <button type="button" class="chip" data-era="NT" aria-pressed="false">New Testament Era</button>
+        <button type="button" class="chip active" data-era="all" aria-pressed="true">Whole Bible</button>
+        <button type="button" class="chip" data-era="OT" aria-pressed="false">Old Testament</button>
+        <button type="button" class="chip" data-era="INTER" aria-pressed="false">Ethiopian books</button>
+        <button type="button" class="chip" data-era="NT" aria-pressed="false">New Testament</button>
       </div>
       <span class="count" id="count"></span>
     </div>
 
     <!-- OT ERA -->
-    <h2>🕎 Old Testament Era (Chronological Flow)</h2>
-    <p class="era-note">Primeval beginnings → patriarchs → Exodus → conquest → monarchy → exile → post-exile. Poetry & wisdom are placed near their historical settings; prophets sit where their ministries likely occurred.</p>
+    <h2>📜 Old Testament</h2>
+    <p class="era-note">From creation and the ancestors of Israel through law, kingdom, wisdom, prophecy, exile, and return.</p>
     <section><ul id="list-OT"></ul></section>
 
-    <!-- INTERTESTAMENTAL -->
-    <h2>📜 Intertestamental / Second Temple Literature</h2>
-    <p class="era-note">Works from the centuries around the close of the Hebrew Bible leading into the time of Jesus; includes deuterocanonical history and wisdom.</p>
+    <!-- ETHIOPIAN BOOKS -->
+    <h2>✝️ Ethiopian Canon Books</h2>
+    <p class="era-note">Books especially associated with the wider Ethiopian collection, including ancient histories, wisdom, and church-order writings.</p>
     <section><ul id="list-INTER"></ul></section>
 
     <!-- NT ERA -->
-    <h2>✝️ New Testament Era (Chronological Flow)</h2>
-    <p class="era-note">Life of Jesus → Acts era → earliest letters → late letters → Revelation. Non-canonical Christian texts are placed near their traditional composition windows.</p>
+    <h2>✝️ New Testament</h2>
+    <p class="era-note">The life and teaching of Jesus, the apostolic mission, letters to the early churches, and the hope of Revelation.</p>
     <section><ul id="list-NT"></ul></section>
   </main>
 
@@ -155,751 +150,522 @@
     const paras = (...arr) => arr.join("\n\n");
 
     // ===== Data model =====
-    // era: "OT" | "INTER" | "NT"; status: "canon" | "deut" | "extra"
-    // order is the chronological flow key (for stable ordering within era)
+    // This is a reader's guide, not a claim that every Ethiopian edition numbers
+    // or groups its books identically. The three display groups provide a practical reading path; compare names/order
+    // with the reader's own edition, since English lists combine books differently.
+    // era: "OT" | "INTER" | "NT"; status is retained for existing rendering.
     const BOOKS = [
-      /* =======================
-         OLD TESTAMENT ERA
-         ======================= */
-
-      // Primeval & Patriarchal (Genesis; early extra traditions)
-      { order: 1, era:"OT", status:"canon", title:"Genesis",
-        summary: paras(
+      { order:1, era:"OT", status:"canon", title:"Genesis", summary: paras(
           "Beginnings set the patterns for everything: creation’s goodness, the image of God in humanity, and the tragedy of the fall. The flood becomes both judgment and reset, while the covenant with Noah signals God’s resolve to preserve the world he loves. Babel’s scattering exposes pride’s impulse to build a name apart from God’s name.",
           "God then turns to one family—Abraham, Sarah, and their descendants—as the channel of blessing for all nations. Promises of land, offspring, and presence move the story through Isaac and Jacob, while the renaming to Israel marks identity given by grace, not grasping. Joseph’s descent into slavery becomes the path to Egypt and unexpected salvation.",
           "Genesis frames sin, promise, and redemption: God elects the unlikely, works through weakness, and stays faithful to his word. It ends with a people preserved in a foreign land, poised for Exodus. Every later book rings with its motifs—creation, covenant, sacrifice, and the whispered hope of a serpent-crusher."
         )
       },
-      { order: 2, era:"OT", status:"extra", title:"1 Enoch",
-        summary: paras(
-          "This composite work gathers visions and warnings attributed to Enoch, the seventh from Adam. It expands Genesis 6 by narrating the Watchers’ descent, the Nephilim’s violence, and the corruption of creation that demands judgment. Angelic tours unveil cosmic order, heavenly courts, and the promise that God will set the world right.",
-          "Transmitted most fully in Ge’ez, 1 Enoch shaped Second Temple imagination and is directly echoed in the New Testament (e.g., Jude). Its sections—the Book of Watchers, Parables, Astronomical Book, Dream Visions, and Epistle—span moral exhortation and apocalyptic hope. The righteous are vindicated; the oppressive powers face ruin.",
-          "Whether read devotionally or historically, 1 Enoch becomes a lens on Jewish hopes before Jesus: the longing for a faithful remnant, a coming Son of Man, and a creation healed. It stands as a major witness to the unseen conflict behind human evil."
-        )
-      },
-      { order: 3, era:"OT", status:"extra", title:"Jubilees",
-        summary: paras(
-          "Jubilees retells Genesis–Exodus within a revealed calendar of ‘jubilee’ periods, presenting sacred history as heaven’s timetable. Angels narrate to Moses a story thick with covenant rhythms—Sabbaths, festivals, and purity. Time itself becomes discipleship, guarding a community’s identity against assimilation.",
-          "The book tightens chronology, expands patriarchal episodes, and explains origins of rituals. It spotlights Abraham’s obedience, Jacob’s trials, and Moses’ call, all framed by holy time and holy life. The 364-day calendar anchors communal unity and worship.",
-          "More than a retelling, Jubilees is a manifesto: life ordered by God’s times keeps a people in covenant. Its influence shows up in Qumran and calendars debates of the Second Temple period."
-        )
-      },
-      { order: 4, era:"OT", status:"extra", title:"Book of Jasher",
-        summary: paras(
-          "Cited in Joshua and 2 Samuel, this ‘Book of the Upright’ is remembered as an early chronicle of Israel’s heroic deeds. Later medieval texts bearing the name are expansions and retellings rather than the original, but they reveal how Israel’s memory was kept alive in story and song.",
-          "References to battles, oaths, and poetic laments suggest a national anthology of valor and covenant faithfulness. It likely collected episodes that celebrated God’s deliverance through human courage.",
-          "Though not part of any major canon, Jasher’s echoes frame how Scripture itself invites remembrance: history becomes worship when told under God’s name."
-        )
-      },
-
-      // Exodus & Sinai
-      { order: 10, era:"OT", status:"canon", title:"Exodus",
-        summary: paras(
+      { order:2, era:"OT", status:"canon", title:"Exodus", summary: paras(
           "The God who calls by name breaks chains by name: ‘I AM’ confronts Pharaoh’s false glory, and slaves become a people. Plagues unmask idols; the sea opens; a nation is baptized into freedom. Salvation here is rescue into worship—‘Let my people go, that they may serve me.’",
           "At Sinai, covenant shapes identity. The Ten Words frame life with God and neighbor; the tabernacle places Presence at the center of camp and calendar. Golden-calf betrayal almost ends the story, but intercession and mercy renew the covenant.",
           "Exodus becomes the prototype of redemption: deliverance, law, and dwelling. Every later liberation, including the cross, will be narrated in Exodus’ grammar—blood, water, Spirit, and a pilgrim people on the way."
         )
       },
-      { order: 11, era:"OT", status:"canon", title:"Leviticus",
-        summary: paras(
+      { order:3, era:"OT", status:"canon", title:"Leviticus", summary: paras(
           "If God dwells among a people, how can an unclean people live with a holy God? Leviticus answers with sacrifices, priests, and festivals—a choreography of nearness and reverence. Holiness is not distance but rightly ordered closeness.",
           "Atonement sits at the center: blood cleanses, the scapegoat carries away guilt, and the sanctuary is made fit for divine Presence. The calendar tutors desire—Sabbaths, feasts, and Jubilee form social holiness where debt loosens and neighbors matter.",
           "The ‘love your neighbor’ command rises like a summit here. Leviticus trains imagination to see worship in justice and justice in worship, so the holy God is reflected in a holy people."
         )
       },
-      { order: 12, era:"OT", status:"canon", title:"Numbers",
-        summary: paras(
+      { order:4, era:"OT", status:"canon", title:"Numbers", summary: paras(
           "Numbered at the start, numbered at the end—the wilderness is a crucible that counts faith. Complaints, rebellions, and serpents mark a people learning dependence. Yet grace threads through manna, water from rock, and unlikely blessing.",
           "Foreign seer Balaam is hired to curse but compelled to bless, revealing a God who guards his people even when they cannot see it. Leadership is tested; patience is forged; judgment and mercy walk together.",
           "Numbers teaches pilgrimage spirituality: God leads by cloud and fire; discipline is fatherly; promises wait beyond present deserts. A new generation rises, ready for the land."
         )
       },
-      { order: 13, era:"OT", status:"canon", title:"Deuteronomy",
-        summary: paras(
+      { order:5, era:"OT", status:"canon", title:"Deuteronomy", summary: paras(
           "Standing at the Jordan, Moses preaches memory into a new generation. He retells the law not as mere rule but covenant love—‘Hear, O Israel… love the LORD your God.’ The heart, the home, and the habits of the day belong to God.",
           "Blessings and curses declare history’s moral shape; obedience is life, idolatry is death. The king (should Israel want one) must be a student of Torah, not a collector of horses and wives. Justice and compassion are woven through fields, courts, and festivals.",
           "Deuteronomy becomes Israel’s conscience. Prophets will quote it, kings will be measured by it, and Jesus will wield it in the wilderness. To choose God is to choose life."
         )
       },
-
-      // Conquest & Judges era (with Ruth)
-      { order: 20, era:"OT", status:"canon", title:"Joshua",
-        summary: paras(
+      { order:6, era:"OT", status:"canon", title:"Joshua", summary: paras(
           "The LORD who saves in Exodus now gives rest in the land. Jericho falls by worship, not siegecraft; allotments map grace into daily geography. Boundary stones become testimonies to promise kept.",
           "Yet conquest is not triumphalism—covenant is. Faithfulness secures life; compromise seeds future pain. Rahab’s inclusion hints at a wide mercy already in motion.",
           "Joshua ends with a choice: ‘As for me and my house, we will serve the LORD.’ The people renew covenant, warned that holy presence cannot be tamed by partial obedience."
         )
       },
-      { order: 21, era:"OT", status:"canon", title:"Judges",
-        summary: paras(
+      { order:7, era:"OT", status:"canon", title:"Judges", summary: paras(
           "Without a king, Israel lurches through cycles: sin, oppression, cry, deliverance. God raises unlikely judges—Deborah, Gideon, Jephthah, Samson—flawed vessels carrying real help. The spiral descends as the book proceeds.",
           "The refrain ‘everyone did what was right in his own eyes’ captures moral anarchy. Even victories carry shadows when vows are rash and strength is unyoked from wisdom.",
           "Judges makes the case not merely for a king, but for a righteous one. It exposes the poverty of charisma without character and the danger of worship without truth."
         )
       },
-      { order: 22, era:"OT", status:"canon", title:"Ruth",
-        summary: paras(
+      { order:8, era:"OT", status:"canon", title:"Ruth", summary: paras(
           "In the dark days of Judges, Ruth shines with quiet fidelity. A Moabite clings to Naomi and to Israel’s God, stepping into vulnerable gleaning and bold proposal.",
           "Boaz’s kindness and lawful care stitch redemption into everyday life. Providence is not loud, but it is relentless in its kindness.",
           "The story lands in a genealogy—Ruth becomes great-grandmother to David. Hidden faithfulness becomes the hinge of history."
         )
       },
-
-      // United Monarchy → Divided Kingdom
-      { order: 30, era:"OT", status:"canon", title:"1 Samuel",
-        summary: paras(
+      { order:9, era:"OT", status:"canon", title:"1 Samuel", summary: paras(
           "Hannah’s prayer births Samuel, a prophet who becomes midwife to monarchy. Israel demands a king to be like nations; God grants Saul, who looks the part but lacks the heart.",
           "David is anointed in obscurity, slays Goliath, and learns kingship in caves and exile. Friendship with Jonathan, songs in the wilderness, and restraint toward an enemy king form his character.",
           "1 Samuel contrasts appearances with reality: God weighs hearts. Leadership without obedience collapses; humility under pressure prepares a shepherd for a throne."
         )
       },
-      { order: 31, era:"OT", status:"canon", title:"2 Samuel",
-        summary: paras(
+      { order:10, era:"OT", status:"canon", title:"2 Samuel", summary: paras(
           "David unites tribes, captures Jerusalem, and brings the ark near. God pledges an everlasting house, anchoring hope in a promise bigger than one man.",
           "But the king’s sin with Bathsheba fractures the house. Swords rise within—Amnon, Absalom, and a throne rocked by grief. Still, mercy and covenant do not fail.",
           "Songs, laments, and last words close the arc. The best of David points beyond David to a king whose throne is righteousness itself."
         )
       },
-      { order: 32, era:"OT", status:"canon", title:"1 Kings",
-        summary: paras(
+      { order:11, era:"OT", status:"canon", title:"1 Kings", summary: paras(
           "Solomon’s wisdom builds a house for God, and glory fills the temple. Nations stream to hear; Israel’s golden age gleams.",
           "Yet hearts drift. Foreign alliances and many wives pull devotion sideways. After Solomon, the kingdom tears—north and south, Jeroboam and Rehoboam.",
           "Prophets arise—Elijah confronts Baal, fire falls, and a still small voice sustains a weary servant. The story warns: splendor without faithfulness rots from within."
         )
       },
-      { order: 33, era:"OT", status:"canon", title:"2 Kings",
-        summary: paras(
+      { order:12, era:"OT", status:"canon", title:"2 Kings", summary: paras(
           "Successive kings toggle between reform and ruin while prophets plead. The northern kingdom falls to Assyria; Judah lingers, revived under Hezekiah and Josiah, then declines.",
           "Babylon finally levels Jerusalem and burns the temple. Exile is the catastrophic ‘curse’ Deuteronomy warned about, a moral verdict on centuries of compromise.",
           "The book ends with a cracked-open door—Jehoiachin released in Babylon. Judgment is not the last word; the Davidic promise still flickers."
         )
       },
-
-      // Poetry & Wisdom (placed broadly within monarchy era)
-      { order: 40, era:"OT", status:"canon", title:"Psalms",
-        summary: paras(
-          "Israel’s prayer book teaches hearts how to speak with God—lament, praise, thanksgiving, and trust. Davidic cries mingle with temple liturgy; life’s valleys and mountaintops find a voice.",
-          "Torah is delight, kingship is hope, creation is choir. Some psalms look ahead to a greater king and a wider salvation than Israel had yet seen.",
-          "Prayed by Jesus and the apostles, the Psalms tune the church to reality: the Lord reigns, the righteous suffer, and steadfast love endures forever."
+      { order:13, era:"OT", status:"canon", title:"1 Chronicles", summary: paras(
+          'The book retells Israel’s history through genealogies, the reign of David, and the preparations for worship in Jerusalem. It traces family lines from Adam onward, then follows David’s rise, his gathering of the tribes, and his care in preparing a place for the ark and temple.',
+          'Its portrait of David emphasizes worship, the Levites, and the continuity of Israel’s calling. The long genealogies are a reminder that the story belongs to generations of people, not only to kings and battles.'
         )
       },
-      { order: 41, era:"OT", status:"canon", title:"Proverbs",
-        summary: paras(
-          "Wisdom is street-level discipleship—skill for living well under God. Proverbs trains the mind in patterns: diligence over sloth, truth over lies, generosity over greed.",
-          "Lady Wisdom calls from the crossroads, inviting the simple into insight. The fear of the LORD is the beginning of knowledge, shaping speech, sexuality, money, and friendship.",
-          "Short sayings become seeds; sow them into daily choices and reap life. Fools scorn correction; the wise welcome it."
+      { order:14, era:"OT", status:"canon", title:"2 Chronicles", summary: paras(
+          'Beginning with Solomon and the temple, Chronicles follows the kings of Judah and the life of worship in Jerusalem. Reforming kings call the people back to God; unfaithful rule brings decline, invasion, and finally exile.',
+          'The closing decree of Cyrus leaves a door open for return and rebuilding. Notice how the book connects leadership, worship, and the people’s response to God across generations.'
         )
       },
-      { order: 42, era:"OT", status:"canon", title:"Ecclesiastes",
-        summary: paras(
-          "A wise teacher surveys life ‘under the sun’ and finds vapor—work, pleasure, wisdom, and legacy slip through fingers. Honest skepticism is not unbelief but a path to reality.",
-          "Yet gifts can be received as gifts: food, friendship, seasons, and toil have goodness when feared rightly. Meaning is not seized but received.",
-          "The conclusion lands with simplicity: fear God and keep his commandments. Humility becomes the gateway to joy."
+      { order:15, era:"INTER", status:"extra", title:"Jubilees", summary: paras(
+          "Jubilees retells Genesis–Exodus within a revealed calendar of ‘jubilee’ periods, presenting sacred history as heaven’s timetable. Angels narrate to Moses a story thick with covenant rhythms—Sabbaths, festivals, and purity. Time itself becomes discipleship, guarding a community’s identity against assimilation.",
+          "The book tightens chronology, expands patriarchal episodes, and explains origins of rituals. It spotlights Abraham’s obedience, Jacob’s trials, and Moses’ call, all framed by holy time and holy life. The 364-day calendar anchors communal unity and worship.",
+          "More than a retelling, Jubilees is a manifesto: life ordered by God’s times keeps a people in covenant. Its influence shows up in Qumran and calendars debates of the Second Temple period."
         )
       },
-      { order: 43, era:"OT", status:"canon", title:"Song of Solomon",
-        summary: paras(
-          "Love poetry celebrates desire, fidelity, and the beauty of mutual pursuit. Bodies and gardens become metaphors for covenant delight.",
-          "The Song dignifies romance and marriage without prudishness or cynicism. It calls desire out of secrecy into holy joy.",
-          "Read across Scripture, it resonates with God’s covenant love—a chorus that whispers of Christ and the church."
+      { order:16, era:"INTER", status:"extra", title:"1 Enoch", summary: paras(
+          "This composite work gathers visions and warnings attributed to Enoch, the seventh from Adam. It expands Genesis 6 by narrating the Watchers’ descent, the Nephilim’s violence, and the corruption of creation that demands judgment. Angelic tours unveil cosmic order, heavenly courts, and the promise that God will set the world right.",
+          "Transmitted most fully in Ge’ez, 1 Enoch shaped Second Temple imagination and is directly echoed in the New Testament (e.g., Jude). Its sections—the Book of Watchers, Parables, Astronomical Book, Dream Visions, and Epistle—span moral exhortation and apocalyptic hope. The righteous are vindicated; the oppressive powers face ruin.",
+          "Whether read devotionally or historically, 1 Enoch becomes a lens on Jewish hopes before Jesus: the longing for a faithful remnant, a coming Son of Man, and a creation healed. It stands as a major witness to the unseen conflict behind human evil."
         )
       },
-      { order: 44, era:"OT", status:"canon", title:"Job",
-        summary: paras(
-          "A righteous sufferer becomes the stage for wrestling with undeserved pain. Friends speak tidy formulas; Job demands honest hearing from God.",
-          "God answers not with a thesis but a tour of creation’s wildness and wisdom. The world is not a machine; it is a theater of glory beyond our metrics.",
-          "Job is vindicated, yet the book’s gift is deeper than restoration: reverent trust amid mystery. Faith can argue with God and adore him."
-        )
-      },
-
-      // Major Prophets (8th–6th c. BCE)
-      { order: 50, era:"OT", status:"canon", title:"Isaiah",
-        summary: paras(
-          "In the year a king died, Isaiah saw the true King—holy, holy, holy. Cleansed by fire, he answered, ‘Here am I; send me.’ His ministry called Judah to trust the LORD rather than alliances, warning that pride would end in exile even as a stump remained for hope.",
-          "Oracles against nations expose the futility of empires, while visions of Zion show nations streaming to God’s instruction. A child called Immanuel, a prince of peace, and a Spirit-anointed servant appear—figures merging into a Messianic horizon where justice and mercy embrace.",
-          "The latter chapters sing of comfort after judgment: a servant who suffers, bears iniquity, and brings many to righteousness; a new exodus; a new heavens and earth. Isaiah holds together holiness and compassion, judgment and renewal—fueling New Testament faith that the promised light has dawned in Jesus."
-        )
-      },
-      { order: 51, era:"OT", status:"canon", title:"Micah",
-        summary: paras(
-          "From rural Judah, Micah denounces urban corruption and false security. Land seizures, exploitative leaders, and hollow religion face divine scrutiny.",
-          "Yet a ruler will come from Bethlehem, shepherding Israel in the LORD’s strength. Zion will one day host peacemaking nations; swords will become plowshares.",
-          "The famous summary of covenant ethics rings out: do justice, love mercy, and walk humbly with your God. Judgment becomes a doorway to mercy."
-        )
-      },
-      { order: 52, era:"OT", status:"canon", title:"Jeremiah",
-        summary: paras(
-          "Called from youth, Jeremiah weeps through Judah’s last decades. His temple sermon warns that rituals cannot mask injustice; the covenant is not a talisman.",
-          "Kings vacillate; prophets flatter; Babylon approaches. Jeremiah buys a field in a siege as a down payment on future hope.",
-          "The new covenant promise shines: God will write his law on hearts, forgive sin, and restore relationship. Tears and hope mingle in a prophet’s life."
-        )
-      },
-      { order: 53, era:"OT", status:"canon", title:"Lamentations",
-        summary: paras(
-          "Alphabetic laments walk through the ruins of Jerusalem with disciplined grief. Sorrow is not rushed; pain is given poetry.",
-          "Yet in the center, hope rises: the LORD’s mercies are new every morning; great is your faithfulness. Waiting becomes worship.",
-          "Lamentations teaches how to mourn without despair—naming loss, confessing sin, and clinging to covenant love."
-        )
-      },
-      { order: 54, era:"OT", status:"canon", title:"Ezekiel",
-        summary: paras(
-          "Exiled by the Chebar canal, Ezekiel sees wheels within wheels and glory on the move. God is not confined to a ruined temple; he is sovereign in exile.",
-          "Prophetic sign-acts and visions announce judgment, then pivot to restoration. Dry bones live; a new heart and spirit are promised; shepherds are replaced by the Good Shepherd.",
-          "A renewed temple vision closes the book—Presence returns, the land is reordered, and the city is renamed ‘The LORD is there.’"
-        )
-      },
-      { order: 55, era:"OT", status:"canon", title:"Daniel",
-        summary: paras(
-          "A faithful exile serves foreign courts without surrendering holiness. Lions’ dens and fiery furnaces become altars of witness.",
-          "Night visions unveil beasts and empires, a Son of Man receiving everlasting dominion, and a timeline toward deliverance.",
-          "Daniel models wisdom in Babylon: prayerful, excellent, and uncompromised—reading history from heaven’s vantage point."
-        )
-      },
-
-      // Twelve (selection; you can keep adding in same form)
-      { order: 56, era:"OT", status:"canon", title:"Hosea",
-        summary: paras(
-          "A broken marriage becomes parable: Hosea’s pursuit of an unfaithful spouse mirrors God’s love for a wandering people.",
-          "Idolatry is adultery; mercy is relentless. Judgment is real, but so is the LORD’s yearning to heal and restore.",
-          "The book ends with an invitation: return, and flourish like the vine under faithful love."
-        )
-      },
-      { order: 57, era:"OT", status:"canon", title:"Amos",
-        summary: paras(
-          "From Tekoa’s hills, Amos thunders against luxury built on injustice. Worship without righteousness is noise to God.",
-          "Plumb lines, baskets of summer fruit, and earthquake warnings picture a nation off-true.",
-          "Yet a promise remains: the fallen booth of David will be raised, and nations will share the harvest."
-        )
-      },
-      { order: 58, era:"OT", status:"canon", title:"Habakkuk",
-        summary: paras(
-          "A prophet dares to question: how can a holy God use a ruthless empire? The answer is a call to trust amid waiting.",
-          "‘The righteous shall live by faith’ becomes a biblical north star, echoed in Paul and Hebrews.",
-          "The book ends as a psalm—though the fig tree fails, yet I will rejoice in the God of my salvation."
-        )
-      },
-      { order: 59, era:"OT", status:"canon", title:"Haggai",
-        summary: paras(
-          "Back from exile, the people stall on rebuilding. Haggai urges courage: consider your ways and put first things first.",
-          "As the temple rises, God promises greater glory and shaking of nations.",
-          "Zerubbabel is signet-ring hope—God’s purposes are not on pause."
-        )
-      },
-      { order: 60, era:"OT", status:"canon", title:"Zechariah",
-        summary: paras(
-          "Night visions reveal horsemen, horns, and a flying scroll—heaven’s commentary on Judah’s fragile restoration.",
-          "Joshua the priest is cleansed; Zerubbabel is strengthened—‘Not by might… but by my Spirit.’",
-          "Later oracles look to a pierced one mourned by the city and a day when the LORD is king over all the earth."
-        )
-      },
-      { order: 61, era:"OT", status:"canon", title:"Malachi",
-        summary: paras(
-          "Post-exile apathy meets prophetic rebuke: half-hearted worship, faithless marriages, and weary priests dishonor God.",
-          "Yet a book of remembrance is written for those who fear the LORD. A refining fire and healing sun approach.",
-          "Elijah will come before the great and awesome day. The Old Testament closes in expectation."
-        )
-      },
-
-      // Post-exile narratives
-      { order: 70, era:"OT", status:"canon", title:"Ezra",
-        summary: paras(
+      { order:17, era:"OT", status:"canon", title:"Ezra", summary: paras(
           "Return from exile is a miracle of mercy and Persian policy. The temple foundation is laid amid tears and shouts.",
           "Opposition slows the work, but prophetic words and royal decrees restart it. Worship returns to the center.",
           "Ezra arrives to teach the Torah, leading reforms that renew covenant identity in a fragile community."
         )
       },
-      { order: 71, era:"OT", status:"canon", title:"Nehemiah",
-        summary: paras(
+      { order:18, era:"OT", status:"canon", title:"Nehemiah", summary: paras(
           "A cupbearer becomes a builder. Through prayer, planning, and grit, Jerusalem’s walls rise despite threats.",
           "With Ezra, Nehemiah guides a public reading of Scripture that sparks repentance and recommitment.",
           "Leadership here looks like courage with compassion—one hand building, the other guarding."
         )
       },
-      { order: 72, era:"OT", status:"canon", title:"Esther",
-        summary: paras(
+      { order:19, era:"OT", status:"canon", title:"Esther", summary: paras(
           "In Persia, a hidden Jewess becomes queen. A genocidal plot turns on providence and courage.",
           "God’s name is never mentioned, yet his fingerprints are everywhere—coincidences stack into salvation.",
           "Purim celebrates reversal: enemies fall into their own trap; the vulnerable are defended."
         )
       },
-
-      // Deuterocanon & OT-era extras placed around exile/Greek periods
-      { order: 80, era:"OT", status:"deut", title:"Tobit",
-        summary: paras(
+      { order:20, era:"INTER", status:"extra", title:"Tobit", summary: paras(
           "A faithful Israelite suffers in exile, practicing prayer and charity. His son journeys with a stranger—Raphael, an angel in disguise.",
           "Healing, marriage, and deliverance unfold as wisdom guides youthful zeal. The story is homely, holy, and hope-filled.",
           "Tobit models covenant life in diaspora: righteousness is possible far from Zion because God is near."
         )
       },
-      { order: 81, era:"OT", status:"deut", title:"Judith",
-        summary: paras(
+      { order:21, era:"INTER", status:"extra", title:"Judith", summary: paras(
           "A widow of courage and prayer disarms a tyrant with beauty and wit. She enters the enemy camp and turns the tide.",
           "The tale blends strategy with piety; fasting and faith frame daring action.",
           "Judith’s victory becomes a festival of thanks—the weak, with God, confound the strong."
         )
       },
-      { order: 82, era:"OT", status:"deut", title:"Wisdom of Solomon",
-        summary: paras(
-          "Wisdom is God’s gift that leads beyond death into friendship with the Immortal. Idolatry is exposed as the root of injustice.",
-          "Creation reveals the Maker; history displays measured judgment and mercy, as in Egypt’s plagues.",
-          "Written to steady a pressured community, Wisdom unites intellect, ethics, and hope."
-        )
-      },
-      { order: 83, era:"OT", status:"deut", title:"Sirach (Ecclesiasticus)",
-        summary: paras(
-          "Jesus ben Sirach gathers proverbs and prayers for daily holiness—speech, money, friendship, family, and worship.",
-          "He honors Israel’s ancestors, showing how tradition forms character without stifling joy.",
-          "Sirach commends reverence for the Law as wisdom’s heart—piety with practical heft."
-        )
-      },
-      { order: 84, era:"OT", status:"deut", title:"Baruch",
-        summary: paras(
-          "Attributed to Jeremiah’s scribe, Baruch confesses sin and seeks wisdom in exile.",
-          "A call to return frames hope beyond ruin; God’s mercy outlasts judgment.",
-          "The book braids prayer, exhortation, and consolation for a scattered people."
-        )
-      },
-      { order: 85, era:"OT", status:"deut", title:"Letter of Jeremiah",
-        summary: paras(
-          "A poetic warning to exiles: idols have mouths but cannot speak; ears but cannot hear.",
-          "Mocking images teach discernment—don’t fear what cannot save.",
-          "Trust the living God whose word made the heavens."
-        )
-      },
-      { order: 86, era:"OT", status:"deut", title:"1 Maccabees",
-        summary: paras(
-          "A gritty history of revolt against Seleucid oppression to restore temple and Torah.",
-          "Courage, strategy, and sacrifice reclaim worship—Hanukkah’s roots are forged in blood and prayer.",
-          "The narrative admires resolve and honors covenant fidelity under fire."
-        )
-      },
-      { order: 87, era:"OT", status:"deut", title:"2 Maccabees",
-        summary: paras(
-          "A theological retelling highlights martyrdom and resurrection hope.",
-          "Visions, prayers, and miracles chart divine involvement in human courage.",
-          "Suffering witnesses become seeds of renewal; justice stretches beyond death."
-        )
-      },
-      { order: 88, era:"OT", status:"deut", title:"3 Maccabees",
-        summary: paras(
-          "Set in Egypt, persecution threatens the diaspora; prayer and providence overturn the decree.",
-          "Royal whims meet a greater King’s designs; memory turns fear into festival.",
-          "Diaspora faith learns courage far from the temple."
-        )
-      },
-      { order: 89, era:"OT", status:"deut", title:"4 Maccabees",
-        summary: paras(
-          "A philosophical sermon praises reason governing passion, illustrated by the Maccabean martyrs.",
-          "Jewish piety converses with Hellenistic ethics to honor steadfastness.",
-          "Suffering becomes victory when wisdom loves God above life."
-        )
-      },
-      { order: 90, era:"OT", status:"deut", title:"1 Esdras",
-        summary: paras(
+      { order:22, era:"INTER", status:"extra", title:"1 Esdras", summary: paras(
           "A Greek retelling of Chronicles–Ezra–Nehemiah with unique touches like the ‘Three Guards’ tale.",
           "Temple and law anchor restoration; truth proves strongest.",
           "An alternate window on post-exilic identity and worship."
         )
       },
-      { order: 91, era:"OT", status:"deut", title:"2 Esdras (4 Ezra)",
-        summary: paras(
-          "After Jerusalem’s fall, a seer wrestles with evil, suffering, and divine justice.",
-          "Angel-guided dialogues unveil visions of judgment and mercy, limits of human knowing, and breadth of God’s compassion.",
-          "A cornerstone of apocalyptic reflection in both Jewish and Christian streams."
+      { order:23, era:"INTER", status:"extra", title:"2 Esdras", summary: paras(
+          'This title is used differently across Bible editions and can refer to distinct Ezra-related writings. In this Ethiopian Bible guide it points to an Ezra tradition that reflects on Jerusalem’s ruin, the people’s suffering, and the hope of restoration.',
+          'As you read, notice how grief and difficult questions are brought before God rather than hidden. Check the title and contents in your edition, since ‘2 Esdras’ is especially variable in English numbering.'
         )
       },
-      { order: 92, era:"OT", status:"deut", title:"Prayer of Manasseh",
-        summary: paras(
-          "A brief, beautiful confession attributed to a notorious king who found mercy.",
-          "Sin is named; grace is sought; hope is born in humility.",
-          "A pocket-model of repentance treasured in worship."
+      { order:24, era:"INTER", status:"extra", title:"1 Maccabees", summary: paras(
+          "A gritty history of revolt against Seleucid oppression to restore temple and Torah.",
+          "Courage, strategy, and sacrifice reclaim worship—Hanukkah’s roots are forged in blood and prayer.",
+          "The narrative admires resolve and honors covenant fidelity under fire."
         )
       },
-      { order: 93, era:"OT", status:"deut", title:"Psalm 151",
-        summary: paras(
-          "An additional psalm ascribed to David reflecting on God’s surprising choice of a shepherd boy.",
-          "It adds a small doxology to Israel’s songbook.",
-          "Greatness begins in hidden pastures under God’s eye."
+      { order:25, era:"INTER", status:"extra", title:"2 Maccabees", summary: paras(
+          "A theological retelling highlights martyrdom and resurrection hope.",
+          "Visions, prayers, and miracles chart divine involvement in human courage.",
+          "Suffering witnesses become seeds of renewal; justice stretches beyond death."
         )
       },
-      { order: 94, era:"OT", status:"deut", title:"Additions to Esther",
-        summary: paras(
-          "Greek expansions provide prayers, edicts, and explicit references to God’s action.",
-          "Where Hebrew Esther is subtle, these passages make providence overt.",
-          "They frame crisis with worship and royal decree, enriching liturgical reading."
+      { order:26, era:"INTER", status:"extra", title:"3 Maccabees", summary: paras(
+          "Set in Egypt, persecution threatens the diaspora; prayer and providence overturn the decree.",
+          "Royal whims meet a greater King’s designs; memory turns fear into festival.",
+          "Diaspora faith learns courage far from the temple."
         )
       },
-      { order: 95, era:"OT", status:"extra", title:"Apocalypse of Abraham",
-        summary: paras(
-          "Abraham is called out of idolatry into a vision of the cosmos and moral history.",
-          "An angelic guide exposes empty idols and unveils judgment and mercy.",
-          "Faith is renunciation and revelation—turning from false glory to the living God."
+      { order:27, era:"OT", status:"canon", title:"Job", summary: paras(
+          "A righteous sufferer becomes the stage for wrestling with undeserved pain. Friends speak tidy formulas; Job demands honest hearing from God.",
+          "God answers not with a thesis but a tour of creation’s wildness and wisdom. The world is not a machine; it is a theater of glory beyond our metrics.",
+          "Job is vindicated, yet the book’s gift is deeper than restoration: reverent trust amid mystery. Faith can argue with God and adore him."
         )
       },
-      { order: 96, era:"OT", status:"extra", title:"Ascension of Isaiah",
-        summary: paras(
-          "Isaiah’s martyrdom story opens into a heavenly ascent.",
-          "The Beloved descends through the heavens in humility and returns in glory.",
-          "Suffering, revelation, and victory weave a tapestry early Christians cherished."
+      { order:28, era:"OT", status:"canon", title:"Psalms", summary: paras(
+          "Israel’s prayer book teaches hearts how to speak with God—lament, praise, thanksgiving, and trust. Davidic cries mingle with temple liturgy; life’s valleys and mountaintops find a voice.",
+          "Torah is delight, kingship is hope, creation is choir. Some psalms look ahead to a greater king and a wider salvation than Israel had yet seen.",
+          "Prayed by Jesus and the apostles, the Psalms tune the church to reality: the Lord reigns, the righteous suffer, and steadfast love endures forever."
         )
       },
-      { order: 97, era:"OT", status:"extra", title:"Lives of the Prophets",
-        summary: paras(
-          "Later traditions summarize major prophets’ ministries and deaths.",
-          "Pious memory mingles history and legend to honor faithful witnesses.",
-          "Not canon, but revealing of how communities remembered their heroes."
+      { order:29, era:"OT", status:"canon", title:"Proverbs", summary: paras(
+          "Wisdom is street-level discipleship—skill for living well under God. Proverbs trains the mind in patterns: diligence over sloth, truth over lies, generosity over greed.",
+          "Lady Wisdom calls from the crossroads, inviting the simple into insight. The fear of the LORD is the beginning of knowledge, shaping speech, sexuality, money, and friendship.",
+          "Short sayings become seeds; sow them into daily choices and reap life. Fools scorn correction; the wise welcome it."
         )
       },
-
-      /* =======================
-         INTERTESTAMENTAL ERA
-         ======================= */
-      { order: 1, era:"INTER", status:"extra", title:"Gospel of the Hebrews",
-        summary: paras(
-          "Fragments preserve a Jewish-Christian telling of Jesus close to synagogue ways.",
-          "Alternate phrasings and emphases sit alongside canonical echoes.",
-          "Patristic citations are sparse but intriguing—evidence of diverse early memory."
+      { order:30, era:"OT", status:"canon", title:"Ecclesiastes", summary: paras(
+          "A wise teacher surveys life ‘under the sun’ and finds vapor—work, pleasure, wisdom, and legacy slip through fingers. Honest skepticism is not unbelief but a path to reality.",
+          "Yet gifts can be received as gifts: food, friendship, seasons, and toil have goodness when feared rightly. Meaning is not seized but received.",
+          "The conclusion lands with simplicity: fear God and keep his commandments. Humility becomes the gateway to joy."
         )
       },
-      { order: 2, era:"INTER", status:"extra", title:"Gospel of the Egyptians",
-        summary: paras(
-          "Known through quotations, the text reflects ascetic themes and sayings traditions.",
-          "It shows how Jesus traditions circulated beyond the emerging canon.",
-          "The fragments are thin, but they witness to the breadth of early Christianity."
+      { order:31, era:"OT", status:"canon", title:"Song of Songs", summary: paras(
+          'This collection of love poems celebrates desire, beauty, longing, and delight between beloveds. Gardens, fragrances, voices, and seasons give its poetry a vivid language of mutual affection.',
+          'Read first as poetry about human love and embodied joy. Across Jewish and Christian traditions it has also invited reflection on divine love; notice how its images resonate with the wider story of Scripture.'
         )
       },
-
-      /* =======================
-         NEW TESTAMENT ERA
-         ======================= */
-
-      // Gospels
-      { order: 1, era:"NT", status:"canon", title:"Matthew",
-        summary: paras(
+      { order:32, era:"INTER", status:"extra", title:"Wisdom of Solomon", summary: paras(
+          "Wisdom is God’s gift that leads beyond death into friendship with the Immortal. Idolatry is exposed as the root of injustice.",
+          "Creation reveals the Maker; history displays measured judgment and mercy, as in Egypt’s plagues.",
+          "Written to steady a pressured community, Wisdom unites intellect, ethics, and hope."
+        )
+      },
+      { order:33, era:"INTER", status:"extra", title:"Sirach", summary: paras(
+          'Jesus ben Sirach gathers practical wisdom about friendship, speech, family, work, money, worship, and responsibility. He praises the wisdom of the Law and remembers the ancestors of Israel as examples of faithfulness.',
+          'The book joins everyday conduct to reverence for God: wisdom is shown in how a person treats neighbors and carries out ordinary duties. Its sayings reward slow reading and reflection.'
+        )
+      },
+      { order:34, era:"OT", status:"canon", title:"Isaiah", summary: paras(
+          "In the year a king died, Isaiah saw the true King—holy, holy, holy. Cleansed by fire, he answered, ‘Here am I; send me.’ His ministry called Judah to trust the LORD rather than alliances, warning that pride would end in exile even as a stump remained for hope.",
+          "Oracles against nations expose the futility of empires, while visions of Zion show nations streaming to God’s instruction. A child called Immanuel, a prince of peace, and a Spirit-anointed servant appear—figures merging into a Messianic horizon where justice and mercy embrace.",
+          "The latter chapters sing of comfort after judgment: a servant who suffers, bears iniquity, and brings many to righteousness; a new exodus; a new heavens and earth. Isaiah holds together holiness and compassion, judgment and renewal—fueling New Testament faith that the promised light has dawned in Jesus."
+        )
+      },
+      { order:35, era:"OT", status:"canon", title:"Jeremiah", summary: paras(
+          "Called from youth, Jeremiah weeps through Judah’s last decades. His temple sermon warns that rituals cannot mask injustice; the covenant is not a talisman.",
+          "Kings vacillate; prophets flatter; Babylon approaches. Jeremiah buys a field in a siege as a down payment on future hope.",
+          "The new covenant promise shines: God will write his law on hearts, forgive sin, and restore relationship. Tears and hope mingle in a prophet’s life."
+        )
+      },
+      { order:36, era:"OT", status:"canon", title:"Lamentations", summary: paras(
+          "Alphabetic laments walk through the ruins of Jerusalem with disciplined grief. Sorrow is not rushed; pain is given poetry.",
+          "Yet in the center, hope rises: the LORD’s mercies are new every morning; great is your faithfulness. Waiting becomes worship.",
+          "Lamentations teaches how to mourn without despair—naming loss, confessing sin, and clinging to covenant love."
+        )
+      },
+      { order:37, era:"INTER", status:"extra", title:"Baruch", summary: paras(
+          "Attributed to Jeremiah’s scribe, Baruch confesses sin and seeks wisdom in exile.",
+          "A call to return frames hope beyond ruin; God’s mercy outlasts judgment.",
+          "The book braids prayer, exhortation, and consolation for a scattered people."
+        )
+      },
+      { order:38, era:"OT", status:"canon", title:"Ezekiel", summary: paras(
+          "Exiled by the Chebar canal, Ezekiel sees wheels within wheels and glory on the move. God is not confined to a ruined temple; he is sovereign in exile.",
+          "Prophetic sign-acts and visions announce judgment, then pivot to restoration. Dry bones live; a new heart and spirit are promised; shepherds are replaced by the Good Shepherd.",
+          "A renewed temple vision closes the book—Presence returns, the land is reordered, and the city is renamed ‘The LORD is there.’"
+        )
+      },
+      { order:39, era:"OT", status:"canon", title:"Daniel", summary: paras(
+          "A faithful exile serves foreign courts without surrendering holiness. Lions’ dens and fiery furnaces become altars of witness.",
+          "Night visions unveil beasts and empires, a Son of Man receiving everlasting dominion, and a timeline toward deliverance.",
+          "Daniel models wisdom in Babylon: prayerful, excellent, and uncompromised—reading history from heaven’s vantage point."
+        )
+      },
+      { order:40, era:"OT", status:"canon", title:"Hosea", summary: paras(
+          "A broken marriage becomes parable: Hosea’s pursuit of an unfaithful spouse mirrors God’s love for a wandering people.",
+          "Idolatry is adultery; mercy is relentless. Judgment is real, but so is the LORD’s yearning to heal and restore.",
+          "The book ends with an invitation: return, and flourish like the vine under faithful love."
+        )
+      },
+      { order:41, era:"OT", status:"canon", title:"Amos", summary: paras(
+          "From Tekoa’s hills, Amos thunders against luxury built on injustice. Worship without righteousness is noise to God.",
+          "Plumb lines, baskets of summer fruit, and earthquake warnings picture a nation off-true.",
+          "Yet a promise remains: the fallen booth of David will be raised, and nations will share the harvest."
+        )
+      },
+      { order:42, era:"OT", status:"canon", title:"Micah", summary: paras(
+          "From rural Judah, Micah denounces urban corruption and false security. Land seizures, exploitative leaders, and hollow religion face divine scrutiny.",
+          "Yet a ruler will come from Bethlehem, shepherding Israel in the LORD’s strength. Zion will one day host peacemaking nations; swords will become plowshares.",
+          "The famous summary of covenant ethics rings out: do justice, love mercy, and walk humbly with your God. Judgment becomes a doorway to mercy."
+        )
+      },
+      { order:43, era:"OT", status:"canon", title:"Joel", summary: paras(
+          'A devastating locust plague becomes the setting for Joel’s call to return to God with the whole heart. The prophet speaks of a coming Day of the LORD, judgment among the nations, and restoration for a humbled people.',
+          'The promise that God will pour out the Spirit gives the book a horizon beyond the immediate crisis. Watch how lament, repentance, justice, and renewal fit together.'
+        )
+      },
+      { order:44, era:"OT", status:"canon", title:"Obadiah", summary: paras(
+          'Obadiah announces judgment against Edom for violence and pride, especially its betrayal of Judah during Jerusalem’s calamity. The prophet’s brief vision turns from Edom’s downfall toward the restoration of God’s people.',
+          'Its central warning is that security built on arrogance cannot last. The closing hope is that the kingdom belongs to the LORD and justice will finally be set right.'
+        )
+      },
+      { order:45, era:"OT", status:"canon", title:"Jonah", summary: paras(
+          'Jonah is sent to warn Nineveh but runs in the opposite direction. A storm, a great fish, and the city’s unexpected repentance turn the mission into a story about God’s mercy and the prophet’s resistance to it.',
+          'The final question challenges Jonah—and the reader—to care about people beyond familiar boundaries. Notice how God’s compassion reaches both the people of Nineveh and the reluctant messenger.'
+        )
+      },
+      { order:46, era:"OT", status:"canon", title:"Nahum", summary: paras(
+          'Nahum announces the fall of Nineveh, the powerful Assyrian capital associated with conquest and cruelty. Its vivid poetry portrays the collapse of an empire and relief for those it has oppressed.',
+          'The book holds together judgment and refuge: God opposes violence, yet is a stronghold for those who trust him. Read its fierce imagery in the context of Assyria’s domination of the region.'
+        )
+      },
+      { order:47, era:"OT", status:"canon", title:"Habakkuk", summary: paras(
+          "A prophet dares to question: how can a holy God use a ruthless empire? The answer is a call to trust amid waiting.",
+          "‘The righteous shall live by faith’ becomes a biblical north star, echoed in Paul and Hebrews.",
+          "The book ends as a psalm—though the fig tree fails, yet I will rejoice in the God of my salvation."
+        )
+      },
+      { order:48, era:"OT", status:"canon", title:"Zephaniah", summary: paras(
+          'Zephaniah warns Judah and the surrounding nations about the Day of the LORD, exposing idolatry, injustice, and complacency. The call is to seek the LORD with humility before judgment arrives.',
+          'The book’s later movement turns toward a purified people and the joy of God dwelling among them. Its hope is striking: the LORD rejoices over the restored community.'
+        )
+      },
+      { order:49, era:"OT", status:"canon", title:"Haggai", summary: paras(
+          "Back from exile, the people stall on rebuilding. Haggai urges courage: consider your ways and put first things first.",
+          "As the temple rises, God promises greater glory and shaking of nations.",
+          "Zerubbabel is signet-ring hope—God’s purposes are not on pause."
+        )
+      },
+      { order:50, era:"OT", status:"canon", title:"Zechariah", summary: paras(
+          "Night visions reveal horsemen, horns, and a flying scroll—heaven’s commentary on Judah’s fragile restoration.",
+          "Joshua the priest is cleansed; Zerubbabel is strengthened—‘Not by might… but by my Spirit.’",
+          "Later oracles look to a pierced one mourned by the city and a day when the LORD is king over all the earth."
+        )
+      },
+      { order:51, era:"OT", status:"canon", title:"Malachi", summary: paras(
+          "Post-exile apathy meets prophetic rebuke: half-hearted worship, faithless marriages, and weary priests dishonor God.",
+          "Yet a book of remembrance is written for those who fear the LORD. A refining fire and healing sun approach.",
+          "Elijah will come before the great and awesome day. The Old Testament closes in expectation."
+        )
+      },
+      { order:52, era:"NT", status:"canon", title:"Matthew", summary: paras(
           "Jesus is portrayed as Israel’s Messiah who fulfills Torah and Prophets. Genealogy, Bethlehem, and exodus-echoes set him inside Israel’s story. The Sermon on the Mount reframes righteousness from the heart.",
           "Parables reveal the kingdom’s surprise growth and mixed field; authority over sickness, storms, and sin signals the King’s presence. Confession at Caesarea Philippi turns toward a cross that crowns.",
           "The risen Lord sends disciples to all nations, promising presence to the end. Matthew teaches the church to be a Torah-shaped, Spirit-empowered people under a gentle, authoritative King."
         )
       },
-      { order: 2, era:"NT", status:"canon", title:"Mark",
-        summary: paras(
+      { order:53, era:"NT", status:"canon", title:"Mark", summary: paras(
           "Fast-paced scenes show Jesus’ authority and secrecy: demons silenced, lepers cleansed, seas stilled.",
           "Disciples struggle to grasp a cruciform Messiah; the way up is down.",
           "At the cross, a centurion sees what others missed: truly the Son of God. The empty tomb summons trembling witness."
         )
       },
-      { order: 3, era:"NT", status:"canon", title:"Luke",
-        summary: paras(
+      { order:54, era:"NT", status:"canon", title:"Luke", summary: paras(
           "An orderly account highlights prayer, the Spirit, and mercy to outsiders. Songs at the start tune the reader to joy.",
           "Parables like the Good Samaritan and Prodigal Son exhibit grace for the lost and the proud.",
           "From temple to table to road, Jesus gathers a new family; Acts continues the movement to the nations."
         )
       },
-      { order: 4, era:"NT", status:"canon", title:"John",
-        summary: paras(
+      { order:55, era:"NT", status:"canon", title:"John", summary: paras(
           "The Word made flesh reveals the Father through signs and ‘I AM’ sayings. Glory shines in love unto death.",
           "Conversations with Nicodemus, the Samaritan woman, and Martha show belief awakening.",
           "Written so that readers may believe and have life—water, bread, light, and resurrection become doors to faith."
         )
       },
-
-      // Acts & Early Letters (approx. chronology)
-      { order: 5, era:"NT", status:"canon", title:"Acts",
-        summary: paras(
+      { order:56, era:"NT", status:"canon", title:"Acts", summary: paras(
           "The risen Jesus sends the Spirit and launches witness from Jerusalem to the ends of the earth. Pentecost births a new community marked by teaching, table, and generosity.",
           "Peter opens doors to Gentiles; Antioch sends missionaries; councils discern unity in the gospel.",
           "Through prisons, storms, and courts, the word runs. The open ending invites the reader to carry on the story."
         )
       },
-      { order: 6, era:"NT", status:"canon", title:"Galatians",
-        summary: paras(
-          "Freedom in Christ stands against returning to the law as identity. The cross severs old allegiances.",
-          "Abraham’s faith pattern embraces Gentiles without circumcision boundary markers.",
-          "The Spirit forms new fruit—love reshapes communities into true family."
-        )
-      },
-      { order: 7, era:"NT", status:"canon", title:"1 Thessalonians",
-        summary: paras(
-          "A young church is encouraged in holiness, love, and hope.",
-          "Concerns about the dead in Christ are answered with comfort and clarity.",
-          "Watchful living sanctifies ordinary work as worship."
-        )
-      },
-      { order: 8, era:"NT", status:"canon", title:"2 Thessalonians",
-        summary: paras(
-          "Rumors about the Day of the Lord are corrected; stand firm.",
-          "The man of lawlessness will be revealed in time; deception is resisted by truth.",
-          "The idle are admonished toward faithful labor and quiet courage."
-        )
-      },
-
-      // Corinth–Romans
-      { order: 9, era:"NT", status:"canon", title:"1 Corinthians",
-        summary: paras(
-          "Factionalism, immorality, and chaotic worship meet the cruciform wisdom of God.",
-          "Love—patient, kind, enduring—outlasts gifts and holds the body together.",
-          "The resurrection secures hope and meaning: labor in the Lord is not in vain."
-        )
-      },
-      { order: 10, era:"NT", status:"canon", title:"2 Corinthians",
-        summary: paras(
-          "Paul defends a ministry of weakness where power is perfected.",
-          "Jars of clay carry treasure; reconciliation and generosity mark the gospel.",
-          "Boast only in the Lord—true apostleship is cruciform."
-        )
-      },
-      { order: 11, era:"NT", status:"canon", title:"Romans",
-        summary: paras(
+      { order:57, era:"NT", status:"canon", title:"Romans", summary: paras(
           "All have sinned; all may be justified by grace through faith. Abraham is father of the faithful.",
           "In Christ, a new humanity walks by the Spirit beyond condemnation.",
           "Mercy forms a living-sacrifice community—humble, hospitable, and hopeful."
         )
       },
-
-      // Prison & Pastoral; Catholic Epistles; Revelation
-      { order: 12, era:"NT", status:"canon", title:"Philippians",
-        summary: paras(
-          "A warm letter from prison rejoices in partnership and humility.",
-          "Christ’s downward glory and exaltation become the church’s mindset.",
-          "Contentment and courage flow from Christ’s sufficiency."
+      { order:58, era:"NT", status:"canon", title:"1 Corinthians", summary: paras(
+          "Factionalism, immorality, and chaotic worship meet the cruciform wisdom of God.",
+          "Love—patient, kind, enduring—outlasts gifts and holds the body together.",
+          "The resurrection secures hope and meaning: labor in the Lord is not in vain."
         )
       },
-      { order: 13, era:"NT", status:"canon", title:"Colossians",
-        summary: paras(
-          "Christ is supreme; lesser ‘spiritualities’ shrink before his fullness.",
-          "Believers die and rise with him into new identity and ethics.",
-          "Peace rules hearts and homes as the word dwells richly."
+      { order:59, era:"NT", status:"canon", title:"2 Corinthians", summary: paras(
+          "Paul defends a ministry of weakness where power is perfected.",
+          "Jars of clay carry treasure; reconciliation and generosity mark the gospel.",
+          "Boast only in the Lord—true apostleship is cruciform."
         )
       },
-      { order: 14, era:"NT", status:"canon", title:"Ephesians",
-        summary: paras(
+      { order:60, era:"NT", status:"canon", title:"Galatians", summary: paras(
+          "Freedom in Christ stands against returning to the law as identity. The cross severs old allegiances.",
+          "Abraham’s faith pattern embraces Gentiles without circumcision boundary markers.",
+          "The Spirit forms new fruit—love reshapes communities into true family."
+        )
+      },
+      { order:61, era:"NT", status:"canon", title:"Ephesians", summary: paras(
           "Grace saves and crafts a people; Jew and Gentile are one new humanity.",
           "The church is Christ’s body, a Spirit-built temple.",
           "Armor imagery calls the saints to stand together against the powers."
         )
       },
-      { order: 15, era:"NT", status:"canon", title:"Philemon",
-        summary: paras(
-          "A personal appeal reframes a social relationship in Christ.",
-          "Receive Onesimus as a beloved brother; the gospel levels pride.",
-          "Reconciliation becomes a living parable of grace."
+      { order:62, era:"NT", status:"canon", title:"Philippians", summary: paras(
+          "A warm letter from prison rejoices in partnership and humility.",
+          "Christ’s downward glory and exaltation become the church’s mindset.",
+          "Contentment and courage flow from Christ’s sufficiency."
         )
       },
-      { order: 16, era:"NT", status:"canon", title:"1 Timothy",
-        summary: paras(
+      { order:63, era:"NT", status:"canon", title:"Colossians", summary: paras(
+          "Christ is supreme; lesser ‘spiritualities’ shrink before his fullness.",
+          "Believers die and rise with him into new identity and ethics.",
+          "Peace rules hearts and homes as the word dwells richly."
+        )
+      },
+      { order:64, era:"NT", status:"canon", title:"1 Thessalonians", summary: paras(
+          "A young church is encouraged in holiness, love, and hope.",
+          "Concerns about the dead in Christ are answered with comfort and clarity.",
+          "Watchful living sanctifies ordinary work as worship."
+        )
+      },
+      { order:65, era:"NT", status:"canon", title:"2 Thessalonians", summary: paras(
+          "Rumors about the Day of the Lord are corrected; stand firm.",
+          "The man of lawlessness will be revealed in time; deception is resisted by truth.",
+          "The idle are admonished toward faithful labor and quiet courage."
+        )
+      },
+      { order:66, era:"NT", status:"canon", title:"1 Timothy", summary: paras(
           "Sound teaching, qualified leaders, and ordered worship protect the gospel.",
           "Care for widows and warnings about greed embody practical piety.",
           "The young pastor is urged to model integrity in word and life."
         )
       },
-      { order: 17, era:"NT", status:"canon", title:"Titus",
-        summary: paras(
-          "Appoint elders, silence deceivers, and let grace train godliness.",
-          "Good works adorn the gospel in public life.",
-          "Gentleness and readiness for every good work hallmark the renewed."
-        )
-      },
-      { order: 18, era:"NT", status:"canon", title:"2 Timothy",
-        summary: paras(
+      { order:67, era:"NT", status:"canon", title:"2 Timothy", summary: paras(
           "Paul’s last charge: guard the good deposit; endure hardship.",
           "Scripture equips for every good work; finish the race.",
           "Desertions hurt, but the Lord stands by his servant."
         )
       },
-      { order: 19, era:"NT", status:"canon", title:"Hebrews",
-        summary: paras(
+      { order:68, era:"NT", status:"canon", title:"Titus", summary: paras(
+          "Appoint elders, silence deceivers, and let grace train godliness.",
+          "Good works adorn the gospel in public life.",
+          "Gentleness and readiness for every good work hallmark the renewed."
+        )
+      },
+      { order:69, era:"NT", status:"canon", title:"Philemon", summary: paras(
+          "A personal appeal reframes a social relationship in Christ.",
+          "Receive Onesimus as a beloved brother; the gospel levels pride.",
+          "Reconciliation becomes a living parable of grace."
+        )
+      },
+      { order:70, era:"NT", status:"canon", title:"Hebrews", summary: paras(
           "Jesus is better—priest, sacrifice, covenant. A sermon-letter for the weary.",
           "Heroes of faith witness to endurance toward a better city.",
           "Worship centers on a once-for-all offering and an unshakable kingdom."
         )
       },
-      { order: 20, era:"NT", status:"canon", title:"James",
-        summary: paras(
+      { order:71, era:"NT", status:"canon", title:"James", summary: paras(
           "Whole-life wisdom—speech, generosity, humility—proves living faith.",
           "Trials refine character; prayer anchors community.",
           "Faith without works is dead; real faith acts."
         )
       },
-      { order: 21, era:"NT", status:"canon", title:"1 Peter",
-        summary: paras(
+      { order:72, era:"NT", status:"canon", title:"1 Peter", summary: paras(
           "Exiles of hope are called to holiness, submission, and love.",
           "Suffering refines; Christ’s example shapes homes and witness.",
           "The Shepherd guards his flock toward glory."
         )
       },
-      { order: 22, era:"NT", status:"canon", title:"2 Peter",
-        summary: paras(
+      { order:73, era:"NT", status:"canon", title:"2 Peter", summary: paras(
           "Grow in grace amid false teaching; remember the apostolic word.",
           "The transfiguration previews glory; Scripture’s origin is divine.",
           "Scoffers forget judgment; the Day urges holy living."
         )
       },
-      { order: 23, era:"NT", status:"canon", title:"1 John",
-        summary: paras(
+      { order:74, era:"NT", status:"canon", title:"1 John", summary: paras(
           "Tests of truth: doctrine, obedience, and love.",
           "God is light and love; liars are unmasked by lives.",
           "Assurance rests in the Son; perfect love casts out fear."
         )
       },
-      { order: 24, era:"NT", status:"canon", title:"2 John",
-        summary: paras(
+      { order:75, era:"NT", status:"canon", title:"2 John", summary: paras(
           "Walk in truth and love; do not host deceivers.",
           "Discernment protects fellowship and mission.",
           "Joy awaits face-to-face reunion."
         )
       },
-      { order: 25, era:"NT", status:"canon", title:"3 John",
-        summary: paras(
+      { order:76, era:"NT", status:"canon", title:"3 John", summary: paras(
           "Hospitality to co-workers is praised; Diotrephes is rebuked.",
           "Imitate good, not evil; truth builds networks of care.",
           "Friendship in Christ ties the letter together."
         )
       },
-      { order: 26, era:"NT", status:"canon", title:"Jude",
-        summary: paras(
+      { order:77, era:"NT", status:"canon", title:"Jude", summary: paras(
           "Contend for the faith amid intruders twisting grace.",
           "Examples from Israel and angels warn; mercy remains central.",
           "A soaring doxology lifts eyes to a keeping God."
         )
       },
-      { order: 27, era:"NT", status:"canon", title:"Revelation",
-        summary: paras(
+      { order:78, era:"NT", status:"canon", title:"Revelation", summary: paras(
           "A prophetic unveiling of the Lamb’s victory over the dragon and Babylon. Letters call churches to overcome compromise with faithful witness.",
           "Seals, trumpets, and bowls dramatize judgment while worship centers the throne. The faithful conquer by testimony and costly love.",
           "The story ends with new creation—God with his people, tears wiped away, and the nations healed."
         )
       },
-
-      // NT-era extra texts
-      { order: 28, era:"NT", status:"extra", title:"Gospel of Thomas",
-        summary: paras(
-          "A collection of 114 sayings attributed to Jesus, emphasizing inner knowledge and wisdom.",
-          "Some logia parallel canonical gospels; others diverge into mystical aphorisms.",
-          "Lacks passion narrative; valuable for comparison, not Scripture."
+      { order:79, era:"INTER", status:"extra", title:"Meqabyan I", summary: paras(
+          "The first Meqabyan tells of faithful resistance to idolatry and the pride of rulers who demand worship for themselves. Its heroes face pressure and danger while holding to the worship of the one God.",
+          "The name can be confused with the Greek books of Maccabees, but these are distinct Ethiopian works. Read for the book’s warnings about power and its encouragement to remain faithful under pressure."
         )
       },
-      { order: 29, era:"NT", status:"extra", title:"Gospel of Philip",
-        summary: paras(
-          "Symbolic reflections on sacraments, names, and union from a Valentinian stream.",
-          "Language is metaphor-dense and esoteric.",
-          "Illuminates debates the early church rejected."
+      { order:80, era:"INTER", status:"extra", title:"Meqabyan II", summary: paras(
+          "The second Meqabyan continues Ethiopian reflections on true worship, human mortality, judgment, and the difference between worldly power and faithfulness to God. Its teaching uses memorable contrasts and exhortations.",
+          "Notice how it speaks directly to the reader about the choices that shape a life. It belongs to the Ethiopian collection and should not be mistaken for a sequel to the Greek Maccabees."
         )
       },
-      { order: 30, era:"NT", status:"extra", title:"Gospel of Mary (Magdalene)",
-        summary: paras(
-          "Fragments portray Mary as a visionary disciple offering inner teaching.",
-          "Conflict with other apostles highlights contested authority.",
-          "A window into alternative Christianities, not apostolic doctrine."
+      { order:81, era:"INTER", status:"extra", title:"Meqabyan III", summary: paras(
+          "The third Meqabyan offers further teaching through stories and reflections on idolatry, justice, and trust in God. Like the other Meqabyan books, it has its own identity within the Ethiopian tradition.",
+          "Read it on its own terms rather than expecting the history found in 1 and 2 Maccabees. Pay attention to the lessons its episodes draw about allegiance, courage, and the limits of earthly authority."
         )
       },
-      { order: 31, era:"NT", status:"extra", title:"Gospel of Judas",
-        summary: paras(
-          "Recasts Judas in a cosmic drama of secret revelation.",
-          "Mythic cosmology eclipses apostolic proclamation.",
-          "Historically interesting; theologically alien to the canon."
+      { order:82, era:"INTER", status:"extra", title:"Sinodos", summary: paras(
+          "Sinodos gathers church teaching and instructions for Christian community and worship in the Ethiopian tradition. It is part of the broader church-order material that distinguishes the Ethiopian collection.",
+          "Approach it as guidance for how a community understands its shared life before God. The exact contents and divisions can vary across editions and translations."
         )
       },
-      { order: 32, era:"NT", status:"extra", title:"Gospel of Peter",
-        summary: paras(
-          "A non-canonical passion narrative with legendary embellishments.",
-          "Docetic tones drew early rejection.",
-          "Contrasts with the sobriety of the canonical passion."
+      { order:83, era:"INTER", status:"extra", title:"Books of the Covenant", summary: paras(
+          "The Books of the Covenant preserve teachings concerning Christian belief, worship, and the life of the church. They belong to the broader Ethiopian collection beyond the familiar narrative and prophetic books.",
+          "As you read, notice the way faith is expressed not only as personal devotion but as a shared pattern of teaching and community practice. Editions may divide or name this material differently."
         )
       },
-      { order: 33, era:"NT", status:"extra", title:"Infancy Gospel of James",
-        summary: paras(
-          "Traditions of Mary’s birth, upbringing, and purity shaped later devotion.",
-          "The nativity is embellished with wonder motifs.",
-          "Influenced art and liturgy though late in origin."
+      { order:84, era:"INTER", status:"extra", title:"Ethiopic Clement", summary: paras(
+          "Ethiopic Clement is a church-order and teaching work preserved in the Ethiopian Christian tradition under Clement’s name. It reflects the importance of instruction, discipline, and faithful communal life.",
+          "Its presence reminds readers that the Ethiopian biblical collection includes writings connected to the ordering and teaching of the church, not only the books familiar from other English Bibles."
         )
       },
-      { order: 34, era:"NT", status:"extra", title:"Infancy Gospel of Thomas",
-        summary: paras(
-          "Stories of Jesus’ childhood power and growth in wisdom.",
-          "Tone ranges from unsettling to edifying across recensions.",
-          "Reveals curiosity about Jesus’ hidden years."
+      { order:85, era:"INTER", status:"extra", title:"Didascalia", summary: paras(
+          "The Didascalia offers instruction for Christian leaders and communities, addressing worship, conduct, and care within the church. In the Ethiopian tradition it belongs with the church-order writings.",
+          "Read for the picture it gives of a community seeking to live faithfully together. Its historical instructions also offer a glimpse into how early Christians organized teaching and pastoral responsibility."
         )
       },
-      { order: 35, era:"NT", status:"extra", title:"Acts of Peter",
-        summary: paras(
-          "Miracles and martyrdom traditions gather around Peter beyond canonical Acts.",
-          "The ‘Quo Vadis?’ scene emerges in this stream.",
-          "Pious imagination fills narrative gaps—devotional, not scriptural."
+      { order:86, era:"INTER", status:"extra", title:"Tegsats (Reproof)", summary: paras(
+          "Tegsats, often rendered ‘Reproof,’ belongs to the wisdom and instruction writings associated with Ethiopian biblical lists. Its title points toward correction that is meant to guide a person toward discernment and a faithful life.",
+          "Read slowly for its practical counsel and the kind of character it commends. English editions may render or group this title differently, so compare the heading in your copy as you study."
         )
       },
-      { order: 36, era:"NT", status:"extra", title:"Acts of Paul",
-        summary: paras(
-          "Journeys and martyrdom lore, including Thecla’s story of courage and chastity.",
-          "Popular in early communities, shaped by ascetic ideals.",
-          "Sits alongside, not within, apostolic Scripture."
+      { order:87, era:"INTER", status:"extra", title:"Metsihafe Tibeb (Books of Wisdom)", summary: paras(
+          "Metsihafe Tibeb is a wisdom collection named in Ethiopian church lists. Its placement alongside familiar wisdom books reflects the broad Ethiopian inheritance of instruction for living with reverence, justice, and understanding.",
+          "Use the title and divisions in your edition as your guide: transliterations and the way these materials are grouped vary. As you read, notice how wisdom is presented as a way of life shaped by God."
         )
       },
-      { order: 37, era:"NT", status:"extra", title:"Acts of Andrew",
-        summary: paras(
-          "Ascetic counsel and miracle tales color Andrew’s mission.",
-          "Late composition, stylized speeches, and wonder motifs abound.",
-          "A devotional portrait rather than historical record."
+      { order:88, era:"INTER", status:"extra", title:"4 Ezra", summary: paras(
+          "Also called 4 Ezra in some traditions, this apocalyptic work wrestles with suffering, injustice, and the question of how God’s promises can stand when the world seems broken. Visions and angelic dialogue carry its search for understanding.",
+          "The book gives voice to grief without letting grief have the final word. Follow its movement from protest and perplexity toward renewed hope in God’s ultimate justice. Numbering and inclusion vary among editions."
         )
-      },
-      { order: 38, era:"NT", status:"extra", title:"Acts of John",
-        summary: paras(
-          "Discourses and miracles attributed to John include docetic-leaning passages.",
-          "Wrestles with matter and spirit in speculative ways.",
-          "Questioned by early leaders; a witness to diversity, not doctrine."
-        )
-      },
-      { order: 39, era:"NT", status:"extra", title:"Acts of Thomas",
-        summary: paras(
-          "Traditions send Thomas east toward India with hymns and wonders.",
-          "Renunciation, mission, and martyrdom frame beloved Syriac memories.",
-          "History and legend intertwine in edifying tales."
-        )
-      },
-      { order: 40, era:"NT", status:"extra", title:"Epistle of Barnabas",
-        summary: paras(
-          "A tract reading the Law allegorically toward Christ and the ‘Two Ways.’",
-          "Warns against ritualism without heart and reinterprets symbols through the cross.",
-          "Influential yet outside the canon."
-        )
-      },
-      { order: 41, era:"NT", status:"extra", title:"Didache",
-        summary: paras(
-          "The earliest church manual—Two Ways of life and death; baptism, Eucharist, fasting; leadership and hospitality.",
-          "House-church rhythms and traveling-teacher safeguards shape fellowship.",
-          "A window into first-century practice and hope."
-        )
-      },
-      { order: 42, era:"NT", status:"extra", title:"Shepherd of Hermas",
-        summary: paras(
-          "Visions, mandates, and parables urge repentance and unity in Rome.",
-          "The church appears as a tower built of living stones.",
-          "Widely read in antiquity, though not received as Scripture."
-        )
-      },
-      { order: 43, era:"NT", status:"extra", title:"Apocalypse of Peter",
-        summary: paras(
-          "A tour of afterlife punishments and consolations with vivid imagery.",
-          "Influenced art and devotion in several communities.",
-          "Ultimately remained outside the canon."
-        )
-      },
-      { order: 44, era:"NT", status:"extra", title:"Apocalypse of Paul",
-        summary: paras(
-          "A later visionary journey through heavens and hells expanding 2 Cor 12 themes.",
-          "Medieval devotion copied it eagerly.",
-          "Devotional impact without apostolic authority."
-        )
-      },
-      { order: 45, era:"NT", status:"extra", title:"Apocalypse of Thomas",
-        summary: paras(
-          "End-time sayings and signs attributed to Thomas sketch a stark timetable.",
-          "A fringe apocalypse reflecting fascination with final things.",
-          "Never received as Scripture by the church."
-        )
-      },
+      }
     ];
 
-    const ICON = { canon:"✅", deut:"✝️", extra:"📜" };
+    const ICON = { canon:"📖", deut:"✝️", extra:"📜" };
     const LISTS = {
       OT: document.getElementById("list-OT"),
       INTER: document.getElementById("list-INTER"),
@@ -965,9 +731,7 @@
     }
 
     function labelStatus(s){
-      if(s==="canon") return "In Bible (Protestant)";
-      if(s==="deut") return "Deuterocanonical";
-      return "Apocrypha / Extra";
+      return "Ethiopian Bible reading guide";
     }
 
     function escapeHTML(s){
