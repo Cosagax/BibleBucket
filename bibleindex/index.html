@@ -13,12 +13,24 @@
     html,body{background:var(--bg);color:var(--fg);margin:0}
     body{font-family:Arial,system-ui,Segoe UI,Helvetica,Arial,sans-serif;line-height:1.55}
     header{
-      background: linear-gradient(180deg, var(--bg), var(--bg2));
-      padding:16px 20px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.4)
+      background:linear-gradient(180deg, #0b0f17, #101827);
+      border-bottom:1px solid rgba(255,255,255,.08);
+      box-shadow:0 2px 10px rgba(0,0,0,.35)
     }
-    header h1{margin:0;font-size:2rem;font-weight:700}
-    header h1 a{color:#fff;text-decoration:none}
-    header h1 a:hover{text-decoration:underline}
+    .header-inner{
+      max-width:1100px;margin:0 auto;padding:10px 20px;
+      min-height:88px;display:flex;align-items:center;gap:14px
+    }
+    .logo-link{display:block;line-height:0;flex:none}
+    .logo{width:68px;height:68px;object-fit:contain;display:block}
+    .brand{display:flex;flex-direction:column;line-height:1.15}
+    .brand-name{font-size:1.8rem;font-weight:800;letter-spacing:.2px;color:#fff}
+    .page-name{margin-top:4px;font-size:.9rem;color:var(--muted)}
+    .home-link{
+      margin-left:auto;padding:9px 13px;border:1px solid #243559;border-radius:10px;
+      color:var(--fg);font-size:.9rem;text-decoration:none
+    }
+    .home-link:hover{border-color:var(--accent);color:#fff}
     main{max-width:1100px;margin:0 auto;padding:20px}
     .toolbar{
       display:flex;flex-wrap:wrap;gap:10px;align-items:center;
@@ -71,12 +83,28 @@
     .count{font-size:.9rem;color:var(--muted);margin-left:auto}
     .topline{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
     .era-note{font-size:.8rem;color:var(--muted)}
-    @media (max-width:600px){ .row{flex-direction:column} }
+    @media (max-width:600px){
+      .row{flex-direction:column}
+      .header-inner{min-height:72px;padding:8px 16px;gap:10px}
+      .logo{width:54px;height:54px}
+      .brand-name{font-size:1.45rem}
+      .page-name{font-size:.8rem}
+      .home-link{padding:8px 10px}
+    }
   </style>
 </head>
 <body>
   <header>
-    <h1><a href="https://biblebucket.net">BibleBucket</a></h1>
+    <div class="header-inner">
+      <a class="logo-link" href="../" aria-label="BibleBucket home">
+        <img class="logo" src="../assets/logo.png" alt="" />
+      </a>
+      <div class="brand">
+        <div class="brand-name">BibleBucket</div>
+        <div class="page-name">Complete Bible Index</div>
+      </div>
+      <a class="home-link" href="../">Home</a>
+    </div>
   </header>
 
   <main>
