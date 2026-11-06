@@ -44,9 +44,11 @@
     .chips{display:flex;gap:8px;flex-wrap:wrap}
     .chip{
       padding:8px 10px;border:1px solid var(--rule);border-radius:999px;cursor:pointer;
-      user-select:none;font-size:.85rem;background:#0f1620
+      user-select:none;font-family:inherit;font-size:.85rem;line-height:1.2;
+      color:var(--fg);background:#0f1620
     }
     .chip.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(88,166,255,.25) inset}
+    .chip:focus-visible,.moreless:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     .legend{
       background:var(--bg2);border-radius:var(--radius);padding:10px 12px;margin-bottom:20px;
       font-size:.95rem;display:flex;gap:18px;flex-wrap:wrap;align-items:center
@@ -77,8 +79,9 @@
       -webkit-line-clamp: 2;
     }
     .moreless{
-      display:inline-block;margin-top:6px;font-size:.85rem;color:var(--accent);
-      cursor:pointer; user-select:none
+      display:inline-block;margin-top:6px;padding:0;border:0;background:none;
+      font-family:inherit;font-size:.85rem;color:var(--accent);text-align:left;
+      cursor:pointer;user-select:none
     }
     .count{font-size:.9rem;color:var(--muted);margin-left:auto}
     .topline{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -117,16 +120,16 @@
     <div class="toolbar">
       <input id="q" type="search" placeholder="Search title or summary… (e.g., Enoch, Watchers, David, Babylon)">
       <div class="chips" id="statusChips">
-        <span class="chip active" data-status="all">All</span>
-        <span class="chip" data-status="canon">✅ Canon</span>
-        <span class="chip" data-status="deut">✝️ Deut</span>
-        <span class="chip" data-status="extra">📜 Extra</span>
+        <button type="button" class="chip active" data-status="all" aria-pressed="true">All</button>
+        <button type="button" class="chip" data-status="canon" aria-pressed="false">✅ Canon</button>
+        <button type="button" class="chip" data-status="deut" aria-pressed="false">✝️ Deut</button>
+        <button type="button" class="chip" data-status="extra" aria-pressed="false">📜 Extra</button>
       </div>
       <div class="chips" id="eraChips">
-        <span class="chip active" data-era="all">All Eras</span>
-        <span class="chip" data-era="OT">Old Testament Era</span>
-        <span class="chip" data-era="INTER">Intertestamental</span>
-        <span class="chip" data-era="NT">New Testament Era</span>
+        <button type="button" class="chip active" data-era="all" aria-pressed="true">All Eras</button>
+        <button type="button" class="chip" data-era="OT" aria-pressed="false">Old Testament Era</button>
+        <button type="button" class="chip" data-era="INTER" aria-pressed="false">Intertestamental</button>
+        <button type="button" class="chip" data-era="NT" aria-pressed="false">New Testament Era</button>
       </div>
       <span class="count" id="count"></span>
     </div>
@@ -911,8 +914,11 @@
     let eraFilter = "all";
 
     function setActive(group, value){
-      [...group.children].forEach(ch=>ch.classList.toggle("active",
-        ch.dataset.status===value || ch.dataset.era===value));
+      [...group.children].forEach(ch=>{
+        const active = ch.dataset.status===value || ch.dataset.era===value;
+        ch.classList.toggle("active", active);
+        ch.setAttribute("aria-pressed", String(active));
+      });
     }
 
     statusChips.addEventListener("click", e=>{
@@ -930,16 +936,18 @@
       const btn = e.target.closest(".moreless"); if(!btn) return;
       const box = btn.previousElementSibling; // .summary
       box.classList.toggle("clamp");
-      btn.textContent = box.classList.contains("clamp") ? "More" : "Less";
+      const collapsed = box.classList.contains("clamp");
+      btn.textContent = collapsed ? "More" : "Less";
+      btn.setAttribute("aria-expanded", String(!collapsed));
     });
 
     function rowHTML(b){
       // Render multi-paragraph content into <p> blocks
-      const htmlParas = escapeHTML(b.summary || "").split("\\n\\n").map(p=>`<p>${p}</p>`).join("");
+      const htmlParas = escapeHTML(b.summary || "").split("\n\n").map(p=>`<p>${p}</p>`).join("");
       // Clamp based on overall length (toggle still available)
       const needsClamp = (b.summary||"").length > 220;
       const clampClass = needsClamp ? "summary clamp" : "summary";
-      const moreLink = needsClamp ? '<span class="moreless">More</span>' : '';
+      const moreLink = needsClamp ? '<button type="button" class="moreless" aria-expanded="false">More</button>' : '';
       return `
         <li>
           <div class="row">
