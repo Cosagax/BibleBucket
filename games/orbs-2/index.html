@@ -185,7 +185,7 @@
   function glowCircle(ctx,x,y,r,iA,oA,t){ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createRadialGradient(x,y,r*.1,x,y,r);g.addColorStop(0,`rgba(${t[0]},${t[1]},${t[2]},${iA})`);g.addColorStop(1,`rgba(${t[0]},${t[1]},${t[2]},${oA})`);ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();ctx.restore()}
 
   // ===== background =====
-  const bgImg=new Image(); bgImg.src="background.jpg";
+  const bgImg=new Image(); bgImg.src="background-kansas.jpg";
   const stars=[]; let starFade=1;
   function seedStars(){stars.length=0;const c=Math.floor(canvas.clientWidth*canvas.clientHeight/18000)+40;for(let i=0;i<c;i++){stars.push({x:Math.random()*canvas.clientWidth,y:Math.random()*canvas.clientHeight*0.7,r:Math.random()*1.6+0.6,base:Math.random()*0.35+0.2,amp:Math.random()*0.45+0.25,spd:Math.random()*0.8+0.6,ph:Math.random()*6.283})}}
   seedStars(); addEventListener('resize',seedStars);
