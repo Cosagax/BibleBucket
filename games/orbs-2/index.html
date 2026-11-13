@@ -51,6 +51,19 @@
   #cinOverlay .center.topRight .btnRow{justify-content:flex-end}
   @media (max-width:520px){#cinOverlay .center.topRight{right:3%;top:calc(80% + env(safe-area-inset-top));width:min(94%,420px)}}
 
+
+  /* A quiet epilogue; the artwork stays above the readable closing verse. */
+  #cinOverlay.ascent{background:linear-gradient(0deg,rgba(3,9,20,.85),transparent 68%)}
+  #cinOverlay.ascent .center{top:auto;bottom:clamp(22px,7vh,80px);left:50%;right:auto;transform:translateX(-50%);width:min(90%,650px);text-align:center;padding:0}
+  #cinOverlay.ascent .title{font:400 clamp(25px,4.5vw,42px)/1.15 Georgia,serif;letter-spacing:.03em;color:#fff0ce}
+  #cinOverlay.ascent .verses{font:400 clamp(16px,2.6vw,23px)/1.55 Georgia,serif;text-shadow:0 2px 12px #000;margin:16px auto 0;padding:0;max-width:540px}
+  #cinOverlay.ascent cite{display:block;font:600 11px/1.5 Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#d1bd95;margin-top:13px}
+  #cinOverlay.ascent .btnRow{justify-content:center}
+  #skipEnding[hidden]{display:none}
+  #skipEnding{position:absolute;right:16px;bottom:20px;z-index:2;background:rgba(7,17,31,.65)}
+  #cinOverlay.ascent .hint{line-height:1.5;color:#c4cdd8}
+  @media(max-height:500px){#cinOverlay.ascent .center{bottom:14px}#cinOverlay.ascent .verses{font-size:16px;margin-top:8px}#cinOverlay.ascent .btnRow{margin-top:10px}#cinOverlay.ascent .title{font-size:24px}}
+
 </style>
 </head>
 <body>
@@ -91,6 +104,7 @@
 
   <!-- Cinematic overlay UI (titles + lines + play again) -->
   <div id="cinOverlay">
+    <button id="skipEnding" class="btn small" hidden>Skip ending</button>
     <div class="center">
       <div id="cinTitle" class="title">ENOCH</div>
       <div id="verses" class="verses"></div>
@@ -141,6 +155,7 @@
   // Auto-reduced motion on small screens
   const isSmallScreen = Math.min(window.innerWidth, window.innerHeight) < 420;
   if (isSmallScreen) REDUCED_MOTION = true;
+  const prefersQuietEnding = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   // ===== audio =====
   let actx; const audio=()=>actx||(actx=new (window.AudioContext||window.webkitAudioContext)());
@@ -352,8 +367,8 @@
   let laserCD=0, laserSparkTimer=0;
 
   // ===== flow =====
-  function startGame(){try{audio().resume()}catch{} STATE.running=true;STATE.ended=false;STATE.mode='play';STATE.timeLeft=SETTINGS.timeStart;STATE.score=0;STATE.hits=0;STATE.misses=0;STATE.streak=0;entities.length=0;particles.length=0;watchers.length=0;enochLineQueue=[];spawnTimer=0;input.keys={};keyboardAiming=false;pointerAiming=false;refreshAiming();input.pointer.x=canvas.clientWidth/2;input.pointer.y=canvas.clientHeight*.35;player.x=(canvas.clientWidth - player.w)/2;player.y=player.feetY-player.h;captain.reset();titleEl.style.display='none';resetBtn.disabled=false;overlay.style.display='none';versesBox.innerHTML='';againBtn.style.display='none';titleText.textContent='ENOCH';hintEl.textContent='';starFade=1;runLoop()}
-  function resetGame(){STATE.running=false;STATE.ended=false;STATE.mode='play';input.keys={};keyboardAiming=false;pointerAiming=false;refreshAiming();if(frameId){cancelAnimationFrame(frameId);frameId=0}titleEl.style.display='flex';resetBtn.disabled=true;overlay.style.display='none';versesBox.innerHTML='';againBtn.style.display='none'; if(articleBtn){articleBtn.style.display='none'; articleBtn.href='#';} starFade=1;try{overlayCenter.classList.remove('topRight')}catch{}render()}
+  function startGame(){clearEnding();try{audio().resume()}catch{} STATE.running=true;STATE.ended=false;STATE.mode='play';STATE.timeLeft=SETTINGS.timeStart;STATE.score=0;STATE.hits=0;STATE.misses=0;STATE.streak=0;entities.length=0;particles.length=0;watchers.length=0;enochLineQueue=[];spawnTimer=0;input.keys={};keyboardAiming=false;pointerAiming=false;refreshAiming();input.pointer.x=canvas.clientWidth/2;input.pointer.y=canvas.clientHeight*.35;player.x=(canvas.clientWidth - player.w)/2;player.y=player.feetY-player.h;captain.reset();titleEl.style.display='none';resetBtn.disabled=false;overlay.style.display='none';versesBox.innerHTML='';againBtn.style.display='none';titleText.textContent='ENOCH';hintEl.textContent='';starFade=1;runLoop()}
+  function resetGame(){clearEnding();STATE.running=false;STATE.ended=false;STATE.mode='play';input.keys={};keyboardAiming=false;pointerAiming=false;refreshAiming();if(frameId){cancelAnimationFrame(frameId);frameId=0}titleEl.style.display='flex';resetBtn.disabled=true;overlay.style.display='none';versesBox.innerHTML='';againBtn.style.display='none'; if(articleBtn){articleBtn.style.display='none'; articleBtn.href='#';} starFade=1;try{overlayCenter.classList.remove('topRight')}catch{}render()}
   tPlay.addEventListener('click',()=>{if(!STATE.running)startGame()});
   resetBtn.addEventListener('click',resetGame);
 
@@ -491,233 +506,112 @@
   // show start
   titleEl.style.display='flex';
 
-  // ===== WIN CINEMATIC =====
+  // ===== WIN CINEMATIC: And God took him =====
+  // Coordinates are normalized so resizing never strands the orbs off-screen.
   let cinWin=null;
-
+  const enochAscent = new Image();
+  enochAscent.src='assets/enoch-ascent.png';
+  const skipEnding=document.getElementById('skipEnding');
+  const smooth=(t)=>{t=clamp(t,0,1);return t*t*(3-2*t)};
+  function clearEnding(){
+    cinWin=null;
+    overlay.classList.remove('ascent');
+    overlayCenter.style.opacity='';
+    skipEnding.hidden=true;
+  }
+  function finishAscent(){
+    if(!cinWin || cinWin.done)return;
+    cinWin.t=12;cinWin.done=true;
+    skipEnding.hidden=true;
+    titleText.textContent='And God took him.';
+    versesBox.innerHTML='“And Enoch walked with God: and he was not; for God took him.”<cite>Genesis 5:24 · KJV</cite>';
+    hintEl.textContent='The night watch is complete.';
+    againBtn.style.display='inline-flex';againBtn.onclick=resetGame;
+    articleBtn.textContent='Explore Enoch →';
+    articleBtn.href='https://biblebucket.net/mysteries/enoch.html';
+    articleBtn.style.display='inline-flex';
+    overlayCenter.style.opacity='1';
+  }
+  skipEnding.addEventListener('click',finishAscent);
+  // Explicit skip controls avoid consuming a held beam, a link click, or replay.
+  window.addEventListener('keydown',e=>{
+    if(STATE.mode==='cin_win' && cinWin && !cinWin.done && e.key==='Escape'){
+      e.preventDefault();finishAscent();
+    }
+  });
   function startWinCinematic(){
-    sfx.win();
     STATE.mode='cin_win';
-    try{overlayCenter.classList.add('topRight')}catch{}; overlay.style.display='block';
-    bindSkip();
-
-    const area = canvas.clientWidth*canvas.clientHeight;
-    const baseCap = Math.floor(area/6500);
-    const DOT_LIMIT = REDUCED_MOTION ? Math.min(320, Math.max(220, baseCap)) :
-                      Math.min(1200, Math.max(500, baseCap));
-
-    const droneCount = REDUCED_MOTION ? 5 : 9;
-    const drones=[];
-    for(let i=0;i<droneCount;i++){
-      drones.push({ x: rand(20, canvas.clientWidth-20), y: rand(canvas.clientHeight*0.18, canvas.clientHeight*0.5), vy: rand(-120,-200), alpha: 1 });
-    }
-
-    const orbStarts = [];
-    for(const e of entities){ if(e.kind==='orb') orbStarts.push({x:e.x,y:e.y}); }
-    entities.length=0; watchers.length=0; particles.length=0;
-
-    const built = buildEnochTargets(DOT_LIMIT);
-    const targets = built.points;
-    const sources = shuffle(orbStarts).slice(0, targets.length);
-    const need = Math.max(0, targets.length - sources.length);
-    for(let i=0;i<need;i++){
-      sources.push({x:rand(10,canvas.clientWidth-10), y:rand(10,canvas.clientHeight*0.5)});
-    }
-
-    const shuffledTargets = shuffle(targets);
-    const dots=[];
-    for(let i=0;i<shuffledTargets.length;i++){
-      const s=sources[i], t=shuffledTargets[i];
-      const dur = REDUCED_MOTION ? rand(1.0,1.5) : rand(1.4,2.2);
-      dots.push({x:s.x,y:s.y, sx:s.x, sy:s.y, tx:t.x,ty:t.y, t:0,dur, edge:t.edge,tone:t.tone});
-    }
-
-    versesBox.innerHTML=''; titleText.textContent='ENOCH'; hintEl.textContent=''; againBtn.style.display='none'; if(articleBtn){ articleBtn.textContent='Enoch →'; articleBtn.href='https://biblebucket.net/mysteries/enoch.html'; articleBtn.style.display='inline-block'; }
-
-    cinWin = {
-      t:0, phase:0, done:false, fastForward:false,
-      drones, dots, holdTimer:0.8,
-      breathe:0,
-      meta: built.meta
-    };
+    input.keys={};pointerAiming=false;keyboardAiming=false;refreshAiming();
+    const w=canvas.clientWidth,h=canvas.clientHeight;
+    const dots=entities.filter(e=>e.kind==='orb' && e.alive).map(e=>({sx:e.x/w,sy:e.y/h}));
+    const count=REDUCED_MOTION?32:64;
+    while(dots.length<count)dots.push({sx:rand(.08,.92),sy:rand(.12,.76)});
+    dots.forEach((d,i)=>Object.assign(d,{angle:i*2.39996,delay:rand(0,1.2),radius:rand(.06,.22),size:rand(1.1,2.6)}));
+    cinWin={t:0,startedAt:performance.now(),done:false,dots,quiet:prefersQuietEnding.matches};
+    entities.length=0;watchers.length=0;particles.length=0;
+    overlayCenter.classList.remove('topRight');overlay.classList.add('ascent');
+    overlay.style.display='block';overlayCenter.style.opacity='0';
+    titleText.textContent='';versesBox.innerHTML='';hintEl.textContent='';
+    againBtn.style.display='none';articleBtn.style.display='none';skipEnding.hidden=false;
+    // Gentle sustained harmony, scheduled once, rather than a victory alarm.
+    try{[261.63,329.63,392].forEach(f=>tone(f,2.8,'sine',.025))}catch{}
   }
-
-  function buildEnochTargets(maxPts){
-    const off=document.createElement('canvas'), w=720,h=720; off.width=w; off.height=h; const oc=off.getContext('2d');
-    oc.clearRect(0,0,w,h); oc.fillStyle='#fff';
-    const cx=w/2, base=h-22;
-
-    // Turban, face, and full beard: the light should gather around a person, not a halo-shaped head.
-    oc.beginPath();
-    oc.ellipse(cx, 150, 58, 38, 0, Math.PI, Math.PI*2);
-    oc.quadraticCurveTo(cx+52, 170, cx+43, 184);
-    oc.lineTo(cx-43, 184); oc.quadraticCurveTo(cx-52, 170, cx-58, 150); oc.fill();
-
-    // Face framed by the headdress, tapering to a distinct prophet's beard.
-    oc.beginPath();
-    oc.moveTo(cx-39, 164);
-    oc.quadraticCurveTo(cx-44, 203, cx-23, 229);
-    oc.quadraticCurveTo(cx-9, 240, cx, 239);
-    oc.quadraticCurveTo(cx+9, 240, cx+23, 229);
-    oc.quadraticCurveTo(cx+44, 203, cx+39, 164);
-    oc.quadraticCurveTo(cx, 146, cx-39, 164); oc.fill();
-    oc.beginPath();
-    oc.moveTo(cx-25, 218); oc.quadraticCurveTo(cx, 230, cx+25, 218);
-    oc.lineTo(cx+32, 246); oc.quadraticCurveTo(cx+20, 276, cx, 292);
-    oc.quadraticCurveTo(cx-20, 276, cx-32, 246); oc.closePath(); oc.fill();
-
-    // Flowing mantle and robe with broad shoulders and a weighted hem.
-    oc.beginPath();
-    oc.moveTo(cx-44, 260); oc.quadraticCurveTo(cx-20, 246, cx, 250);
-    oc.quadraticCurveTo(cx+20, 246, cx+44, 260);
-    oc.bezierCurveTo(cx+88, 278, cx+128, 305, cx+160, 335);
-    oc.bezierCurveTo(cx+178, 397, cx+158, 535, cx+138, base);
-    oc.lineTo(cx-138, base);
-    oc.bezierCurveTo(cx-158, 535, cx-178, 397, cx-160, 335);
-    oc.bezierCurveTo(cx-128, 305, cx-88, 278, cx-44, 260);
-    oc.closePath(); oc.fill();
-
-    // Raised mantle collar, hanging sleeves, and hands.
-    oc.beginPath(); oc.moveTo(cx-50, 272); oc.quadraticCurveTo(cx, 308, cx+50, 272);
-    oc.lineTo(cx+29, 322); oc.quadraticCurveTo(cx, 343, cx-29, 322); oc.closePath(); oc.fill();
-    oc.beginPath(); oc.moveTo(cx-48, 286); oc.quadraticCurveTo(cx-92, 302, cx-128, 336);
-    oc.lineTo(cx-110, 372); oc.quadraticCurveTo(cx-70, 344, cx-32, 333); oc.closePath(); oc.fill();
-    oc.beginPath(); oc.moveTo(cx+48, 286); oc.quadraticCurveTo(cx+90, 300, cx+112, 330);
-    oc.lineTo(cx+90, 364); oc.quadraticCurveTo(cx+63, 340, cx+31, 333); oc.closePath(); oc.fill();
-    oc.beginPath(); oc.ellipse(cx-117, 366, 15, 20, -.3, 0, Math.PI*2); oc.fill();
-    oc.beginPath(); oc.ellipse(cx+98, 359, 15, 19, .25, 0, Math.PI*2); oc.fill();
-
-    // Robe seam, sash, folds, and embroidered hem.
-    oc.beginPath(); oc.moveTo(cx, 304); oc.quadraticCurveTo(cx-25, 450, cx-8, base);
-    oc.lineTo(cx+8, base); oc.quadraticCurveTo(cx+25, 450, cx, 304); oc.closePath(); oc.fill();
-    oc.save(); oc.translate(cx-68, 365); oc.rotate(-.34); oc.fillRect(-58,-13,116,26); oc.restore();
-    oc.beginPath(); oc.moveTo(cx-122, base-20); oc.quadraticCurveTo(cx, base-2, cx+122, base-20);
-    oc.lineTo(cx+118, base-7); oc.quadraticCurveTo(cx, base+8, cx-118, base-7); oc.closePath(); oc.fill();
-
-    const staffTopY=270, staffBaseY=base+8, staffX=cx+100;
-    oc.fillRect(staffX-7, staffTopY, 14, staffBaseY-staffTopY);
-    oc.beginPath(); oc.arc(staffX, staffTopY-18, 17, 0, Math.PI*2); oc.fill();
-    const rawStaffTip={x:staffX, y:staffTopY-18};
-
-    // Carved eyes, nose, and mouth give the face definition without changing the particle aesthetic.
-    oc.globalCompositeOperation='destination-out';
-    oc.beginPath(); oc.ellipse(cx-15, 190, 9, 5, -.08, 0, Math.PI*2); oc.fill();
-    oc.beginPath(); oc.ellipse(cx+15, 190, 9, 5, .08, 0, Math.PI*2); oc.fill();
-    oc.beginPath(); oc.moveTo(cx, 196); oc.lineTo(cx-7, 212); oc.lineTo(cx+7, 212); oc.closePath(); oc.fill();
-    oc.beginPath(); oc.ellipse(cx, 222, 9, 4, 0, 0, Math.PI*2); oc.fill();
-    oc.beginPath(); oc.moveTo(cx-4, base-6); oc.lineTo(cx, base-74); oc.lineTo(cx+4, base-6); oc.closePath(); oc.fill();
-    oc.globalCompositeOperation='source-over';
-
-    const stepBase=10, step=REDUCED_MOTION?stepBase+3:stepBase;
-    const edges=[], fills=[];
-    const img=oc.getImageData(0,0,w,h).data;
-    const aAt=(x,y)=> (x<0||y<0||x>=w||y>=h)?0:img[(y*w+x)*4+3];
-    for(let y=0;y<h;y+=step){
-      for(let x=0;x<w;x+=step){
-        const a=aAt(x,y);
-        if(a>160){
-          const e=aAt(x+step,y)<100||aAt(x-step,y)<100||aAt(x,y+step)<100||aAt(x,y-step)<100;
-          const jitter = e ? 0 : (Math.random()-0.5)*step*0.35;
-          const face=Math.abs(x-cx)<39&&y>165&&y<222;
-          const staff=Math.abs(x-staffX)<10&&y>staffTopY;
-          const trim=e&&((y>base-28)||(Math.abs(x-cx)>118&&y>320));
-          const tone=face?'warm':(staff||trim?'gold':'ice');
-          (e?edges:fills).push({x:x+jitter,y:y-jitter,edge:e,tone});
-        }
-      }
-    }
-    const edgeRatio = 0.54;
-    const wantEdges=Math.min(edges.length,Math.floor(maxPts*edgeRatio));
-    const wantFill=Math.min(fills.length,Math.max(0,maxPts-wantEdges));
-    const chosen=shuffle(edges).slice(0,wantEdges).concat(shuffle(fills).slice(0,wantFill));
-
-    const scale=(canvas.clientHeight*0.54)/h;
-    const shift=canvas.clientWidth>620?canvas.clientWidth*.17:0;
-    const ox=canvas.clientWidth*0.5-(w*scale)/2-shift;
-    const oy=Math.max(6, canvas.clientHeight*0.02);
-
-    let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
-    for(const p of chosen){p.x=ox+p.x*scale;p.y=oy+p.y*scale; if(p.x<minX)minX=p.x; if(p.y<minY)minY=p.y; if(p.x>maxX)maxX=p.x; if(p.y>maxY)maxY=p.y; }
-
-    const staffTip = { x: ox + rawStaffTip.x*scale, y: oy + rawStaffTip.y*scale };
-    const center = { x:(minX+maxX)/2, y:(minY+maxY)/2 };
-    const radius = Math.max(maxX-minX, maxY-minY)/2;
-
-    return { points: chosen, meta:{staffTip, center, radius} };
-  }
-
-  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]]}return a}
-  function randomSubset(arr,n){const s=shuffle([...arr]);return s.slice(0,Math.max(0,Math.min(n,s.length)))}
-
   function updateWinCinematic(dt){
-    if(!cinWin) return;
-    const C=cinWin; C.t+=dt;
-
-    if(C.fastForward){
-      C.drones.length=0;
-      C.dots.forEach(d=>{d.x=d.tx; d.y=d.ty; d.t=d.dur;});
-      C.phase=1; C.holdTimer=0.15; C.fastForward=false;
-    }
-
-    if(C.phase===0){
-      for(let i=C.drones.length-1;i>=0;i--){
-        const d=C.drones[i]; d.y+=d.vy*dt; d.alpha=Math.max(0,d.alpha-dt*0.7);
-        if(d.y<-40||d.alpha<=0) C.drones.splice(i,1);
-      }
-      for(const d of C.dots){
-        d.t=Math.min(d.dur,d.t+dt);
-        const k=easeInOut(d.t/d.dur);
-        d.x = d.sx + (d.tx - d.sx) * k; d.y = d.sy + (d.ty - d.sy) * k;
-      }
-      const allIn=C.dots.every(d=>d.t>=d.dur*0.98);
-      if((C.drones.length===0 && allIn) || C.t>6.0){ C.phase=1; C.t=0; }
-    } else if(C.phase===1){
-      C.holdTimer-=dt;
-      if(C.holdTimer<=0){againBtn.style.display='inline-block';againBtn.onclick=resetGame;C.done=true}
-    }
+    if(!cinWin || cinWin.done)return;
+    cinWin.t=(performance.now()-cinWin.startedAt)/1000;
+    if(cinWin.t >= (cinWin.quiet?2:12))finishAscent();
   }
-
   function drawWinCinematic(){
-    if(!cinWin) return; const C=cinWin;
+    if(!cinWin)return;
+    const C=cinWin,t=C.t,w=canvas.clientWidth,h=canvas.clientHeight;
+    const cx=w*.5,cy=h*.23,scale=Math.min(w,h);
+    ctx.save();
+    ctx.fillStyle=`rgba(3,9,22,${.32*smooth(t/2)})`;ctx.fillRect(0,0,w,h);
+    const gathering=smooth((t-1)/4), departing=smooth((t-7)/4);
+    const glow=C.done?.22:(.08+.48*gathering)*(1-.65*departing);
+    const radius=scale*(.18+.14*gathering);
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,radius);
+    g.addColorStop(0,`rgba(255,237,190,${glow})`);
+    g.addColorStop(.35,`rgba(239,196,124,${glow*.3})`);
+    g.addColorStop(1,'rgba(200,166,105,0)');
+    ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
 
-    // halo
-    if(C.meta){
-      const r=C.meta.radius*1.35, a=0.10+0.05*Math.sin(C.t*1.4);
-      const {x,y}=C.meta.center;
-      ctx.save();
-      const g=ctx.createRadialGradient(x,y,r*0.25,x,y,r);
-      g.addColorStop(0,`rgba(180,220,255,${0.10+a})`);
-      g.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.globalCompositeOperation='lighter';
-      ctx.fillStyle=g; ctx.fillRect(0,0,canvas.clientWidth,canvas.clientHeight);
-      ctx.restore();
+    if(!C.done && !C.quiet){
+      for(const d of C.dots){
+        const p=smooth((t-d.delay)/6), collapse=smooth((t-6-d.delay*.3)/3);
+        const angle=d.angle+t*.42;
+        const r=d.radius*scale*(1-collapse);
+        const x=lerp(d.sx*w,cx+Math.cos(angle)*r,p);
+        const y=lerp(d.sy*h,cy+Math.sin(angle)*r*.4,p);
+        const opacity=(1-smooth((t-8)/2))*.85;
+        glowCircle(ctx,x,y,9,opacity*.45,0,[202,224,255]);
+        ctx.fillStyle=`rgba(255,239,199,${opacity})`;
+        ctx.beginPath();ctx.arc(x,y,d.size,0,Math.PI*2);ctx.fill();
+      }
     }
 
-    // Face in warm light; robe and turban in moonlit blue; staff and embroidery in gold.
-    const pulse = 0.24 + 0.10*Math.sin(C.t*1.2);
-    const tones={ice:{fill:'#e9f7ff',glow:[135,215,255]},warm:{fill:'#ffe0b6',glow:[255,164,91]},gold:{fill:'#ffe5a3',glow:[255,202,102]}};
-    ctx.save(); ctx.globalCompositeOperation='lighter';
-    for(const tone of ['ice','warm','gold']){
-      ctx.fillStyle=tones[tone].fill; ctx.beginPath();
-      for(const d of C.dots){if(d.tone!==tone)continue;ctx.moveTo(d.x+1.5,d.y);ctx.arc(d.x,d.y,d.edge?1.9:1.5,0,Math.PI*2)}
-      ctx.fill();
+    // The same hood, white beard, burgundy/gold robe, and staff as the intro.
+    // Missing art degrades to the light-and-orbs ending, never a broken image.
+    const visible=C.done?0:(C.quiet?.7:smooth((t-2)/2)*(1-smooth((t-7)/3)));
+    if(visible>0 && enochAscent.complete && enochAscent.naturalWidth){
+      const ascent=C.quiet?0:smooth((t-5)/5);
+      const ih=Math.min(h*.49,w*.65)*(1-ascent*.22);
+      const iw=ih*enochAscent.naturalWidth/enochAscent.naturalHeight;
+      ctx.globalAlpha=visible;
+      ctx.drawImage(enochAscent,cx-iw/2,h*.10-ascent*h*.08,iw,ih);
+      ctx.globalAlpha=1;
     }
-    for(const d of C.dots){const tone=tones[d.tone]||tones.ice;glowCircle(ctx,d.x,d.y,d.edge?7.0:5.4,0.62+pulse,0,tone.glow)}
+    // One steady star remains. No flashing or infinite particle animation.
+    const starAlpha=C.done?1:smooth((t-8)/3);
+    if(starAlpha>0){
+      glowCircle(ctx,cx,cy,25,starAlpha*.5,0,[255,229,175]);
+      ctx.strokeStyle=`rgba(255,242,213,${starAlpha})`;ctx.lineWidth=1.2;
+      ctx.beginPath();ctx.moveTo(cx-9,cy);ctx.lineTo(cx+9,cy);
+      ctx.moveTo(cx,cy-14);ctx.lineTo(cx,cy+14);ctx.stroke();
+      ctx.fillStyle=`rgba(255,252,235,${starAlpha})`;
+      ctx.beginPath();ctx.arc(cx,cy,2.2,0,Math.PI*2);ctx.fill();
+    }
     ctx.restore();
-
-    // staff tip twinkle
-    if(C.meta && C.meta.staffTip){
-      const s=C.meta.staffTip, tw=1+0.6*Math.sin(C.t*8);
-      glowCircle(ctx,s.x,s.y,9+tw*2,0.8,0,[180,230,255]);
-      ctx.save(); ctx.globalCompositeOperation='lighter';
-      ctx.strokeStyle='rgba(200,240,255,0.9)';
-      ctx.lineWidth=1.4;
-      ctx.beginPath(); ctx.moveTo(s.x-6,s.y); ctx.lineTo(s.x+6,s.y);
-      ctx.moveTo(s.x,s.y-6); ctx.lineTo(s.x,s.y+6); ctx.stroke();
-      ctx.restore();
-    }
-
-    overlay.style.pointerEvents='auto'; try{overlayCenter.classList.add('topRight')}catch{}; overlay.style.display='block';
-    titleText.textContent='ENOCH';
   }
 
   // ===== LOSE CINEMATIC =====
@@ -869,11 +763,11 @@
     captain.draw(ctx);
   }
 
-  // skip-to-final for win overlay
-  const bindSkip=()=>{window.addEventListener('keydown',skipOnce,{once:true});window.addEventListener('mousedown',skipOnce,{once:true});window.addEventListener('touchstart',skipOnce,{once:true})};
-  const skipOnce=()=>{if(!cinWin) return; if(!cinWin.done){cinWin.fastForward=true;} else { resetGame(); }}
-
   titleEl.style.display='flex';
+  // Shareable art review: normal games still require reaching the score goal.
+  if(new URLSearchParams(location.search).get('ending')==='preview'){
+    startGame();STATE.timeLeft=0;STATE.ended=true;startWinCinematic();
+  }
 })();
 </script>
 </body>
