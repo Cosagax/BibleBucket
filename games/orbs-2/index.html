@@ -47,8 +47,9 @@
   #cinOverlay .verses{margin-top:14px;color:#eaf4ff;text-shadow:0 0 10px rgba(180,220,255,0.55);font-size:clamp(14px,4.2vw,22px);line-height:1.33;padding:0 16px}
   #cinOverlay .hint{color:#9fb6cc;font-size:12px;margin-top:8px}
   #cinOverlay .btnRow{margin-top:16px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-  #cinOverlay .center.topRight{left:auto;right:6%;top:calc(32% + env(safe-area-inset-top));transform:translate(0,-50%);text-align:right;width:min(92%,520px);padding-right:max(16px,env(safe-area-inset-right));word-wrap:break-word}
-  @media (max-width:520px){#cinOverlay .center.topRight{right:4%;top:calc(30% + env(safe-area-inset-top));width:min(92%,420px)}}
+  #cinOverlay .center.topRight{left:auto;right:4%;top:calc(24% + env(safe-area-inset-top));transform:translate(0,-50%);text-align:right;width:min(34%,340px);padding-right:max(12px,env(safe-area-inset-right));word-wrap:break-word}
+  #cinOverlay .center.topRight .btnRow{justify-content:flex-end}
+  @media (max-width:520px){#cinOverlay .center.topRight{right:3%;top:calc(80% + env(safe-area-inset-top));width:min(94%,420px)}}
 
 </style>
 </head>
@@ -527,7 +528,7 @@
     for(let i=0;i<shuffledTargets.length;i++){
       const s=sources[i], t=shuffledTargets[i];
       const dur = REDUCED_MOTION ? rand(1.0,1.5) : rand(1.4,2.2);
-      dots.push({x:s.x,y:s.y, sx:s.x, sy:s.y, tx:t.x,ty:t.y, t:0,dur, edge:t.edge});
+      dots.push({x:s.x,y:s.y, sx:s.x, sy:s.y, tx:t.x,ty:t.y, t:0,dur, edge:t.edge,tone:t.tone});
     }
 
     versesBox.innerHTML=''; titleText.textContent='ENOCH'; hintEl.textContent=''; againBtn.style.display='none'; if(articleBtn){ articleBtn.textContent='Enoch →'; articleBtn.href='https://biblebucket.net/mysteries/enoch.html'; articleBtn.style.display='inline-block'; }
@@ -545,42 +546,65 @@
     oc.clearRect(0,0,w,h); oc.fillStyle='#fff';
     const cx=w/2, base=h-22;
 
+    // Turban, face, and full beard: the light should gather around a person, not a halo-shaped head.
     oc.beginPath();
-    oc.moveTo(cx-56, 276);
-    oc.quadraticCurveTo(cx-20, 260, cx, 260);
-    oc.quadraticCurveTo(cx+20, 260, cx+56, 276);
-    oc.bezierCurveTo(cx+152, 340, cx+180, 520, cx+180, base);
-    oc.lineTo(cx-180, base);
-    oc.bezierCurveTo(cx-180, 520, cx-152, 340, cx-56, 276);
+    oc.ellipse(cx, 150, 58, 38, 0, Math.PI, Math.PI*2);
+    oc.quadraticCurveTo(cx+52, 170, cx+43, 184);
+    oc.lineTo(cx-43, 184); oc.quadraticCurveTo(cx-52, 170, cx-58, 150); oc.fill();
+
+    // Face framed by the headdress, tapering to a distinct prophet's beard.
+    oc.beginPath();
+    oc.moveTo(cx-39, 164);
+    oc.quadraticCurveTo(cx-44, 203, cx-23, 229);
+    oc.quadraticCurveTo(cx-9, 240, cx, 239);
+    oc.quadraticCurveTo(cx+9, 240, cx+23, 229);
+    oc.quadraticCurveTo(cx+44, 203, cx+39, 164);
+    oc.quadraticCurveTo(cx, 146, cx-39, 164); oc.fill();
+    oc.beginPath();
+    oc.moveTo(cx-25, 218); oc.quadraticCurveTo(cx, 230, cx+25, 218);
+    oc.lineTo(cx+32, 246); oc.quadraticCurveTo(cx+20, 276, cx, 292);
+    oc.quadraticCurveTo(cx-20, 276, cx-32, 246); oc.closePath(); oc.fill();
+
+    // Flowing mantle and robe with broad shoulders and a weighted hem.
+    oc.beginPath();
+    oc.moveTo(cx-44, 260); oc.quadraticCurveTo(cx-20, 246, cx, 250);
+    oc.quadraticCurveTo(cx+20, 246, cx+44, 260);
+    oc.bezierCurveTo(cx+88, 278, cx+128, 305, cx+160, 335);
+    oc.bezierCurveTo(cx+178, 397, cx+158, 535, cx+138, base);
+    oc.lineTo(cx-138, base);
+    oc.bezierCurveTo(cx-158, 535, cx-178, 397, cx-160, 335);
+    oc.bezierCurveTo(cx-128, 305, cx-88, 278, cx-44, 260);
     oc.closePath(); oc.fill();
 
-    oc.beginPath();
-    oc.moveTo(cx, 128);
-    oc.bezierCurveTo(cx-62, 148, cx-70, 198, cx-45, 230);
-    oc.bezierCurveTo(cx-22, 246, cx-10, 252, cx, 254);
-    oc.bezierCurveTo(cx+10, 252, cx+22, 246, cx+45, 230);
-    oc.bezierCurveTo(cx+70, 198, cx+62, 148, cx, 128);
-    oc.closePath(); oc.fill();
+    // Raised mantle collar, hanging sleeves, and hands.
+    oc.beginPath(); oc.moveTo(cx-50, 272); oc.quadraticCurveTo(cx, 308, cx+50, 272);
+    oc.lineTo(cx+29, 322); oc.quadraticCurveTo(cx, 343, cx-29, 322); oc.closePath(); oc.fill();
+    oc.beginPath(); oc.moveTo(cx-48, 286); oc.quadraticCurveTo(cx-92, 302, cx-128, 336);
+    oc.lineTo(cx-110, 372); oc.quadraticCurveTo(cx-70, 344, cx-32, 333); oc.closePath(); oc.fill();
+    oc.beginPath(); oc.moveTo(cx+48, 286); oc.quadraticCurveTo(cx+90, 300, cx+112, 330);
+    oc.lineTo(cx+90, 364); oc.quadraticCurveTo(cx+63, 340, cx+31, 333); oc.closePath(); oc.fill();
+    oc.beginPath(); oc.ellipse(cx-117, 366, 15, 20, -.3, 0, Math.PI*2); oc.fill();
+    oc.beginPath(); oc.ellipse(cx+98, 359, 15, 19, .25, 0, Math.PI*2); oc.fill();
 
-    oc.beginPath(); oc.moveTo(cx-18, 248); oc.lineTo(cx+18, 248); oc.lineTo(cx, 304); oc.closePath(); oc.fill();
-    oc.beginPath(); oc.ellipse(cx, 244, 28, 18, 0, 0, Math.PI*2); oc.fill();
+    // Robe seam, sash, folds, and embroidered hem.
+    oc.beginPath(); oc.moveTo(cx, 304); oc.quadraticCurveTo(cx-25, 450, cx-8, base);
+    oc.lineTo(cx+8, base); oc.quadraticCurveTo(cx+25, 450, cx, 304); oc.closePath(); oc.fill();
+    oc.save(); oc.translate(cx-68, 365); oc.rotate(-.34); oc.fillRect(-58,-13,116,26); oc.restore();
+    oc.beginPath(); oc.moveTo(cx-122, base-20); oc.quadraticCurveTo(cx, base-2, cx+122, base-20);
+    oc.lineTo(cx+118, base-7); oc.quadraticCurveTo(cx, base+8, cx-118, base-7); oc.closePath(); oc.fill();
 
-    oc.beginPath(); oc.moveTo(cx-48, 300); oc.bezierCurveTo(cx-150, 350, cx-150, 410, cx-70, 430); oc.lineTo(cx-48, 420); oc.closePath(); oc.fill();
-    oc.beginPath(); oc.moveTo(cx+48, 300); oc.bezierCurveTo(cx+150, 350, cx+150, 410, cx+70, 430); oc.lineTo(cx+48, 420); oc.closePath(); oc.fill();
+    const staffTopY=270, staffBaseY=base+8, staffX=cx+100;
+    oc.fillRect(staffX-7, staffTopY, 14, staffBaseY-staffTopY);
+    oc.beginPath(); oc.arc(staffX, staffTopY-18, 17, 0, Math.PI*2); oc.fill();
+    const rawStaffTip={x:staffX, y:staffTopY-18};
 
-    oc.fillRect(cx-82, 408, 164, 18);
-
-    const staffTopY=258, staffBaseY=base+10, staffX=cx+146;
-    oc.fillRect(staffX-8, staffTopY, 16, staffBaseY-staffTopY);
-    oc.beginPath(); oc.arc(staffX, staffTopY-22, 20, 0, Math.PI*2); oc.fill();
-    const rawStaffTip={x:staffX, y:staffTopY-22};
-
-    oc.save(); oc.translate(cx-126, 332); oc.rotate(-0.22); oc.fillRect(-52,-16,104,32); oc.restore();
-
+    // Carved eyes, nose, and mouth give the face definition without changing the particle aesthetic.
     oc.globalCompositeOperation='destination-out';
-    oc.beginPath(); oc.moveTo(cx, base-2); oc.lineTo(cx-12, base-62); oc.lineTo(cx+12, base-62); oc.closePath(); oc.fill();
-    oc.beginPath(); oc.ellipse(cx, 360, 44, 7, 0, 0, Math.PI*2); oc.fill();
-    oc.beginPath(); oc.ellipse(cx, 288, 20, 6, 0, 0, Math.PI*2); oc.fill();
+    oc.beginPath(); oc.ellipse(cx-15, 190, 9, 5, -.08, 0, Math.PI*2); oc.fill();
+    oc.beginPath(); oc.ellipse(cx+15, 190, 9, 5, .08, 0, Math.PI*2); oc.fill();
+    oc.beginPath(); oc.moveTo(cx, 196); oc.lineTo(cx-7, 212); oc.lineTo(cx+7, 212); oc.closePath(); oc.fill();
+    oc.beginPath(); oc.ellipse(cx, 222, 9, 4, 0, 0, Math.PI*2); oc.fill();
+    oc.beginPath(); oc.moveTo(cx-4, base-6); oc.lineTo(cx, base-74); oc.lineTo(cx+4, base-6); oc.closePath(); oc.fill();
     oc.globalCompositeOperation='source-over';
 
     const stepBase=10, step=REDUCED_MOTION?stepBase+3:stepBase;
@@ -593,17 +617,22 @@
         if(a>160){
           const e=aAt(x+step,y)<100||aAt(x-step,y)<100||aAt(x,y+step)<100||aAt(x,y-step)<100;
           const jitter = e ? 0 : (Math.random()-0.5)*step*0.35;
-          (e?edges:fills).push({x:x+jitter,y:y-jitter,edge:e});
+          const face=Math.abs(x-cx)<39&&y>165&&y<222;
+          const staff=Math.abs(x-staffX)<10&&y>staffTopY;
+          const trim=e&&((y>base-28)||(Math.abs(x-cx)>118&&y>320));
+          const tone=face?'warm':(staff||trim?'gold':'ice');
+          (e?edges:fills).push({x:x+jitter,y:y-jitter,edge:e,tone});
         }
       }
     }
-    const edgeRatio = 0.70;
+    const edgeRatio = 0.54;
     const wantEdges=Math.min(edges.length,Math.floor(maxPts*edgeRatio));
     const wantFill=Math.min(fills.length,Math.max(0,maxPts-wantEdges));
     const chosen=shuffle(edges).slice(0,wantEdges).concat(shuffle(fills).slice(0,wantFill));
 
     const scale=(canvas.clientHeight*0.54)/h;
-    const ox=canvas.clientWidth*0.5-(w*scale)/2;
+    const shift=canvas.clientWidth>620?canvas.clientWidth*.17:0;
+    const ox=canvas.clientWidth*0.5-(w*scale)/2-shift;
     const oy=Math.max(6, canvas.clientHeight*0.02);
 
     let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
@@ -663,13 +692,16 @@
       ctx.restore();
     }
 
-    // dots
+    // Face in warm light; robe and turban in moonlit blue; staff and embroidery in gold.
     const pulse = 0.24 + 0.10*Math.sin(C.t*1.2);
+    const tones={ice:{fill:'#e9f7ff',glow:[135,215,255]},warm:{fill:'#ffe0b6',glow:[255,164,91]},gold:{fill:'#ffe5a3',glow:[255,202,102]}};
     ctx.save(); ctx.globalCompositeOperation='lighter';
-    ctx.fillStyle='rgba(235,250,255,0.95)'; ctx.beginPath();
-    for(const d of C.dots){ ctx.moveTo(d.x+1.5,d.y); ctx.arc(d.x,d.y,d.edge?1.9:1.5,0,Math.PI*2); }
-    ctx.fill();
-    for(const d of C.dots){ glowCircle(ctx,d.x,d.y,d.edge?7.0:5.4,0.62+pulse,0,[140,220,255]); }
+    for(const tone of ['ice','warm','gold']){
+      ctx.fillStyle=tones[tone].fill; ctx.beginPath();
+      for(const d of C.dots){if(d.tone!==tone)continue;ctx.moveTo(d.x+1.5,d.y);ctx.arc(d.x,d.y,d.edge?1.9:1.5,0,Math.PI*2)}
+      ctx.fill();
+    }
+    for(const d of C.dots){const tone=tones[d.tone]||tones.ice;glowCircle(ctx,d.x,d.y,d.edge?7.0:5.4,0.62+pulse,0,tone.glow)}
     ctx.restore();
 
     // staff tip twinkle
