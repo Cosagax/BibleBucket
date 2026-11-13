@@ -206,9 +206,11 @@
   const entities=[];
 
   // ===== player & Captain =====
+  const playerImg=new Image(); playerImg.src="jake-character.png";
+  const captainImg=new Image(); captainImg.src="captain-character.png";
   const player={
-    x:100,y:0,w:34,h:64,speed:260,
-    get feetY(){return canvas.clientHeight-36},
+    x:100,y:0,w:96,h:144,speed:260,
+    get feetY(){return canvas.clientHeight-30},
     hand:{x:0,y:0}
   };
 
@@ -229,62 +231,43 @@
 
   function drawPlayer(){
     const torsoX=player.x, torsoY=player.y;
+    if(playerImg.complete&&playerImg.naturalWidth>0){
+      ctx.drawImage(playerImg,torsoX,torsoY,player.w,player.h);
+    }else{
+      ctx.fillStyle='#4b6da0';ctx.fillRect(torsoX+player.w*.34,torsoY+player.h*.73,player.w*.32,player.h*.27);
+      ctx.fillStyle='#777983';ctx.fillRect(torsoX+player.w*.18,torsoY+player.h*.18,player.w*.64,player.h*.48);
+      ctx.fillStyle='#e8c39e';ctx.beginPath();ctx.arc(torsoX+player.w*.5,torsoY+player.h*.09,player.w*.13,0,Math.PI*2);ctx.fill();
+    }
 
-    // legs
-    ctx.save();
-    ctx.translate(torsoX,torsoY);
-    ctx.fillStyle='#4b6da0';
-    ctx.fillRect(6,player.h-18,8,18);
-    ctx.fillRect(player.w-14,player.h-18,8,18);
-
-    // torso
-    ctx.fillStyle='#6ea3ff';
-    ctx.fillRect(2,14,player.w-4,player.h-26);
-
-    // head
-    ctx.fillStyle='#e8c39e';
-    ctx.beginPath(); ctx.arc(player.w/2,6,12,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='#0b0f14'; ctx.fillRect(player.w/2-6,4,3,3); ctx.fillRect(player.w/2+3,4,3,3);
-
-    // shoulder anchors: LEFT (aiming), RIGHT (stationary at outer side)
-    const leftSx  = player.w*0.28, leftSy  = 22;  // LEFT aims
-    const rightSx = player.w*0.88, rightSy = 22;  // RIGHT sits at the very right side
-
-    // LEFT ARM (aiming)
-    const tgtX = input.pointer.x, tgtY = input.pointer.y;
-    const worldLSx = torsoX+leftSx, worldLSy = torsoY+leftSy;
-    const arm = solveArm(worldLSx,worldLSy,tgtX,tgtY,17,17,0.30);
-    player.hand.x = arm.handX; player.hand.y = arm.handY;
-
-    ctx.lineCap='round';
-    ctx.strokeStyle='#e8c39e'; ctx.lineWidth=6;
-    ctx.beginPath(); ctx.moveTo(leftSx,leftSy); ctx.lineTo(arm.elbowX-torsoX,arm.elbowY-torsoY); ctx.lineTo(arm.handX-torsoX,arm.handY-torsoY); ctx.stroke();
-    ctx.strokeStyle='#cfae82'; ctx.lineWidth=3.5;
-    ctx.beginPath(); ctx.moveTo(leftSx,leftSy); ctx.lineTo(arm.elbowX-torsoX,arm.elbowY-torsoY); ctx.lineTo(arm.handX-torsoX,arm.handY-torsoY); ctx.stroke();
-
-    // RIGHT ARM (stationary at outer side  -  relaxed, slight bend)
-    const elbowRx = rightSx + 1;
-    const elbowRy = rightSy + 14;
-    const handRx  = rightSx + 1;
-    const handRy  = rightSy + 30;
-
-    ctx.strokeStyle='#e8c39e'; ctx.lineWidth=6;
-    ctx.beginPath(); ctx.moveTo(rightSx,rightSy); ctx.lineTo(elbowRx,elbowRy); ctx.lineTo(handRx,handRy); ctx.stroke();
-    ctx.strokeStyle='#cfae82'; ctx.lineWidth=3.5;
-    ctx.beginPath(); ctx.moveTo(rightSx,rightSy); ctx.lineTo(elbowRx,elbowRy); ctx.lineTo(handRx,handRy); ctx.stroke();
-
+    // Only the right arm moves; Jake stays planted while aiming.
+    const shoulderX=torsoX+player.w*.68, shoulderY=torsoY+player.h*.27;
+    const armScale=player.h/144;
+    const arm=solveArm(shoulderX,shoulderY,input.pointer.x,input.pointer.y,32*armScale,32*armScale,0.30);
+    player.hand.x=arm.handX; player.hand.y=arm.handY;
+    ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+    ctx.strokeStyle='#555763';ctx.lineWidth=14*armScale;
+    ctx.beginPath();ctx.moveTo(shoulderX,shoulderY);ctx.lineTo(arm.elbowX,arm.elbowY);ctx.lineTo(arm.handX,arm.handY);ctx.stroke();
+    ctx.strokeStyle='#898b94';ctx.lineWidth=10*armScale;
+    ctx.beginPath();ctx.moveTo(shoulderX,shoulderY);ctx.lineTo(arm.elbowX,arm.elbowY);ctx.lineTo(arm.handX,arm.handY);ctx.stroke();
+    ctx.fillStyle='#d7ad8e';ctx.beginPath();ctx.arc(arm.handX,arm.handY,5*armScale,0,Math.PI*2);ctx.fill();
     ctx.restore();
   }
 
-  const captain={x:80,y:0,w:36,h:22,dir:1,t:0,cooldown:0,bark:0,get groundY(){return canvas.clientHeight-40},
-    reset(){this.x=Math.random()*canvas.clientWidth*.8+20;this.dir=Math.random()<.5?-1:1;this.t=0;this.cooldown=0;this.bark=0},
+  const captain={x:80,y:0,w:104,h:82,dir:1,t:0,cooldown:0,bark:0,get groundY(){return canvas.clientHeight-30},
+    reset(){this.x=Math.random()*Math.max(1,canvas.clientWidth-this.w)+this.w/2;this.dir=Math.random()<.5?-1:1;this.t=0;this.cooldown=0;this.bark=0},
     update(dt,panic=false){this.t+=dt;this.cooldown=Math.max(0,this.cooldown-dt);this.bark=Math.max(0,this.bark-dt);
       const base=(panic?300:220)*(.85+.3*Math.sin(this.t*3)); this.x+=this.dir*base*dt;
-      if(this.x<10){this.x=10;this.dir=1} if(this.x>canvas.clientWidth-10){this.x=canvas.clientWidth-10;this.dir=-1}
+      if(this.x<this.w/2){this.x=this.w/2;this.dir=1} if(this.x>canvas.clientWidth-this.w/2){this.x=canvas.clientWidth-this.w/2;this.dir=-1}
       if(panic && Math.random()<0.02) this.dir*=-1;
       this.y=this.groundY-Math.abs(Math.sin(this.t*12))*(panic?10:6)},
-    draw(ctx){ctx.save();ctx.translate(this.x,this.y);ctx.scale(this.dir,1);ctx.fillStyle='#8b5f3f';ctx.fillRect(-this.w/2,-this.h/2,this.w,this.h);ctx.beginPath();ctx.arc(this.w/2,-this.h*.2,10,0,Math.PI*2);ctx.fill();ctx.fillStyle='#6d4a2e';ctx.fillRect(this.w/2-3,-this.h*.2-12,6,10);ctx.fillStyle='#10161d';ctx.beginPath();ctx.arc(this.w/2+2,-this.h*.2-2,2,0,Math.PI*2);ctx.fill();ctx.fillRect(this.w/2+6,-this.h*.2+1,3,3);ctx.strokeStyle='#6d4a2e';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-this.w/2,-2);ctx.lineTo(-this.w/2-6,-6+Math.sin(this.t*12)*4);ctx.stroke();if(this.bark>0){ctx.fillStyle='#ffd27a';ctx.font='bold 12px Arial';ctx.fillText('WOOF!',-6,-this.h/2-8)}ctx.restore()},
-    circle(){return{x:this.x,y:this.y-6,r:14}}};
+    draw(ctx){
+      ctx.save();ctx.translate(this.x,this.y);ctx.scale(-this.dir,1);
+      if(captainImg.complete&&captainImg.naturalWidth>0)ctx.drawImage(captainImg,-this.w/2,-this.h,this.w,this.h);
+      else{ctx.fillStyle='#8b5f3f';ctx.fillRect(-this.w/2,-this.h*.72,this.w*.72,this.h*.58);ctx.beginPath();ctx.arc(this.w*.18,-this.h*.7,this.h*.3,0,Math.PI*2);ctx.fill()}
+      ctx.restore();
+      if(this.bark>0){ctx.fillStyle='#ffd27a';ctx.font='bold 14px Arial';ctx.fillText('WOOF!',this.x-this.w*.18,this.y-this.h-8)}
+    },
+    circle(){return{x:this.x,y:this.y-this.h*.46,r:Math.max(20,this.h*.3)}}};
 
   // ===== whispers & win verses =====
   const WHISPER_GOOD=["Holy watchers stand","Watchers of heaven","Luminaries keep their order","Stars sing together","He counts the stars","The heavens declare","Messengers of Light","Scribe of righteousness","Hosts of heaven praise","Ministering spirits","Sent forth to serve","Lights for signs","Names in heaven","Morning stars rejoice","Obedient stars","Keepers of truth"];
