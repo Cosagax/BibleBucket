@@ -782,7 +782,11 @@
     ctx.beginPath();ctx.moveTo(14,-57);ctx.lineTo(22,-48);ctx.lineTo(16,-39);ctx.lineTo(11,-48);ctx.fill();
     ctx.fillStyle='#e6e3dc';ctx.beginPath();ctx.moveTo(-5,-58);ctx.lineTo(5,-58);ctx.lineTo(3,-43);ctx.lineTo(0,-39);ctx.lineTo(-3,-43);ctx.fill();
     ctx.fillStyle='#161b24';ctx.beginPath();ctx.moveTo(-1,-54);ctx.lineTo(1,-54);ctx.lineTo(3,-40);ctx.lineTo(0,-36);ctx.lineTo(-3,-40);ctx.fill();
-    ctx.fillStyle='#cfbda8';ctx.beginPath();ctx.ellipse(0,-67,8,10,0,0,Math.PI*2);ctx.fill();
+    // Warm face and a small neck break up the pale shirt at this tiny scale.
+    ctx.fillStyle='#a9785e';ctx.fillRect(-3,-60,6,5);
+    ctx.fillStyle='#bd9075';ctx.strokeStyle='#795843';ctx.lineWidth=.8;
+    ctx.beginPath();ctx.ellipse(0,-67,8,10,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+    ctx.fillStyle='rgba(239,190,151,.42)';ctx.beginPath();ctx.ellipse(-4,-66,2,5,-.12,0,Math.PI*2);ctx.fill();
     ctx.fillStyle='#141821';ctx.fillRect(-9,-72,8,5);ctx.fillRect(1,-72,8,5);ctx.fillRect(-1,-70,2,2);
     ctx.fillStyle='#090b10';ctx.fillRect(-17,-55,5,21);ctx.fillRect(12,-55,5,21);
     ctx.fillStyle='#d8d8d4';ctx.fillRect(-12,-1,9,2);ctx.fillRect(3,-1,9,2);
