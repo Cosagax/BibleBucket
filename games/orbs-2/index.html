@@ -229,6 +229,28 @@
     return {elbowX,elbowY,handX,handY};
   }
 
+  function aimingArmPose(){
+    const scale=player.h/144;
+    const shoulderX=player.x+player.w*.68, shoulderY=player.y+player.h*.27;
+    const arm=solveArm(shoulderX,shoulderY,input.pointer.x,input.pointer.y,32*scale,32*scale,0.30);
+    const angle=Math.atan2(input.pointer.y-shoulderY,input.pointer.x-shoulderX);
+    const pointerTipX=arm.handX+Math.cos(angle)*25*scale;
+    const pointerTipY=arm.handY+Math.sin(angle)*25*scale;
+    return{...arm,shoulderX,shoulderY,angle,pointerTipX,pointerTipY,scale};
+  }
+
+  function drawSleeveSegment(x1,y1,x2,y2,r1,r2,scale){
+    const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy)||1,px=-dy/len,py=dx/len;
+    ctx.beginPath();
+    ctx.moveTo(x1+px*r1,y1+py*r1);
+    ctx.quadraticCurveTo(x1+dx*.42+px*r1*1.08,y1+dy*.42+py*r1*1.08,x2+px*r2,y2+py*r2);
+    ctx.lineTo(x2-px*r2,y2-py*r2);
+    ctx.quadraticCurveTo(x1+dx*.58-px*r1*1.08,y1+dy*.58-py*r1*1.08,x1-px*r1,y1-py*r1);
+    ctx.closePath();ctx.fillStyle='#777981';ctx.fill();ctx.strokeStyle='#50525a';ctx.lineWidth=1.5*scale;ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x1+px*r1*.55,y1+py*r1*.55);ctx.lineTo(x2+px*r2*.55,y2+py*r2*.55);
+    ctx.strokeStyle='rgba(210,210,216,.38)';ctx.lineWidth=1.2*scale;ctx.stroke();
+  }
+
   function drawPlayer(){
     const torsoX=player.x, torsoY=player.y;
     if(playerImg.complete&&playerImg.naturalWidth>0){
@@ -239,17 +261,23 @@
       ctx.fillStyle='#e8c39e';ctx.beginPath();ctx.arc(torsoX+player.w*.5,torsoY+player.h*.09,player.w*.13,0,Math.PI*2);ctx.fill();
     }
 
-    // Only the right arm moves; Jake stays planted while aiming.
-    const shoulderX=torsoX+player.w*.68, shoulderY=torsoY+player.h*.27;
-    const armScale=player.h/144;
-    const arm=solveArm(shoulderX,shoulderY,input.pointer.x,input.pointer.y,32*armScale,32*armScale,0.30);
-    player.hand.x=arm.handX; player.hand.y=arm.handY;
-    ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
-    ctx.strokeStyle='#555763';ctx.lineWidth=14*armScale;
-    ctx.beginPath();ctx.moveTo(shoulderX,shoulderY);ctx.lineTo(arm.elbowX,arm.elbowY);ctx.lineTo(arm.handX,arm.handY);ctx.stroke();
-    ctx.strokeStyle='#898b94';ctx.lineWidth=10*armScale;
-    ctx.beginPath();ctx.moveTo(shoulderX,shoulderY);ctx.lineTo(arm.elbowX,arm.elbowY);ctx.lineTo(arm.handX,arm.handY);ctx.stroke();
-    ctx.fillStyle='#d7ad8e';ctx.beginPath();ctx.arc(arm.handX,arm.handY,5*armScale,0,Math.PI*2);ctx.fill();
+    // A shaped hoodie sleeve follows the shoulder/elbow, ending in a hand gripping Jake's pointer.
+    const pose=aimingArmPose(), scale=pose.scale;
+    player.hand.x=pose.pointerTipX;player.hand.y=pose.pointerTipY;
+    drawSleeveSegment(pose.shoulderX,pose.shoulderY,pose.elbowX,pose.elbowY,8.5*scale,7*scale,scale);
+    drawSleeveSegment(pose.elbowX,pose.elbowY,pose.handX,pose.handY,7*scale,4.8*scale,scale);
+
+    ctx.save();ctx.translate(pose.handX,pose.handY);ctx.rotate(pose.angle);ctx.lineCap='round';ctx.lineJoin='round';
+    // Short black laser pointer, with a subtle barrel highlight and emitter at the beam origin.
+    ctx.strokeStyle='#101317';ctx.lineWidth=5*scale;ctx.beginPath();ctx.moveTo(-3*scale,0);ctx.lineTo(25*scale,0);ctx.stroke();
+    ctx.strokeStyle='#69717a';ctx.lineWidth=1*scale;ctx.beginPath();ctx.moveTo(1*scale,-1*scale);ctx.lineTo(21*scale,-1*scale);ctx.stroke();
+    ctx.fillStyle='#16191d';ctx.beginPath();ctx.arc(25*scale,0,2.2*scale,0,Math.PI*2);ctx.fill();
+    // Palm and curled fingers wrap around the barrel instead of ending in a round blob.
+    ctx.fillStyle='#d5ad90';ctx.strokeStyle='#9d7762';ctx.lineWidth=.8*scale;
+    ctx.beginPath();ctx.ellipse(5*scale,0,6.3*scale,4.8*scale,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+    ctx.beginPath();ctx.moveTo(1*scale,-3*scale);ctx.quadraticCurveTo(6*scale,-5*scale,10*scale,-2*scale);
+    ctx.moveTo(2*scale,0);ctx.quadraticCurveTo(6*scale,-1.2*scale,10*scale,1*scale);
+    ctx.moveTo(2*scale,2.5*scale);ctx.quadraticCurveTo(6*scale,1.5*scale,9*scale,3*scale);ctx.stroke();
     ctx.restore();
   }
 
@@ -330,11 +358,9 @@
       laserCD=Math.max(0,laserCD-dt);
       laserSparkTimer-=dt;
       if(input.aiming){
-        // LEFT-hand IK origin
-        const shoulderX = player.x + player.w*0.28;
-        const shoulderY = player.y + 22;
-        const ik = solveArm(shoulderX,shoulderY,input.pointer.x,input.pointer.y,17,17,0.30);
-        player.hand.x = ik.handX; player.hand.y = ik.handY;
+        // Keep the visible hand, pointer, and beam origin on the same aim pose.
+        const pose=aimingArmPose();
+        player.hand.x=pose.pointerTipX;player.hand.y=pose.pointerTipY;
 
         const sx=player.hand.x, sy=player.hand.y, tx=input.pointer.x, ty=input.pointer.y;
 
