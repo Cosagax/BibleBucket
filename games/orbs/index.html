@@ -6,34 +6,33 @@
 <title>Backyard Orbs  -  Enoch and the Watchers (2.1 Mobile)</title>
 <style>
   html,body{height:100%;height:100dvh;margin:0;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);background:#0b0f14;color:#e6f0ff;font-family:Arial,Helvetica,sans-serif; overscroll-behavior: none;}
-  #wrap{display:flex;flex-direction:column;height:100%}
+  #wrap{position:relative;display:flex;flex-direction:column;height:100%}
   header{flex-wrap:wrap;padding:10px 12px;display:flex;gap:8px;align-items:center;background:#101722;border-bottom:1px solid #243140; padding-top: calc(10px + env(safe-area-inset-top)); position:relative; z-index:10;}
-  .btn{padding:10px 14px;border:1px solid #2a3a4a;background:#121a22;color:#e6f0ff;border-radius:10px;cursor:pointer}
-  .btn.small{padding:6px 10px;border-radius:8px;font-size:12px}
+  .btn{pointer-events:auto;display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 14px;border:1px solid rgba(255,255,255,.18);background:rgba(15,23,42,.9);color:#e6edf3;border-radius:12px;cursor:pointer;font:700 14px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;text-decoration:none;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  .btn:hover{background:rgba(30,41,59,.96);border-color:rgba(255,255,255,.32)}
+  .btn:focus-visible{outline:3px solid #93c5fd;outline-offset:3px}
+  .btn.small{min-height:36px;padding:6px 10px;font-size:12px}
   .btn:disabled{opacity:.6;cursor:not-allowed}
   @media(max-width:520px){header{gap:6px;padding-left:8px;padding-right:8px}.btn{padding:10px 11px}.stat{padding:5px 6px}.stat:last-child{margin-left:auto}}
   .stat{padding:6px 8px;border:1px solid #243140;background:#0e141b;border-radius:6px;font-variant-numeric:tabular-nums; font-size: clamp(12px, 2.6vw, 14px);}
   canvas{display:block;width:100%;height:100%; touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;}
 
-  /* Start (Primer) */
-  #title{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;background: linear-gradient(rgba(11,15,20,0.88), rgba(11,15,20,0.88)), url('enoch.png') center/cover no-repeat;backdrop-filter:saturate(120%) blur(2px)}
-  #card{width:min(92%,780px);border:1px solid #243140;background:#0e141b;padding:16px 14px 18px;border-radius:12px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,0.35)}
-  #toggles{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:10px;color:#bcd0e3;font-size:13px}
-  #toggles label{display:flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid #243140;background:#0b1219;border-radius:8px}
-  #card h1 { font-size: clamp(20px, 6vw, 28px); }
-  .mono{font-variant-numeric:tabular-nums}
-  footer{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);color:#9fb6cc;font-size:12px; padding-bottom: env(safe-area-inset-bottom);}
-
-  /* Lore / Prologue */
-  #loreBox{margin:12px auto 6px;text-align:left;background:linear-gradient(180deg,#0b1219,#0c131a);border:1px solid #243140;border-radius:10px;max-width:720px}
-  #loreHead{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-bottom:1px solid #1a2733}
-  #loreHead .title{font-weight:bold;letter-spacing:.6px}
-  #loreHead .b20{background:linear-gradient(90deg,#9fe2ff,#c9b3ff);-webkit-background-clip:text;background-clip:text;color:transparent}
-  #loreBody{padding:10px 12px;max-height:0;overflow:hidden;transition:max-height 400ms ease}
-  #loreBox.open #loreBody{max-height:240px}
-  #loreBody p{margin:6px 0;color:#cfe2ff;line-height:1.35}
-  #loreBody em{color:#a9c6ff}
-
+  /* Start screen shares Wiseman's full-screen intro and simple button language. */
+  #title{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px max(16px,env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));box-sizing:border-box;text-align:center;background:linear-gradient(rgba(0,0,0,.48),rgba(0,0,0,.62)),url('enoch.png') center/cover no-repeat}
+  #card{width:min(92vw,760px);max-height:100%;overflow:auto;padding:16px 14px 18px;box-sizing:border-box;text-shadow:0 2px 8px #000}
+  #card h1{margin:0;font-size:clamp(26px,6vw,40px);font-weight:800;letter-spacing:.3px}
+  .tagline{margin:6px 0 14px;color:#dbeafe;font-style:italic}
+  .intro{max-width:680px;margin:0 auto 12px;color:#e6edf3;line-height:1.5}
+  .controls{margin:0 auto 16px;color:#dbeafe;font-size:14px}
+  .start-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center}
+  .start-actions .btn{min-width:150px}
+  .start-actions .primary{min-width:220px}
+  #loreBox{max-width:640px;margin:14px auto 0;text-align:left;border:1px solid rgba(255,255,255,.22);border-radius:12px;background:rgba(0,0,0,.35);text-shadow:none}
+  #loreBox summary{padding:10px 12px;color:#dbeafe;font-weight:700;cursor:pointer}
+  #loreBody{padding:0 12px 10px;color:#e6edf3;line-height:1.45}
+  #loreBody p{margin:6px 0}
+  @media(max-height:560px){#title{align-items:flex-start}#card{margin:auto}.tagline{margin-bottom:8px}.intro{margin-bottom:8px}#loreBox{margin-top:8px}}
+  footer{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);color:#9fb6cc;font-size:12px;padding-bottom:env(safe-area-inset-bottom)}
   /* Overlay (used by win & lose) */
   #cinOverlay{position:absolute;inset:0;pointer-events:auto;display:none}
   #cinOverlay .center{position:absolute;left:50%;top:78%;transform:translate(-50%,-50%);width:min(92%,820px);text-align:center; pointer-events:none}
@@ -44,13 +43,11 @@
   #cinOverlay .center.topRight{left:auto;right:6%;top:calc(32% + env(safe-area-inset-top));transform:translate(0,-50%);text-align:right;width:min(92%,520px);padding-right:max(16px,env(safe-area-inset-right));word-wrap:break-word}
   @media (max-width:520px){#cinOverlay .center.topRight{right:4%;top:calc(30% + env(safe-area-inset-top));width:min(92%,420px)}}
 
-  #toggles{display:none !important; visibility:hidden !important; height:0; overflow:hidden}
 </style>
 </head>
 <body>
 <div id="wrap">
   <header>
-    <button id="startBtn" class="btn">Play</button>
     <button id="pauseBtn" class="btn" disabled>Pause</button>
     <button id="resetBtn" class="btn" disabled>Reset</button>
     <div class="stat">Score: <span id="scoreEl">0</span></div>
@@ -59,43 +56,26 @@
     <div class="stat">Goal: <span id="goalEl">1500</span></div>
   </header>
 
-  <!-- Primer -->
+  <!-- Start screen -->
   <div id="title">
     <div id="card">
-      <h1 style="margin:6px 0 4px;">Backyard Orbs</h1>
-      <p style="margin:6px 0 10px;color:#cfe6ff"><em>Night watch. Signs in the heavens.</em></p>
-
-      <!-- Lore / Prologue (collapsed by default) -->
-      <div id="loreBox" class="">
-        <div id="loreHead">
-          <div class="title">Prologue: <span class="b20">Enoch and the Watchers</span></div>
-          <button id="loreToggle" class="btn small">Read</button>
-        </div>
+      <h1>Backyard Orbs</h1>
+      <p class="tagline">Night watch. Signs in the heavens.</p>
+      <p class="intro">A fictional night-watch game inspired by Enoch and the Watchers. Aim with your mouse or finger and hold to shine your beam. Collect blue orbs, avoid red drones, and reach <strong>1500</strong> before dawn.</p>
+      <p class="controls">Aim: mouse or touch &nbsp;·&nbsp; Beam: hold &nbsp;·&nbsp; Playtime: 60 seconds</p>
+      <div class="start-actions">
+        <button id="tPlay" class="btn primary" type="button">Start Night Watch</button>
+        <a class="btn" href="https://biblebucket.net/mysteries/enoch.html">Read Enoch</a>
+        <a class="btn" href="../index.html">← All Games</a>
+      </div>
+      <details id="loreBox">
+        <summary>Story and game details</summary>
         <div id="loreBody">
-          <p>Tonight the luminaries stir - stars sliding like messengers. Not burning rocks, but living lights. Yet <em>something</em> is watching the watchers.</p>
-          <p>Use your backyard beam to identify the light sources and unlock their messages. <span style="color:#9fe2ff">Blue orbs</span> answer truth; <span style="color:#ff9aa0">red drones</span> spoof and interfere.</p>
-          <p>Beware the watching AI-drones - they do not want the mysteries of <strong>Enoch and the Watchers</strong> exposed. Gather truth before dawn and you may see the Heavens speak.</p>
+          <p>This is the game's imagined story, not a claim about real lights or drones. In the story, mysterious blue lights and red drones appear during a night watch.</p>
+          <p>Shine your beam at blue orbs to score and build a streak. Red drones interfere, so avoid them. Reach the goal before the 60-second timer ends.</p>
+          <p>The Watchers theme is inspired by the biblical book of Enoch. <a href="https://biblebucket.net/mysteries/enoch.html" style="color:#bfdbfe">Read the Enoch article</a>.</p>
         </div>
-      </div>
-
-      <p style="margin:6px 0 6px">
-        <span style="color:#9fe2ff">Blue orbs</span> are living lights  -  keepers of truth.<br>
-        <span style="color:#ff9aa0">Red drones</span> are deceivers  -  fallen watchers and their toys.
-      </p>
-      <p style="margin:0 0 10px">Shine your beam, gather truth, avoid the counterfeit. Reach <strong>1500</strong> before dawn.</p>
-
-      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0 8px" class="mono">
-        <span class="stat">Aim: mouse/touch</span>
-        <span class="stat">Beam: hold</span>
-      </div>
-      <p style="margin:0 0 10px;color:#9fb6cc;font-size:12px">Hint: Streaks awaken the heavens to speak.</p>
-
-      <button id="tPlay" class="btn" style="min-width:220px;margin-top:6px">Start Night Watch</button>
-      <a class="btn" href="../index.html" style="display:inline-block;margin-top:10px;text-decoration:none">← All Games</a>
-      <div id="toggles">
-        <label><input type="checkbox" id="sfxToggle" checked> Sound Effects</label>
-        <label><input type="checkbox" id="motionToggle"> Reduced Motion</label>
-      </div>
+      </details>
     </div>
   </div>
 
@@ -140,7 +120,7 @@
 
   // ===== UI =====
   const titleEl=document.getElementById('title');
-  const startBtn=document.getElementById('startBtn'), tPlay=document.getElementById('tPlay');
+  const tPlay=document.getElementById('tPlay');
   const pauseBtn=document.getElementById('pauseBtn'), resetBtn=document.getElementById('resetBtn');
   const scoreEl=document.getElementById('scoreEl'), timeEl=document.getElementById('timeEl');
   const hitsEl=document.getElementById('hitsEl'), missesEl=document.getElementById('missesEl'), goalEl=document.getElementById('goalEl');
@@ -148,20 +128,7 @@
   const articleBtn=document.getElementById('articleBtn');
   const overlayCenter = overlay.querySelector('.center');
 
-  // Lore toggle
-  const loreBox=document.getElementById('loreBox');
-  const loreToggle=document.getElementById('loreToggle');
-  loreToggle?.addEventListener('click',()=>{
-    const open=loreBox.classList.toggle('open');
-    loreToggle.textContent=open?'Hide':'Read';
-  });
-
-  // Toggles
-  const sfxToggle=document.getElementById('sfxToggle');
-  const motionToggle=document.getElementById('motionToggle');
   let SFX_ENABLED=true, REDUCED_MOTION=false;
-  sfxToggle?.addEventListener('change',()=>SFX_ENABLED=sfxToggle.checked);
-  motionToggle?.addEventListener('change',()=>REDUCED_MOTION=motionToggle.checked);
 
   // Auto-reduced motion on small screens
   const isSmallScreen = Math.min(window.innerWidth, window.innerHeight) < 420;
@@ -344,7 +311,7 @@
   function startGame(){try{audio().resume()}catch{} STATE.running=true;STATE.paused=false;STATE.ended=false;STATE.mode='play';STATE.timeLeft=SETTINGS.timeStart;STATE.score=0;STATE.hits=0;STATE.misses=0;STATE.streak=0;entities.length=0;particles.length=0;watchers.length=0;spawnTimer=0;player.x=(canvas.clientWidth - player.w)/2;player.y=player.feetY-player.h;captain.reset();titleEl.style.display='none';pauseBtn.disabled=false;resetBtn.disabled=false;overlay.style.display='none';versesBox.innerHTML='';againBtn.style.display='none';titleText.textContent='ENOCH';hintEl.textContent='';starFade=1}
   function togglePause(){if(!STATE.running||STATE.mode!=='play')return;STATE.paused=!STATE.paused;pauseBtn.textContent=STATE.paused?'Resume':'Pause'}
   function resetGame(){STATE.running=false;STATE.paused=false;STATE.ended=false;STATE.mode='play';titleEl.style.display='flex';pauseBtn.disabled=true;resetBtn.disabled=true;pauseBtn.textContent='Pause';overlay.style.display='none';versesBox.innerHTML='';againBtn.style.display='none'; if(articleBtn){articleBtn.style.display='none'; articleBtn.href='#';} starFade=1;try{overlayCenter.classList.remove('topRight')}catch{}}
-  startBtn.addEventListener('click',()=>{if(!STATE.running)startGame()}); tPlay.addEventListener('click',()=>{if(!STATE.running)startGame()});
+  tPlay.addEventListener('click',()=>{if(!STATE.running)startGame()});
   pauseBtn.addEventListener('click',togglePause); resetBtn.addEventListener('click',resetGame);
 
   function update(dt){
