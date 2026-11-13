@@ -214,19 +214,19 @@
     hand:{x:0,y:0}
   };
 
-  // simple 2-bone IK for the aiming (LEFT) arm
+  // two-bone IK keeps the aiming sleeve visibly bent at full reach
   function solveArm(shoulderX,shoulderY,targetX,targetY,upper=16,fore=16,bend=0.26){
     const dx=targetX-shoulderX, dy=targetY-shoulderY;
-    let d=Math.hypot(dx,dy); const maxLen=upper+fore;
-    const ux = d>1e-4 ? dx/d : 1, uy = d>1e-4 ? dy/d : 0;
-    const perpX=-uy, perpY=ux;
-    d=Math.min(d,maxLen-0.5);
-    const bendAmt = bend*(1 - d/maxLen);
-    const elbowX = shoulderX + ux*upper + perpX*upper*bendAmt;
-    const elbowY = shoulderY + uy*upper + perpY*upper*bendAmt;
-    const handX  = shoulderX + ux*d;
-    const handY  = shoulderY + uy*d;
-    return {elbowX,elbowY,handX,handY};
+    let d=Math.hypot(dx,dy); const ux=d>1e-4?dx/d:1, uy=d>1e-4?dy/d:0;
+    const minLen=Math.max(0.5,Math.abs(upper-fore)+0.5), maxLen=upper+fore-6;
+    d=clamp(d,minLen,maxLen);
+    const along=(upper*upper-fore*fore+d*d)/(2*d);
+    const elbowHeight=Math.sqrt(Math.max(0,upper*upper-along*along));
+    const perpX=-uy,perpY=ux,bendDir=bend<0?-1:1;
+    const elbowX=shoulderX+ux*along+perpX*elbowHeight*bendDir;
+    const elbowY=shoulderY+uy*along+perpY*elbowHeight*bendDir;
+    const handX=shoulderX+ux*d,handY=shoulderY+uy*d;
+    return{elbowX,elbowY,handX,handY};
   }
 
   function aimingArmPose(){
