@@ -55,13 +55,11 @@
 <body>
 <div id="wrap">
   <header>
-    <button id="pauseBtn" class="btn" disabled>Pause</button>
     <button id="resetBtn" class="btn" disabled>Reset</button>
     <div class="stat">Score: <span id="scoreEl">0</span></div>
     <div class="stat">Time: <span id="timeEl">60.0</span>s</div>
     <div class="stat">Orbs: <span id="hitsEl">0</span> Drone hits: <span id="missesEl">0</span></div>
     <div class="stat">Goal: <span id="goalEl">1500</span></div>
-    <button id="soundBtn" class="btn small" type="button" aria-pressed="true" aria-label="Mute sound">Sound: On</button>
   </header>
 
   <!-- Start screen -->
@@ -71,12 +69,11 @@
       <h1>Backyard Orbs 2.0</h1>
       <p class="tagline">Night watch. Signs in the heavens.</p>
       <p class="intro">Aim with your mouse, finger, or arrow keys. Hold to shine your beam. Collect blue orbs, avoid red drones, and reach <strong>1500</strong> before dawn.</p>
-      <p class="controls"><span>Aim · mouse, touch, arrows</span><span>Beam · hold mouse, touch, or F</span><span>Pause · Space</span><span>Watch · 60 seconds</span></p>
+      <p class="controls"><span>Aim · mouse, touch, arrows</span><span>Beam · hold mouse, touch, or F</span><span>Watch · 60 seconds</span></p>
       <p class="scoring">Scoring: orb +100 · streak bonus +25 per orb starting with the third · drone hit −150 and resets streak.</p>
       <div class="start-actions">
         <button id="tPlay" class="btn primary" type="button">Start Night Watch</button>
-        <button id="soundStartBtn" class="btn" type="button" aria-pressed="true" aria-label="Mute sound">Sound: On</button>
-        <a class="btn" href="https://biblebucket.net/mysteries/enoch.html">Read Enoch</a>
+                <a class="btn" href="https://biblebucket.net/mysteries/enoch.html">Read Enoch</a>
         <a class="btn" href="../index.html">← All Games</a>
       </div>
       <details id="loreBox">
@@ -131,8 +128,7 @@
   // ===== UI =====
   const titleEl=document.getElementById('title');
   const tPlay=document.getElementById('tPlay');
-  const pauseBtn=document.getElementById('pauseBtn'), resetBtn=document.getElementById('resetBtn');
-  const soundButtons=[document.getElementById('soundBtn'),document.getElementById('soundStartBtn')];
+  const resetBtn=document.getElementById('resetBtn');
   const scoreEl=document.getElementById('scoreEl'), timeEl=document.getElementById('timeEl');
   const hitsEl=document.getElementById('hitsEl'), missesEl=document.getElementById('missesEl'), goalEl=document.getElementById('goalEl');
   const overlay=document.getElementById('cinOverlay'), titleText=document.getElementById('cinTitle'), versesBox=document.getElementById('verses'), againBtn=document.getElementById('againBtn'), hintEl=document.getElementById('cinHint');
@@ -140,7 +136,6 @@
   const overlayCenter = overlay.querySelector('.center');
 
   let SFX_ENABLED=true, REDUCED_MOTION=false;
-  soundButtons.forEach(button=>button.addEventListener('click',()=>{SFX_ENABLED=!SFX_ENABLED;soundButtons.forEach(b=>{b.textContent=`Sound: ${SFX_ENABLED?'On':'Off'}`;b.setAttribute('aria-pressed',String(SFX_ENABLED));b.setAttribute('aria-label',SFX_ENABLED?'Mute sound':'Enable sound')})}));
 
   // Auto-reduced motion on small screens
   const isSmallScreen = Math.min(window.innerWidth, window.innerHeight) < 420;
@@ -160,7 +155,7 @@
 
   // ===== game state =====
   const SETTINGS={timeStart:60,goal:1500,max:20,droneChance:.35};
-  const STATE={running:false,paused:false,ended:false,timeLeft:SETTINGS.timeStart,score:0,hits:0,misses:0,streak:0,last:0,t:0,mode:'play'};
+  const STATE={running:false,ended:false,timeLeft:SETTINGS.timeStart,score:0,hits:0,misses:0,streak:0,last:0,t:0,mode:'play'};
   goalEl.textContent=SETTINGS.goal;
 
   // ===== input =====
@@ -180,8 +175,7 @@
     const k=e.key.toLowerCase();
     const inPlay=STATE.running&&STATE.mode==='play';
     if(!inPlay){if(!down&&k==='f'){keyboardAiming=false;refreshAiming()}if(!down&&k in input.keys)input.keys[k]=false;return}
-    if(['arrowleft','arrowright','arrowup','arrowdown',' '].includes(k))e.preventDefault();
-    if(down&&k===' '&&!e.repeat){togglePause();return}
+    if(['arrowleft','arrowright','arrowup','arrowdown'].includes(k))e.preventDefault();
     if(k==='f'){keyboardAiming=down;refreshAiming();return}
     if(['arrowleft','arrowright','arrowup','arrowdown'].includes(k))input.keys[k]=down;
   }
@@ -308,15 +302,14 @@
   let laserCD=0, laserSparkTimer=0;
 
   // ===== flow =====
-  function startGame(){try{audio().resume()}catch{} STATE.running=true;STATE.paused=false;STATE.ended=false;STATE.mode='play';STATE.timeLeft=SETTINGS.timeStart;STATE.score=0;STATE.hits=0;STATE.misses=0;STATE.streak=0;entities.length=0;particles.length=0;watchers.length=0;spawnTimer=0;input.keys={};keyboardAiming=false;pointerAiming=false;refreshAiming();input.pointer.x=canvas.clientWidth/2;input.pointer.y=canvas.clientHeight*.35;player.x=(canvas.clientWidth - player.w)/2;player.y=player.feetY-player.h;captain.reset();titleEl.style.display='none';pauseBtn.disabled=false;resetBtn.disabled=false;overlay.style.display='none';versesBox.innerHTML='';againBtn.style.display='none';titleText.textContent='ENOCH';hintEl.textContent='';starFade=1;runLoop()}
-  function togglePause(){if(!STATE.running||STATE.mode!=='play')return;STATE.paused=!STATE.paused;pauseBtn.textContent=STATE.paused?'Resume':'Pause';if(!STATE.paused)runLoop()}
-  function resetGame(){STATE.running=false;STATE.paused=false;STATE.ended=false;STATE.mode='play';input.keys={};keyboardAiming=false;pointerAiming=false;refreshAiming();if(frameId){cancelAnimationFrame(frameId);frameId=0}titleEl.style.display='flex';pauseBtn.disabled=true;resetBtn.disabled=true;pauseBtn.textContent='Pause';overlay.style.display='none';versesBox.innerHTML='';againBtn.style.display='none'; if(articleBtn){articleBtn.style.display='none'; articleBtn.href='#';} starFade=1;try{overlayCenter.classList.remove('topRight')}catch{}render()}
+  function startGame(){try{audio().resume()}catch{} STATE.running=true;STATE.ended=false;STATE.mode='play';STATE.timeLeft=SETTINGS.timeStart;STATE.score=0;STATE.hits=0;STATE.misses=0;STATE.streak=0;entities.length=0;particles.length=0;watchers.length=0;spawnTimer=0;input.keys={};keyboardAiming=false;pointerAiming=false;refreshAiming();input.pointer.x=canvas.clientWidth/2;input.pointer.y=canvas.clientHeight*.35;player.x=(canvas.clientWidth - player.w)/2;player.y=player.feetY-player.h;captain.reset();titleEl.style.display='none';resetBtn.disabled=false;overlay.style.display='none';versesBox.innerHTML='';againBtn.style.display='none';titleText.textContent='ENOCH';hintEl.textContent='';starFade=1;runLoop()}
+  function resetGame(){STATE.running=false;STATE.ended=false;STATE.mode='play';input.keys={};keyboardAiming=false;pointerAiming=false;refreshAiming();if(frameId){cancelAnimationFrame(frameId);frameId=0}titleEl.style.display='flex';resetBtn.disabled=true;overlay.style.display='none';versesBox.innerHTML='';againBtn.style.display='none'; if(articleBtn){articleBtn.style.display='none'; articleBtn.href='#';} starFade=1;try{overlayCenter.classList.remove('topRight')}catch{}render()}
   tPlay.addEventListener('click',()=>{if(!STATE.running)startGame()});
-  pauseBtn.addEventListener('click',togglePause); resetBtn.addEventListener('click',resetGame);
+  resetBtn.addEventListener('click',resetGame);
 
   function update(dt){
     STATE.t += dt;
-    if(!STATE.running || STATE.paused) return;
+    if(!STATE.running) return;
 
     if(STATE.mode==='play'){
       STATE.timeLeft=Math.max(0,STATE.timeLeft-dt);
@@ -378,6 +371,7 @@
           for(let i=0;i<10;i++){ const ang=Math.random()*Math.PI*2, spd=rand(20,60); const color = best.kind==='orb' ? [200,250,255] : [255,180,140]; const glow  = best.kind==='orb' ? [160,220,255] : [255,100,80]; particles.push(new Particle(hitC.x,hitC.y,Math.cos(ang)*spd,Math.sin(ang)*spd,0.9,color,glow,1.3,28)); }
           if(best.kind==='orb'){ STATE.hits++;STATE.streak++;STATE.score+=100+Math.max(0,STATE.streak-2)*25; best.alive=false; sfx.orb(); }
           else { STATE.misses++;STATE.streak=0;STATE.score-=150; sfx.drone(); captain.bark=.6; sfx.bark(); }
+          best.alive=false;
           laserCD=.12;
         }
       }
@@ -442,8 +436,8 @@
   }
 
   let frameId=0;
-  function loop(t){frameId=0;if(!STATE.running||STATE.paused)return;const n=t||performance.now(),dt=Math.min(.033,(n-(STATE.last||n))/1000);STATE.last=n;update(dt);render();if(STATE.running&&!STATE.paused)frameId=requestAnimationFrame(loop)}
-  function runLoop(){if(!frameId&&STATE.running&&!STATE.paused){STATE.last=performance.now();frameId=requestAnimationFrame(loop)}}
+  function loop(t){frameId=0;if(!STATE.running)return;const n=t||performance.now(),dt=Math.min(.033,(n-(STATE.last||n))/1000);STATE.last=n;update(dt);render();if(STATE.running)frameId=requestAnimationFrame(loop)}
+  function runLoop(){if(!frameId&&STATE.running){STATE.last=performance.now();frameId=requestAnimationFrame(loop)}}
   render();
 
   // show start
@@ -728,7 +722,7 @@
         hintEl.textContent='';
         versesBox.innerHTML='';
         againBtn.style.display='inline-block';
-        if(articleBtn){articleBtn.style.display='none';articleBtn.href='#'}
+        if(articleBtn){articleBtn.textContent='Enoch →';articleBtn.href='https://biblebucket.net/mysteries/enoch.html';articleBtn.style.display='inline-block';}
         againBtn.onclick=()=>resetGame();
         try{overlayCenter.classList.add('topRight')}catch{}; overlay.style.display='block';
         L.done=true;
