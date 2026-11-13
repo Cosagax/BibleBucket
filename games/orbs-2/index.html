@@ -232,10 +232,10 @@
   function aimingArmPose(){
     const scale=player.h/144;
     const shoulderX=player.x+player.w*.68, shoulderY=player.y+player.h*.27;
-    const arm=solveArm(shoulderX,shoulderY,input.pointer.x,input.pointer.y,32*scale,32*scale,0.30);
+    const arm=solveArm(shoulderX,shoulderY,input.pointer.x,input.pointer.y,26*scale,26*scale,0.30);
     const angle=Math.atan2(input.pointer.y-shoulderY,input.pointer.x-shoulderX);
-    const pointerTipX=arm.handX+Math.cos(angle)*25*scale;
-    const pointerTipY=arm.handY+Math.sin(angle)*25*scale;
+    const pointerTipX=arm.handX+Math.cos(angle)*18*scale;
+    const pointerTipY=arm.handY+Math.sin(angle)*18*scale;
     return{...arm,shoulderX,shoulderY,angle,pointerTipX,pointerTipY,scale};
   }
 
@@ -264,20 +264,20 @@
     // A shaped hoodie sleeve follows the shoulder/elbow, ending in a hand gripping Jake's pointer.
     const pose=aimingArmPose(), scale=pose.scale;
     player.hand.x=pose.pointerTipX;player.hand.y=pose.pointerTipY;
-    drawSleeveSegment(pose.shoulderX,pose.shoulderY,pose.elbowX,pose.elbowY,8.5*scale,7*scale,scale);
-    drawSleeveSegment(pose.elbowX,pose.elbowY,pose.handX,pose.handY,7*scale,4.8*scale,scale);
+    drawSleeveSegment(pose.shoulderX,pose.shoulderY,pose.elbowX,pose.elbowY,7*scale,5.8*scale,scale);
+    drawSleeveSegment(pose.elbowX,pose.elbowY,pose.handX,pose.handY,5.8*scale,4.1*scale,scale);
 
     ctx.save();ctx.translate(pose.handX,pose.handY);ctx.rotate(pose.angle);ctx.lineCap='round';ctx.lineJoin='round';
     // Short black laser pointer, with a subtle barrel highlight and emitter at the beam origin.
-    ctx.strokeStyle='#101317';ctx.lineWidth=5*scale;ctx.beginPath();ctx.moveTo(-3*scale,0);ctx.lineTo(25*scale,0);ctx.stroke();
-    ctx.strokeStyle='#69717a';ctx.lineWidth=1*scale;ctx.beginPath();ctx.moveTo(1*scale,-1*scale);ctx.lineTo(21*scale,-1*scale);ctx.stroke();
-    ctx.fillStyle='#16191d';ctx.beginPath();ctx.arc(25*scale,0,2.2*scale,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#101317';ctx.lineWidth=4*scale;ctx.beginPath();ctx.moveTo(-2*scale,0);ctx.lineTo(18*scale,0);ctx.stroke();
+    ctx.strokeStyle='#69717a';ctx.lineWidth=1*scale;ctx.beginPath();ctx.moveTo(1*scale,-1*scale);ctx.lineTo(15*scale,-1*scale);ctx.stroke();
+    ctx.fillStyle='#16191d';ctx.beginPath();ctx.arc(18*scale,0,1.8*scale,0,Math.PI*2);ctx.fill();
     // Palm and curled fingers wrap around the barrel instead of ending in a round blob.
     ctx.fillStyle='#d5ad90';ctx.strokeStyle='#9d7762';ctx.lineWidth=.8*scale;
-    ctx.beginPath();ctx.ellipse(5*scale,0,6.3*scale,4.8*scale,0,0,Math.PI*2);ctx.fill();ctx.stroke();
-    ctx.beginPath();ctx.moveTo(1*scale,-3*scale);ctx.quadraticCurveTo(6*scale,-5*scale,10*scale,-2*scale);
-    ctx.moveTo(2*scale,0);ctx.quadraticCurveTo(6*scale,-1.2*scale,10*scale,1*scale);
-    ctx.moveTo(2*scale,2.5*scale);ctx.quadraticCurveTo(6*scale,1.5*scale,9*scale,3*scale);ctx.stroke();
+    ctx.beginPath();ctx.ellipse(4*scale,0,5.2*scale,4*scale,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+    ctx.beginPath();ctx.moveTo(1*scale,-2.6*scale);ctx.quadraticCurveTo(5*scale,-4.2*scale,8*scale,-1.8*scale);
+    ctx.moveTo(1.5*scale,0);ctx.quadraticCurveTo(5*scale,-1*scale,8*scale,.8*scale);
+    ctx.moveTo(1.5*scale,2*scale);ctx.quadraticCurveTo(5*scale,1.3*scale,7.5*scale,2.7*scale);ctx.stroke();
     ctx.restore();
   }
 
