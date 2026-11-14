@@ -891,9 +891,9 @@ function draw(){
   if(!inFinale) drawComets();
 }
 
-/* Captain gets one quick, purely visual run-by per journey: 7–9.4 active seconds. */
+/* Captain gets one quick, purely visual run-by per journey: 7–9.8 active seconds. */
 function drawCaptain(W,H){
-  const t=elapsed-7, duration=2.4;
+  const t=elapsed-7, duration=2.8;
   if(t<0||t>=duration||!captain.complete||!captain.naturalWidth)return;
   const height=man.h*.58, width=height*captain.naturalWidth/captain.naturalHeight;
   const x=-width+(W+width*2)*(t/duration);
