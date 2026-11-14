@@ -26,3 +26,7 @@
 .painted-intro .art-caption{z-index:2;text-shadow:0 2px 8px #061c24}
 @media(max-width:650px){.painted-intro{height:220px;min-height:0;padding:0}.painted-intro img{width:147px;object-fit:contain}.painted-intro .art-caption{left:160px;right:14px;bottom:65px;font-size:20px}}
 @media(max-width:650px) and (max-height:740px){.painted-intro{height:160px;min-height:0}.painted-intro img{width:107px;height:160px;margin:0}.painted-intro .art-caption{left:125px;bottom:45px;font-size:18px}}
+
+.painted-intro .art-caption{padding:0 16px;font-size:18px}.art-caption small{display:block;margin-top:8px;font:11px/1.4 system-ui,sans-serif;letter-spacing:.06em}
+@media(max-width:650px){.painted-intro .art-caption{padding:0;font-size:17px;bottom:55px}}
+@media(max-width:650px) and (max-height:740px){.painted-intro .art-caption{font-size:16px;bottom:28px}.art-caption small{font-size:10px}}
