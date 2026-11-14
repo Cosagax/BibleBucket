@@ -56,3 +56,7 @@ The painted Ark is not drawn a second time. Endings layer a closing-door overlay
 Captain is intentionally a little larger than the other animals, with his paws aligned to the ground, original aspect ratio preserved, and pickup radius scaled accordingly. The brief partner hint lasts 1.15 active-game seconds. The animal identity in the task panel remains available afterwards, but there is no permanent map locator.
 
 Noah and all animal artwork render 15% larger for readability, including automatic boarding. Artwork, movement, pickup distances, and the round mechanics are unchanged.
+
+## Painted introduction
+
+The approved introduction illustration is `art/noah-captain-intro-painted.png`: weathered Noah and Captain before the Ark. It replaces only the introduction panel art, not the gameplay sprites. The caption, instructions and controls remain live HTML; narrow screens show the whole portrait beside the caption. Previous SVG art is retained.
