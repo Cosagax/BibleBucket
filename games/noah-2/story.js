@@ -291,7 +291,14 @@ function drawWater(t,won){
  const waterY=mix(startLevel,h*.414,p);ctx.fillStyle=won?'#5e9399':'#487e8a';
  ctx.beginPath();ctx.moveTo(0,h);ctx.lineTo(0,waterY);for(let x=0;x<=w+20;x+=20)ctx.lineTo(x,waterY+Math.sin(x*.018+(quiet.matches?0:t))*(4*u));ctx.lineTo(w,h);ctx.closePath();ctx.fill();
  ctx.strokeStyle='#c4d9ca44';ctx.lineWidth=1.6*u;for(let i=0;i<7;i++){const yy=waterY+(h-waterY)*(i+.7)/8;ctx.beginPath();for(let x=0;x<=w;x+=10){const y=yy+Math.sin(x*.024+i+t*.4)*3*u;x?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();}
- if(won){ctx.save();ctx.globalAlpha=p*.65;ctx.lineWidth=7*u;const colors=['#e1a187','#e5c486','#e4d99f','#a8c6a2','#95bfc3'];colors.forEach((color,i)=>{ctx.strokeStyle=color;ctx.beginPath();ctx.ellipse(w*.5,h*.47,w*.38-i*8*u,h*.39-i*8*u,0,Math.PI,Math.PI*2);ctx.stroke();});ctx.restore();}
+ if(won){
+  // A wide, luminous sky arch: keep the crown and inner bands above the painted roof.
+  const band=Math.min(9*u,h*.012,w*.018);
+  const colors=['#ff6868','#ffac45','#ffe879','#78df99','#66d8ff','#9294ff','#d39aff'];
+  ctx.save();ctx.globalAlpha=p*.95;ctx.lineWidth=band;ctx.shadowBlur=12*u;
+  colors.forEach((color,i)=>{ctx.strokeStyle=color;ctx.shadowColor=color;ctx.beginPath();ctx.ellipse(w*.5,h*.21,w*.46-i*band,h*.18-i*band,0,Math.PI,Math.PI*2);ctx.stroke();});
+  ctx.restore();
+ }
 }
 function render(t){
  ctx.clearRect(0,0,w,h);if(scene)ctx.drawImage(scene,0,0,w,h);
