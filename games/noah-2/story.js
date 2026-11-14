@@ -7,7 +7,10 @@ const canvas=$('game'),ctx=canvas.getContext('2d'),stage=$('stage');
 const SPECIES=[['elephant','Elephants'],['giraffe','Giraffes'],['sheep','Sheep'],['rabbit','Rabbits'],['lion','Lions'],['zebra','Zebras'],['tortoise','Tortoises'],['pig','Pigs'],['red-panda','Red pandas'],['captain','Captain’s pair']].map(([id,name])=>({id,name,img:new Image()}));
 const ROUND_SECONDS=60;
 const noah=new Image();noah.src='art/noah.svg';
-SPECIES.forEach(s=>{s.img.src=`art/${s.id}.svg`;});
+SPECIES.forEach(s=>{s.img.src=s.id==='captain'?'art/captain-orbs.png':`art/${s.id}.svg`;});
+const paintedScene=new Image();paintedScene.src='art/ark-meadow-painted.png';
+paintedScene.addEventListener('load',()=>{buildScene();dirty=true;});
+let cloudBank=null;
 const quiet=matchMedia('(prefers-reduced-motion: reduce)');
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const mix=(a,b,t)=>a+(b-a)*t;
@@ -27,21 +30,21 @@ function noise(duration,cutoff,volume,delay=0){
 }
 function bark(){noise(.18,800,.18);tone(135,.13,.07);noise(.18,700,.14,.22);tone(115,.14,.055,.22);}
 function updateStormAudio(){
- const s=state;if(s.elapsed>=s.thunderAt){noise(1.4,180,.16);s.thunderAt=s.elapsed+(s.elapsed>40?6:12);}
+ const s=state;if(s.elapsed>=s.thunderAt){noise(1.4,180,.16);s.thunderAt=s.elapsed+(s.elapsed>20?5:8);}
  const seconds=Math.ceil(s.seconds);if(seconds<=10&&seconds>0&&seconds<s.lastBeat){s.lastBeat=seconds;tone(165,.16,.025);}
 }
 function chime(kind){if(kind==='board'){[392,494,587,784].forEach((f,i)=>tone(f,.4,.045,i*.1));}else if(kind==='pair'){tone(440,.18);tone(660,.28,.04,.11);}else tone(330,.16);}
 $('sound').onclick=()=>{soundOn=!soundOn;$('sound').textContent=soundOn?'Sound on':'Sound off';$('sound').setAttribute('aria-pressed',String(soundOn));$('sound').setAttribute('aria-label',soundOn?'Turn sound off':'Turn sound on');if(soundOn)tone(523,.18);else if(audioCtx)audioCtx.suspend();};
 function fit(){
- const oldW=w,oldH=h;w=Math.max(240,stage.clientWidth);h=Math.max(190,stage.clientHeight);u=clamp(Math.min(w/720,h/640),.68,1.25);
+ const oldW=w,oldH=h;w=Math.max(240,canvas.clientWidth);h=Math.max(190,canvas.clientHeight);u=clamp(Math.min(w/720,h/640),.68,1.25);
  const dpr=Math.min(devicePixelRatio||1,1.5);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
  if(state){for(const a of state.animals){a.x=a.x/oldW*w;a.y=a.y/oldH*h;a.homeX=a.homeX/oldW*w;a.homeY=a.homeY/oldH*h;if(a.wanderTarget){a.wanderTarget.x*=w/oldW;a.wanderTarget.y*=h/oldH;}}state.noah.x=state.noah.x/oldW*w;state.noah.y=state.noah.y/oldH*h;if(state.target){state.target.x*=w/oldW;state.target.y*=h/oldH;}for(const pair of state.boarding){for(const start of pair.starts){start.x*=w/oldW;start.y*=h/oldH;}}}
  buildScene();dirty=true;
 }
-new ResizeObserver(fit).observe(stage);
+new ResizeObserver(fit).observe(canvas);
 function ellipse(c,x,y,rx,ry,color){c.fillStyle=color;c.beginPath();c.ellipse(x,y,Math.max(.01,rx),Math.max(.01,ry),0,0,Math.PI*2);c.fill();}
 function path(c,points,fill){c.beginPath();points(c);c.fillStyle=fill;c.fill();}
-function buildScene(){
+function buildLegacyScene(){
  scene=document.createElement('canvas');scene.width=Math.ceil(w);scene.height=Math.ceil(h);const c=scene.getContext('2d');
  const sky=c.createLinearGradient(0,0,0,h*.65);sky.addColorStop(0,'#86b1b2');sky.addColorStop(1,'#d8d8b4');c.fillStyle=sky;c.fillRect(0,0,w,h);
  ellipse(c,w*.78,h*.16,42*u,42*u,'#f4e6ad');
@@ -59,8 +62,32 @@ function buildScene(){
  // Corner vignette gives the scene a printed-storybook edge.
  const vignette=c.createRadialGradient(w*.5,h*.55,w*.25,w*.5,h*.55,Math.max(w,h)*.8);vignette.addColorStop(0,'#143e3000');vignette.addColorStop(1,'#143e302b');c.fillStyle=vignette;c.fillRect(0,0,w,h);
 }
-function doorway(){return {x:w*.5,y:h*.405};}
-function drawArk(progress=0,closed=false){
+// The same camera transform positions the painting, ramp, doorway, and door overlay.
+function paintingFrame(){const width=Math.max(w,h*.78);return {x:(w-width)/2,width,height:h};}
+function paintPoint(x,y){const f=paintingFrame();return {x:f.x+x*f.width,y:y*f.height};}
+function buildScene(){
+ if(!paintedScene.complete||!paintedScene.naturalWidth){buildLegacyScene();}
+ else{
+  scene=document.createElement('canvas');scene.width=Math.ceil(w);scene.height=Math.ceil(h);
+  const c=scene.getContext('2d'),f=paintingFrame();c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';c.drawImage(paintedScene,f.x,0,f.width,f.height);
+ }
+ // Cache a softly modeled cloud bank, not dozens of flat ellipses each frame.
+ cloudBank=document.createElement('canvas');cloudBank.width=768;cloudBank.height=220;const c=cloudBank.getContext('2d');
+ const veil=c.createLinearGradient(0,0,0,220);veil.addColorStop(0,'#122331dd');veil.addColorStop(1,'#12233100');c.fillStyle=veil;c.fillRect(0,0,768,220);
+ for(let i=0;i<18;i++){const x=(i*157)%900-60,y=20+(i*47)%100,r=75+(i*23)%80;const g=c.createRadialGradient(x-r*.2,y-r*.35,r*.1,x,y,r);g.addColorStop(0,i%2?'#78959e66':'#536f7e88');g.addColorStop(.55,'#243b4c99');g.addColorStop(1,'#172a3c00');c.fillStyle=g;c.fillRect(x-r,y-r,r*2,r*2);}
+}
+function doorway(){return paintedScene.complete&&paintedScene.naturalWidth?paintPoint(.504,.389):{x:w*.5,y:h*.405};}
+function drawPaintedDoor(closed){
+ if(!closed)return;const top=paintPoint(.459,.309),bottom=paintPoint(.547,.392),peak=paintPoint(.503,.286);
+ ctx.save();ctx.beginPath();ctx.moveTo(top.x,bottom.y);ctx.lineTo(top.x,top.y);ctx.quadraticCurveTo(peak.x,peak.y,bottom.x,top.y);ctx.lineTo(bottom.x,bottom.y);ctx.closePath();ctx.clip();
+ const wood=ctx.createLinearGradient(top.x,0,bottom.x,0);wood.addColorStop(0,'#614027');wood.addColorStop(.48,'#9f692f');wood.addColorStop(.52,'#543a27');wood.addColorStop(1,'#9c692f');ctx.fillStyle=wood;ctx.fillRect(top.x,peak.y,bottom.x-top.x,bottom.y-peak.y);
+ ctx.strokeStyle='#442f2399';ctx.lineWidth=1.5*u;for(let i=1;i<7;i++){const x=mix(top.x,bottom.x,i/7);ctx.beginPath();ctx.moveTo(x,peak.y);ctx.lineTo(x,bottom.y);ctx.stroke();}
+ ctx.fillStyle='#d0a354';ctx.fillRect(peak.x-5*u,mix(top.y,bottom.y,.6),10*u,2.5*u);ctx.restore();
+}
+function drawDoorLight(){
+ const d=doorway(),r=65*u;ctx.save();ctx.globalCompositeOperation='screen';const g=ctx.createRadialGradient(d.x,d.y-12*u,2,d.x,d.y,r);g.addColorStop(0,'#ffd06b22');g.addColorStop(1,'#ffcf6900');ctx.fillStyle=g;ctx.fillRect(d.x-r,d.y-r,r*2,r*2);ctx.restore();
+}
+function drawLegacyArk(progress=0,closed=false){
  const aw=Math.min(w*.65,420*u),ah=aw*.47,x=w*.5-aw*.5,y=h*.405-ah*1.06-progress*18*u;
  ctx.save();ctx.translate(x,y);
  // A curved timber hull and a little shelter; warm edges give it volume.
@@ -79,23 +106,32 @@ function drawArk(progress=0,closed=false){
  ctx.restore();
 }
 function image(c,img,x,y,width,height,alpha=1){if(!img.complete||!img.naturalWidth)return;c.save();c.globalAlpha=alpha;c.drawImage(img,x-width/2,y-height*.8,width,height);c.restore();}
+function speciesArt(species,x,y,scale=1,facing=1,alpha=1){
+ ctx.save();ctx.translate(x,y);ctx.scale(facing,1);ctx.globalAlpha=alpha;ctx.shadowColor='#13241988';ctx.shadowBlur=3*u;
+ if(species.id==='captain'&&species.img.complete&&species.img.naturalWidth){
+  // Exact Orbs PNG. Preserve its aspect ratio and place the paws on the ground.
+  const iw=84*u*scale,ih=iw*species.img.naturalHeight/species.img.naturalWidth;
+  ctx.drawImage(species.img,-iw*.5,-ih*.975,iw,ih);
+ }else{image(ctx,species.img,0,0,47*u*scale,43*u*scale,alpha);}
+ ctx.restore();
+}
 function drawAnimal(a,t){
  if(a.safe)return;
- const size=47*u,bob=quiet.matches?0:Math.sin(t*2+a.seed)*1.2*u;
- ellipse(ctx,a.x,a.y+4*u,17*u,4*u,'#294d3226');ctx.save();ctx.translate(a.x,a.y+bob);ctx.scale(a.facing||1,1);image(ctx,a.species.img,0,0,size,size*.92);ctx.restore();
+ const bob=quiet.matches?0:Math.sin(t*2+a.seed)*1.2*u;
+ ellipse(ctx,a.x,a.y+4*u,a.species.id==='captain'?23*u:17*u,4*u,'#142d3555');speciesArt(a.species,a.x,a.y+bob,1,a.facing||1);
 }
 function marker(x,y,r,color){ctx.strokeStyle=color;ctx.lineWidth=2*u;ctx.beginPath();ctx.ellipse(x,y+7*u,r,r*.42,0,0,Math.PI*2);ctx.stroke();}
 function init(){
  hideNotice();keys.clear();$('intro').hidden=true;$('ending').hidden=true;$('pausePanel').hidden=true;$('skip').hidden=true;$('hud').hidden=false;$('pause').disabled=false;
  const animals=[],slots=[];
- const cols=h<360?10:w<600?4:5,rows=Math.ceil(SPECIES.length*2/cols);
- for(let row=0;row<rows;row++)for(let col=0;col<cols;col++)slots.push({x:mix(w*.1,w*.9,col/(cols-1)),y:mix(h*.49,h*.77,row/(rows-1))});
+ const cols=h<360?(w>700?10:5):w<600?4:5,rows=Math.ceil(SPECIES.length*2/cols);
+ for(let row=0;row<rows;row++)for(let col=0;col<cols;col++)slots.push({x:mix(w*.1,w*.9,col/(cols-1)),y:mix(h*.53,h*.79,row/(rows-1))});
  // Shuffle placement, never species identities: every animal always has one mate.
  for(let i=slots.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[slots[i],slots[j]]=[slots[j],slots[i]];}
  SPECIES.forEach((species,i)=>{for(let j=0;j<2;j++){const pos=slots[i*2+j];animals.push({...pos,species,seed:i*7+j*2,held:false,safe:false,running:false,homeX:pos.x,homeY:pos.y,wanderTarget:null,rest:Math.random()*2.5,wanderSpeed:8+Math.random()*5,facing:1});}});
- state={animals,noah:{x:w*.5,y:h*.435},target:null,lead:null,rescued:new Set(),matched:new Set(),seconds:ROUND_SECONDS,elapsed:0,inactive:0,boarding:[],phase:'find',pickupCooldown:0,endStarted:0,won:false,captainFound:false,thunderAt:18,lastBeat:15};
+ state={animals,noah:{x:w*.5+(h<360?40*u:0),y:h*.477},target:null,lead:null,rescued:new Set(),matched:new Set(),seconds:ROUND_SECONDS,elapsed:0,inactive:0,boarding:[],phase:'find',pickupCooldown:0,endStarted:0,won:false,captainFound:false,thunderAt:0,lastBeat:15,hintUntil:0};
  mode='play';dirty=true;ambient=0;refreshTask();refreshHUD();$('collection').replaceChildren(...SPECIES.map(s=>{const img=document.createElement('img');img.src=s.img.src;img.alt=s.id==='captain'?'A surprise pair: waiting':`${s.name}: waiting`;img.dataset.id=s.id;return img;}));
- $('footerHelp').textContent='Find the partner. They’ll take it from there.';canvas.focus({preventScroll:true});tone(294,.2);tone(392,.3,.035,.15);
+ $('footerHelp').textContent='Find the partner. They’ll take it from there.';canvas.focus({preventScroll:true});noise(2.1,170,.22);state.thunderAt=6;note('The flood is coming. Get them aboard!');
 }
 function refreshTask(){
  if(!state)return;const s=state;const img=$('taskAnimal');img.hidden=!s.lead;
@@ -108,7 +144,7 @@ function refreshTask(){
 function refreshHUD(){
  if(!state)return;const s=state;$('count').textContent=s.rescued.size;
  $('clock').textContent=`${Math.floor(Math.ceil(s.seconds)/60)}:${String(Math.ceil(s.seconds)%60).padStart(2,'0')}`;
- $('weatherLabel').textContent=mode==='closing'?'Closing the gates':s.seconds>45?'Clouds gathering':s.seconds>30?'Here comes the rain':s.seconds>15?'The storm is building':'Hurry! The flood is near';
+ $('weatherLabel').textContent=mode==='closing'?'Closing the gates':s.seconds>45?'The flood is coming':s.seconds>30?'Water is rising':s.seconds>15?'The meadow is flooding':'Get them aboard!';
  $('timeFill').style.width=(s.seconds/ROUND_SECONDS*100)+'%';$('timeFill').style.background=s.seconds<=15?'#f1a778':'#e5ca8c';
  document.querySelector('.weather').classList.toggle('urgent',s.seconds<=15);
 
@@ -124,7 +160,7 @@ window.addEventListener('keydown',e=>{
 window.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
 window.addEventListener('blur',()=>{keys.clear();if(mode==='play')pause();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&mode==='play')pause();});
-function setTarget(e){if(mode!=='play')return;const r=canvas.getBoundingClientRect();state.target={x:clamp(e.clientX-r.left,24*u,w-24*u),y:clamp(e.clientY-r.top,h*.405,h*.79)};}
+function setTarget(e){if(mode!=='play')return;const r=canvas.getBoundingClientRect();state.target={x:clamp(e.clientX-r.left,24*u,w-24*u),y:clamp(e.clientY-r.top,h*.45,h*.81)};}
 canvas.addEventListener('pointerdown',e=>{if(mode!=='play')return;e.preventDefault();canvas.focus({preventScroll:true});canvas.setPointerCapture(e.pointerId);setTarget(e);});
 canvas.addEventListener('pointermove',e=>{if(e.buttons||e.pointerType==='touch'&&canvas.hasPointerCapture(e.pointerId))setTarget(e);});
 canvas.addEventListener('pointercancel',()=>{if(state)state.target=null;});
@@ -186,14 +222,14 @@ function update(dt,clockDt=dt){
  const n=s.noah,speed=clamp(Math.min(w,h)*.6,185,390);
  if(dx||dy){const len=Math.hypot(dx,dy);n.x+=dx/len*speed*dt;n.y+=dy/len*speed*dt;s.inactive=0;}
  else if(s.target){dx=s.target.x-n.x;dy=s.target.y-n.y;const dist=Math.hypot(dx,dy),travel=Math.min(dist,speed*dt);if(dist>1){n.x+=dx/dist*travel;n.y+=dy/dist*travel;s.inactive=0;}else s.target=null;}
- n.x=clamp(n.x,24*u,w-24*u);n.y=clamp(n.y,h*.405,h*.79);
+ n.x=clamp(n.x,24*u,w-24*u);n.y=clamp(n.y,h*.45,h*.81);
  // The meadow stays bounded above the task panel; animals never hide under the UI.
  for(const a of s.animals){
   if(a.safe||a.held||a.running||quiet.matches)continue;
   if(!a.wanderTarget){
    a.rest-=dt;if(a.rest>0)continue;
    const angle=Math.random()*Math.PI*2,radius=(14+Math.random()*16)*u;
-   a.wanderTarget={x:clamp(a.homeX+Math.cos(angle)*radius,28*u,w-28*u),y:clamp(a.homeY+Math.sin(angle)*radius,h*.48,h*.77)};
+   a.wanderTarget={x:clamp(a.homeX+Math.cos(angle)*radius,28*u,w-28*u),y:clamp(a.homeY+Math.sin(angle)*radius,h*.52,h*.79)};
   }
   const dx=a.wanderTarget.x-a.x,dy=a.wanderTarget.y-a.y,distance=Math.hypot(dx,dy);
   if(distance<1){a.wanderTarget=null;a.rest=.8+Math.random()*1.8;continue;}
@@ -203,29 +239,42 @@ function update(dt,clockDt=dt){
  if(s.lead){const follow=(a,tx,ty)=>{const k=1-Math.exp(-dt*9);a.x=mix(a.x,tx,k);a.y=mix(a.y,ty,k);};follow(s.lead,n.x-27*u,n.y+19*u);}
  if(s.pickupCooldown===0){
  const close=s.animals.filter(a=>!a.safe&&!a.held&&!a.running&&(!s.lead||a.species.id===s.lead.species.id)).sort((a,b)=>Math.hypot(a.x-n.x,a.y-n.y)-Math.hypot(b.x-n.x,b.y-n.y))[0];
- if(close&&Math.hypot(close.x-n.x,close.y-n.y)<28*u){close.held=true;s.inactive=0;if(!s.lead){s.lead=close;s.phase='partner';chime('pick');if(close.species.id==='captain'&&!s.captainFound){s.captainFound=true;bark();note('Captain?! There’s room for good boys, too.');}}else{matchPair(close);}refreshTask();}
+ if(close&&Math.hypot(close.x-n.x,close.y-n.y)<(close.species.id==='captain'?46:28)*u){close.held=true;s.inactive=0;if(!s.lead){s.lead=close;s.phase='partner';s.hintUntil=s.elapsed+1.15;chime('pick');if(close.species.id==='captain'&&!s.captainFound){s.captainFound=true;bark();note('Captain?! There’s room for good boys, too.');}}else{matchPair(close);}refreshTask();}
  }
  refreshHUD();
 
 }
 function drawStorm(intensity,t){
  if(intensity<=0)return;
- // Darken the land first. Noah, animals, and partner markers are drawn afterwards.
- ctx.fillStyle=`rgba(22,43,62,${intensity*.40})`;ctx.fillRect(0,0,w,h);
- const sky=ctx.createLinearGradient(0,0,0,h*.52);sky.addColorStop(0,`rgba(18,33,51,${intensity*.65})`);sky.addColorStop(1,'rgba(18,33,51,0)');ctx.fillStyle=sky;ctx.fillRect(0,0,w,h*.52);
- const drift=quiet.matches?0:t*(3+intensity*12);
- for(let i=0;i<8;i++){const x=((i*.19*w+drift)%(w*1.35))-w*.16,y=h*(.04+(i%3)*.055);ellipse(ctx,x,y,w*.19,19*u+intensity*17*u,`rgba(37,56,69,${intensity*.68})`);}
- const flood=smooth((intensity-.48)/.52);
- for(let i=0;i<5;i++){ellipse(ctx,i%2?w*.97:w*.03,h*(.64+i*.075),w*(.03+flood*.11),3*u+flood*13*u,`rgba(109,157,165,${flood*.4})`);}
- if(flood>0){ellipse(ctx,w*.55,h*.86,w*.32,flood*20*u,`rgba(116,163,167,${flood*.25})`);}
- // An occasional distant, low-contrast bolt, not a screen-filling flash.
- const bolt=!quiet.matches&&intensity>.45&&(t%11)<.17;
- if(bolt){const x=w*.82;ctx.strokeStyle='#e1e2c580';ctx.lineWidth=2*u;ctx.beginPath();ctx.moveTo(x,h*.06);ctx.lineTo(x-12*u,h*.14);ctx.lineTo(x+2*u,h*.14);ctx.lineTo(x-20*u,h*.24);ctx.stroke();}
+ // Shade only the painted world. Sprites and UI render afterwards at full brightness.
+ ctx.fillStyle=`rgba(13,32,49,${.17+intensity*.27})`;ctx.fillRect(0,0,w,h);
+ const sky=ctx.createLinearGradient(0,0,0,h*.49);sky.addColorStop(0,`rgba(12,27,43,${intensity*.59})`);sky.addColorStop(1,'rgba(12,27,43,0)');ctx.fillStyle=sky;ctx.fillRect(0,0,w,h*.49);
+ if(cloudBank){ctx.save();ctx.globalAlpha=.55+intensity*.25;const drift=quiet.matches?0:(t*(9+intensity*12))%w;ctx.drawImage(cloudBank,drift-w,0,w,h*.29);ctx.drawImage(cloudBank,drift,0,w,h*.29);ctx.restore();}
+ const bolt=!quiet.matches&&((t+2)%7)<.13;
+ if(bolt){const x=w*.83;ctx.strokeStyle='#e2e8d6aa';ctx.lineWidth=1.8*u;ctx.beginPath();ctx.moveTo(x,h*.06);ctx.lineTo(x-13*u,h*.14);ctx.lineTo(x+1*u,h*.14);ctx.lineTo(x-21*u,h*.25);ctx.moveTo(x-13*u,h*.14);ctx.lineTo(x-31*u,h*.17);ctx.stroke();}
 }
-function drawRain(intensity,t){
+function drawMeadowFlood(progress,t){
+ // Water belongs to the world layer: feet may splash, faces never disappear.
+ const p=.10+smooth(progress)*.9,level=mix(h*.95,h*.65,progress*progress);
+ ctx.save();
+ for(let i=0;i<6;i++){
+  const x=i%2?w*.98:w*.02,y=h*(.58+i*.075),rx=w*(.035+p*.12),ry=(3+p*15)*u;
+  const g=ctx.createRadialGradient(x,y,0,x,y,rx);g.addColorStop(0,`rgba(118,179,187,${p*.55})`);g.addColorStop(1,'rgba(67,137,158,0)');ellipse(ctx,x,y,rx,ry,g);
+ }
+ // A stream forms along the painted path, growing from a trickle to a current.
+ const a=paintPoint(.505,.445),b=paintPoint(.62,.72),c=paintPoint(.39,1);
+ ctx.strokeStyle=`rgba(116,176,184,${.12+progress*.31})`;ctx.lineWidth=(3+progress*19)*u;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.bezierCurveTo(a.x,h*.55,b.x,h*.68,b.x,h*.73);ctx.bezierCurveTo(b.x,h*.85,c.x,h*.94,c.x,h*1.04);ctx.stroke();
+ const water=ctx.createLinearGradient(0,level,0,h);water.addColorStop(0,'rgba(78,137,159,.18)');water.addColorStop(1,`rgba(55,119,148,${.38+progress*.24})`);
+ path(ctx,q=>{q.moveTo(0,h);q.lineTo(0,level);for(let x=0;x<=w+12;x+=12)q.lineTo(x,level+Math.sin(x*.025+(quiet.matches?0:t*1.8))*3*u);q.lineTo(w,h);},water);
+ // Sparse ripples and rain splashes imply motion without covering the animals.
+ ctx.strokeStyle=`rgba(207,233,231,${.14+progress*.14})`;ctx.lineWidth=.9*u;
+ for(let i=0;i<18;i++){const x=((i*.618+.13)%1)*w,y=h*(.54+((i*.383)%1)*.44),wave=quiet.matches?.5:(t*1.8+i*.31)%1;ctx.globalAlpha=1-wave;ctx.beginPath();ctx.ellipse(x,y,(3+wave*8)*u,(1+wave*2)*u,0,0,Math.PI*2);ctx.stroke();}
+ ctx.restore();
+}
+function drawRain(intensity,t,foreground=false){
  if(intensity<=0||quiet.matches)return;
- ctx.save();ctx.strokeStyle=`rgba(218,233,227,${.14+intensity*.14})`;ctx.lineWidth=(.8+intensity*.45)*u;ctx.beginPath();
- const count=Math.floor(35+intensity*130),wind=6+intensity*15;
+ ctx.save();ctx.strokeStyle=`rgba(218,233,227,${foreground?.19:.18+intensity*.12})`;ctx.lineWidth=(foreground?1.25:.85)*u;ctx.beginPath();
+ const count=foreground?28:Math.floor(65+intensity*110),wind=12+intensity*19;
  for(let i=0;i<count;i++){const x=((i*.618033*w+t*(30+intensity*100))%(w+40))-20,y=(i*71+t*(180+intensity*420))%(h+40)-30;ctx.moveTo(x,y);ctx.lineTo(x-wind*u,y+(10+intensity*14)*u);}ctx.stroke();ctx.restore();
 }
 function drawBoarding(t){
@@ -235,44 +284,52 @@ function drawBoarding(t){
  const x=q*q*start.x+2*q*k*(d.x+(i?10:-10)*u)+k*k*(d.x+(i?3:-3)*u);
  const y=q*q*start.y+2*q*k*(start.y-28*u)+k*k*(d.y-8*u);
  const bob=quiet.matches?0:Math.sin(t*19+i)*2*u,scale=1-smooth((p-.75)/.25)*.62;
- ellipse(ctx,x,y+4*u,14*u*scale,3*u*scale,'#18332e22');image(ctx,pair.species.img,x,y+bob,47*u*scale,43*u*scale,1-smooth((p-.94)/.06));
+ ellipse(ctx,x,y+4*u,14*u*scale,3*u*scale,'#18332e33');speciesArt(pair.species,x,y+bob,scale,1,1-smooth((p-.94)/.06));
  });}
 }
 function drawWater(t,won){
  const p=mode==='ended'?1:smooth(t/(quiet.matches?1:5));
- const waterY=mix(h*1.1,h*.385,p);ctx.fillStyle=won?'#5e9399':'#487e8a';
+ const startLevel=state?mix(h*.95,h*.65,Math.pow(clamp(state.elapsed/ROUND_SECONDS,0,1),2)):h*.90;
+ const waterY=mix(startLevel,h*.414,p);ctx.fillStyle=won?'#5e9399':'#487e8a';
  ctx.beginPath();ctx.moveTo(0,h);ctx.lineTo(0,waterY);for(let x=0;x<=w+20;x+=20)ctx.lineTo(x,waterY+Math.sin(x*.018+(quiet.matches?0:t))*(4*u));ctx.lineTo(w,h);ctx.closePath();ctx.fill();
  ctx.strokeStyle='#c4d9ca44';ctx.lineWidth=1.6*u;for(let i=0;i<7;i++){const yy=waterY+(h-waterY)*(i+.7)/8;ctx.beginPath();for(let x=0;x<=w;x+=10){const y=yy+Math.sin(x*.024+i+t*.4)*3*u;x?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();}
  if(won){ctx.save();ctx.globalAlpha=p*.65;ctx.lineWidth=7*u;const colors=['#e1a187','#e5c486','#e4d99f','#a8c6a2','#95bfc3'];colors.forEach((color,i)=>{ctx.strokeStyle=color;ctx.beginPath();ctx.ellipse(w*.5,h*.47,w*.38-i*8*u,h*.39-i*8*u,0,Math.PI,Math.PI*2);ctx.stroke();});ctx.restore();}
 }
 function render(t){
  ctx.clearRect(0,0,w,h);if(scene)ctx.drawImage(scene,0,0,w,h);
- const s=state,cin=mode==='cinematic'||mode==='ended';
- const storm=s?clamp(s.elapsed/ROUND_SECONDS,0,1):0;
+ const s=state,cin=mode==='cinematic'||mode==='ended',painted=paintedScene.complete&&paintedScene.naturalWidth;
+ const progress=s?clamp(s.elapsed/ROUND_SECONDS,0,1):0;
+ const endTime=cin?(mode==='ended'?8:(performance.now()-s.endStarted)/1000):0;
+ const storm=s?(cin&&s.won?mix(.8,.12,smooth(endTime/5)):.62+progress*.38):0;
  drawStorm(storm,t);
- if(cin){const elapsed=mode==='ended'?8:(performance.now()-s.endStarted)/1000;drawWater(elapsed,s.won);drawArk(smooth(elapsed/5),true);if(s.won){const dh=Math.min(w*.65,420*u)*.47;image(ctx,noah,w*.49,h*.405-dh*.66-18*u,35*u,46*u);}drawRain(s.won?0:.7,t);return;}
- drawArk();
- if(s){
- const d=doorway();
- if(s.target&&mode==='play'){marker(s.target.x,s.target.y,8*u,'#f4e4aeaa');}
- const mate=s.lead?s.animals.find(a=>!a.held&&!a.safe&&a.species.id===s.lead.species.id):null;
- if(mate){marker(mate.x,mate.y,23*u,'#f5e5a8');ctx.fillStyle='#fff5ce';ctx.font=`bold ${12*u}px system-ui`;ctx.textAlign='center';ctx.fillText('PARTNER',mate.x,mate.y-29*u);}
- const actors=s.animals.filter(a=>!a.safe&&!a.running).map(a=>({y:a.y,draw:()=>drawAnimal(a,t)}));actors.push({y:s.noah.y,draw:()=>{
- ellipse(ctx,s.noah.x,s.noah.y+5*u,18*u,5*u,'#294d3240');const bob=!quiet.matches&&(s.target||keys.size)?Math.sin(t*12)*1.1*u:0;image(ctx,noah,s.noah.x,s.noah.y+bob,58*u,76*u);
- }});actors.sort((a,b)=>a.y-b.y).forEach(a=>a.draw());
- drawBoarding(t);
- }else{
- image(ctx,SPECIES[0].img,w*.25,h*.72,75*u,69*u);image(ctx,SPECIES[0].img,w*.18,h*.77,68*u,62*u);image(ctx,SPECIES[1].img,w*.77,h*.64,70*u,64*u);image(ctx,SPECIES[2].img,w*.82,h*.78,66*u,61*u);
+ if(cin){
+  if(painted)drawPaintedDoor(true);
+  drawWater(endTime,s.won);
+  if(!painted)drawLegacyArk(smooth(endTime/5),true);
+  if(!s.won)drawRain(1,t,true);
+  return;
  }
- drawRain(storm>.18?(storm-.18)/.82:0,t);
+ if(!painted)drawLegacyArk();
+ if(s){
+  drawMeadowFlood(progress,t);drawDoorLight();drawRain(storm,t);
+  if(s.target&&mode==='play')marker(s.target.x,s.target.y,8*u,'#f4e4aeaa');
+  const mate=s.lead?s.animals.find(a=>!a.held&&!a.safe&&a.species.id===s.lead.species.id):null;
+  if(mate&&s.elapsed<s.hintUntil){marker(mate.x,mate.y,23*u,'#fff0b9');ctx.fillStyle='#fff5ce';ctx.font=`bold ${11*u}px system-ui`;ctx.textAlign='center';ctx.fillText('PARTNER',mate.x,mate.y-29*u);}
+  const actors=s.animals.filter(a=>!a.safe&&!a.running).map(a=>({y:a.y,draw:()=>drawAnimal(a,t)}));actors.push({y:s.noah.y,draw:()=>{
+   ellipse(ctx,s.noah.x,s.noah.y+5*u,18*u,5*u,'#102a3b66');const bob=!quiet.matches&&(s.target||keys.size)?Math.sin(t*12)*1.1*u:0;
+   ctx.save();ctx.shadowColor='#142431aa';ctx.shadowBlur=4*u;image(ctx,noah,s.noah.x,s.noah.y+bob,64*u,84*u);ctx.restore();
+  }});actors.sort((a,b)=>a.y-b.y).forEach(a=>a.draw());drawBoarding(t);drawRain(storm,t,true);
+ }else{
+  speciesArt(SPECIES[0],w*.25,h*.72,1.4);speciesArt(SPECIES[1],w*.78,h*.64,1.4);speciesArt(SPECIES[2],w*.82,h*.79,1.3);
+ }
 }
 function loop(now){frame=requestAnimationFrame(loop);if(!w||!h)return;const clockDt=(now-(last||now))/1000,dt=Math.min(clockDt,.08);last=now;if(mode!=='paused'){ambient+=dt;if(mode==='play'||mode==='closing')update(dt,clockDt);if(mode==='cinematic'&&(now-state.endStarted)/1000>(quiet.matches?1.2:6.5))finishEnding();}
  if(dirty||((mode==='play'||mode==='closing'||mode==='cinematic')&&now-lastPaint>=32)){render(ambient);lastPaint=now;dirty=false;}
 }
 fit();frame=requestAnimationFrame(loop);
 // Keep the story playable even if an optional illustration fails to load.
-Promise.allSettled([...SPECIES.map(s=>s.img.decode()),noah.decode()]).then(results=>{
- dirty=true;
+Promise.allSettled([...SPECIES.map(s=>s.img.decode()),noah.decode(),paintedScene.decode()]).then(results=>{
+ buildScene();dirty=true;$('start').disabled=false;$('start').textContent='Open the gates →';
  if(results.some(r=>r.status==='rejected'))note('Some artwork could not load. Refresh to try again.');
 });
 })();

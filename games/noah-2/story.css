@@ -9,3 +9,13 @@
 .round-badge{border:1px solid #c9c7ad;border-radius:9px;background:#e7eadb;padding:13px 10px;font-size:12px;font-weight:750;text-align:center;color:#396052;margin:0 0 19px}.round-badge span{padding:0 8px;color:#ac8957}.weather.urgent{border-color:#e5a16f;background:#432f2ceF}.weather.urgent>strong{color:#ffd2a2}.weather.urgent>span{color:#eccab0}.collection{gap:4px}.collection img{width:27px}.end-animals img{width:33px}
 @media(max-width:650px){.collection img{width:24px;height:25px}.collection{gap:3px}.round-badge{font-size:11px;margin-bottom:15px;padding:11px 8px}.round-badge span{padding:0 5px}.end-animals{gap:2px}.end-animals img{width:27px;height:28px}}
 @media(max-width:350px){.collection img{width:22px}.collection{padding:5px 6px;gap:2px}.round-badge{font-size:10px}.end-animals img{width:24px}}
+.primary:disabled{opacity:.65;cursor:wait}
+/* In short landscape, keep the painting dimensional and use the side gutters for HUD. */
+@media(max-height:500px) and (min-width:651px) and (min-aspect-ratio:2/1){
+ #stage{background:radial-gradient(ellipse at center,#244d48,#102b30 75%)}
+ #game{width:min(100%,calc((100dvh - 101px)*1.4));margin-inline:auto}
+ .hud-top{left:12px;right:12px;top:12px}.saved{padding:8px 10px}.saved>#count{font-size:28px}.weather{width:145px;padding:8px 10px}
+ .task{left:12px;bottom:20px;transform:none;width:175px;max-width:calc((100% - (100dvh - 101px)*1.4)/2 - 20px);padding:10px}
+ .task strong{font-size:10px}.task small{font-size:8px}.task img{width:30px;height:30px}
+ .collection{left:auto;right:12px;bottom:20px;transform:none;display:grid;grid-template-columns:repeat(5,25px);gap:4px;padding:7px}.collection img{width:25px;height:25px}
+}
