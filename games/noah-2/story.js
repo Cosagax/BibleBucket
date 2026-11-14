@@ -15,16 +15,14 @@ const quiet=matchMedia('(prefers-reduced-motion: reduce)');
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const mix=(a,b,t)=>a+(b-a)*t;
 const smooth=t=>{t=clamp(t,0,1);return t*t*(3-2*t);};
-let w=800,h=650,u=1,mode='intro',state=null,last=0,scene=null,frame=0,ambient=0,soundOn=false,audioCtx=null,noticeTimer=0,lastPaint=0,dirty=true;
+let w=800,h=650,u=1,mode='intro',state=null,last=0,scene=null,frame=0,ambient=0,audioCtx=null,noticeTimer=0,lastPaint=0,dirty=true;
 const keys=new Set();
 function note(message){$('notice').textContent=message;$('notice').classList.add('show');clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>$('notice').classList.remove('show'),2600);}
 function hideNotice(){clearTimeout(noticeTimer);$('notice').classList.remove('show');}
 function tone(f,d=.15,volume=.035,delay=0){
- if(!soundOn)return;
- try{audioCtx??=new (window.AudioContext||window.webkitAudioContext)();audioCtx.resume();const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime+delay;o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(volume,t+.025);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(audioCtx.destination);o.start(t);o.stop(t+d+.02);}catch{/* Sound is optional. */}
+ try{audioCtx??=new (window.AudioContext||window.webkitAudioContext)();audioCtx.resume();const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime+delay;o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(volume,t+.025);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(audioCtx.destination);o.start(t);o.stop(t+d+.02);}catch{/* Continue playing if device audio is unavailable. */}
 }
 function noise(duration,cutoff,volume,delay=0){
- if(!soundOn)return;
  try{audioCtx??=new (window.AudioContext||window.webkitAudioContext)();audioCtx.resume();const rate=audioCtx.sampleRate,buffer=audioCtx.createBuffer(1,Math.ceil(rate*duration),rate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;
  const src=audioCtx.createBufferSource(),filter=audioCtx.createBiquadFilter(),gain=audioCtx.createGain(),at=audioCtx.currentTime+delay;src.buffer=buffer;filter.type='lowpass';filter.frequency.value=cutoff;gain.gain.setValueAtTime(.0001,at);gain.gain.exponentialRampToValueAtTime(volume,at+.04);gain.gain.exponentialRampToValueAtTime(.0001,at+duration);src.connect(filter).connect(gain).connect(audioCtx.destination);src.start(at);src.stop(at+duration);}catch{}
 }
@@ -34,7 +32,6 @@ function updateStormAudio(){
  const seconds=Math.ceil(s.seconds);if(seconds<=10&&seconds>0&&seconds<s.lastBeat){s.lastBeat=seconds;tone(165,.16,.025);}
 }
 function chime(kind){if(kind==='board'){[392,494,587,784].forEach((f,i)=>tone(f,.4,.045,i*.1));}else if(kind==='pair'){tone(440,.18);tone(660,.28,.04,.11);}else tone(330,.16);}
-$('sound').onclick=()=>{soundOn=!soundOn;$('sound').textContent=soundOn?'Sound on':'Sound off';$('sound').setAttribute('aria-pressed',String(soundOn));$('sound').setAttribute('aria-label',soundOn?'Turn sound off':'Turn sound on');if(soundOn)tone(523,.18);else if(audioCtx)audioCtx.suspend();};
 function fit(){
  const oldW=w,oldH=h;w=Math.max(240,canvas.clientWidth);h=Math.max(190,canvas.clientHeight);u=clamp(Math.min(w/720,h/640),.68,1.25);
  const dpr=Math.min(devicePixelRatio||1,1.5);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -107,6 +104,7 @@ function drawLegacyArk(progress=0,closed=false){
 }
 function image(c,img,x,y,width,height,alpha=1){if(!img.complete||!img.naturalWidth)return;c.save();c.globalAlpha=alpha;c.drawImage(img,x-width/2,y-height*.8,width,height);c.restore();}
 function speciesArt(species,x,y,scale=1,facing=1,alpha=1){
+ scale*=1.15;
  ctx.save();ctx.translate(x,y);ctx.scale(facing,1);ctx.globalAlpha=alpha;ctx.shadowColor='#13241988';ctx.shadowBlur=3*u;
  if(species.id==='captain'&&species.img.complete&&species.img.naturalWidth){
   // Exact Orbs PNG. Preserve its aspect ratio and place the paws on the ground.
@@ -118,7 +116,7 @@ function speciesArt(species,x,y,scale=1,facing=1,alpha=1){
 function drawAnimal(a,t){
  if(a.safe)return;
  const bob=quiet.matches?0:Math.sin(t*2+a.seed)*1.2*u;
- ellipse(ctx,a.x,a.y+4*u,a.species.id==='captain'?23*u:17*u,4*u,'#142d3555');speciesArt(a.species,a.x,a.y+bob,1,a.facing||1);
+ ellipse(ctx,a.x,a.y+4*u,(a.species.id==='captain'?23:17)*u*1.15,4*u,'#142d3555');speciesArt(a.species,a.x,a.y+bob,1,a.facing||1);
 }
 function marker(x,y,r,color){ctx.strokeStyle=color;ctx.lineWidth=2*u;ctx.beginPath();ctx.ellipse(x,y+7*u,r,r*.42,0,0,Math.PI*2);ctx.stroke();}
 function init(){
@@ -316,8 +314,8 @@ function render(t){
   const mate=s.lead?s.animals.find(a=>!a.held&&!a.safe&&a.species.id===s.lead.species.id):null;
   if(mate&&s.elapsed<s.hintUntil){marker(mate.x,mate.y,23*u,'#fff0b9');ctx.fillStyle='#fff5ce';ctx.font=`bold ${11*u}px system-ui`;ctx.textAlign='center';ctx.fillText('PARTNER',mate.x,mate.y-29*u);}
   const actors=s.animals.filter(a=>!a.safe&&!a.running).map(a=>({y:a.y,draw:()=>drawAnimal(a,t)}));actors.push({y:s.noah.y,draw:()=>{
-   ellipse(ctx,s.noah.x,s.noah.y+5*u,18*u,5*u,'#102a3b66');const bob=!quiet.matches&&(s.target||keys.size)?Math.sin(t*12)*1.1*u:0;
-   ctx.save();ctx.shadowColor='#142431aa';ctx.shadowBlur=4*u;image(ctx,noah,s.noah.x,s.noah.y+bob,64*u,84*u);ctx.restore();
+   ellipse(ctx,s.noah.x,s.noah.y+5*u,18*u*1.15,5*u,'#102a3b66');const bob=!quiet.matches&&(s.target||keys.size)?Math.sin(t*12)*1.1*u:0;
+   ctx.save();ctx.shadowColor='#142431aa';ctx.shadowBlur=4*u;image(ctx,noah,s.noah.x,s.noah.y+bob,64*u*1.15,84*u*1.15);ctx.restore();
   }});actors.sort((a,b)=>a.y-b.y).forEach(a=>a.draw());drawBoarding(t);drawRain(storm,t,true);
  }else{
   speciesArt(SPECIES[0],w*.25,h*.72,1.4);speciesArt(SPECIES[1],w*.78,h*.64,1.4);speciesArt(SPECIES[2],w*.82,h*.79,1.3);

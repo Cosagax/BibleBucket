@@ -8,9 +8,9 @@ Tap a destination, drag, or use arrow/WASD keys to guide Noah. Collect any waiti
 
 A match made before the buzzer is honored: any pairs already running finish boarding before the result is shown. The playable clock stops at 60 seconds; the short boarding/result animation does not permit extra matches. Completing all ten matches early closes the gates after the runners board. The clock uses active elapsed wall time independently of capped movement steps; pausing or changing tabs stops the clock.
 
-Pause with the Pause button, P, or Escape. Replay and new-journey paths clear overlays, input, collections, cameo discovery, and animation state. Optional Web Audio chimes, procedural thunder, last-ten-second urgency tones, and Captain’s bark are enabled with Sound on. Reduced-motion preference disables walking bob, rain streaks, cloud drift, distant lightning, and animated wave motion and shortens the ending.
+Pause with the Pause button, P, or Escape. Replay and new-journey paths clear overlays, input, collections, cameo discovery, and animation state. Web Audio chimes, procedural thunder, last-ten-second urgency tones, and Captain’s bark are enabled automatically when the player starts the round. There is no in-game sound toggle; use device/browser volume controls. Reduced-motion preference disables walking bob, rain streaks, cloud drift, distant lightning, and animated wave motion and shortens the ending.
 
-The storm is already underway from the opening second: immediate driving rain, an opening thunderclap when sound is enabled, a dark cloud bank, and water at the meadow edges. It intensifies throughout the round; runoff forms along the painted path and water advances over the lower meadow. Landscape shading occurs before actors are drawn, preserving animal/Noah readability. There are no full-screen lightning flashes.
+The storm is already underway from the opening second: immediate driving rain, an opening thunderclap, a dark cloud bank, and water at the meadow edges. It intensifies throughout the round; runoff forms along the painted path and water advances over the lower meadow. Landscape shading occurs before actors are drawn, preserving animal/Noah readability. There are no full-screen lightning flashes.
 
 ## Files and artwork
 
@@ -34,7 +34,7 @@ Publishing follows the repository’s GitHub Pages main-branch flow. Verify the 
 ## The two surprise pairs
 
 - **Red pandas:** August’s surprise animal choice, with rust-colored fur, cream facial markings and a striped bushy tail.
-- **Captain:** Jake’s American Pitbull. The active sprite is now the exact Orbs artwork, not a redraw: `art/captain-orbs.png`, copied byte-for-byte from `../orbs-2/captain-character.png`. It has his happy face, brown/brindle coat, white chest/toes, and red collar. Use **Captain** only in the game. His first pickup reveals the cameo with an optional bark; boarding announces “Captain’s aboard. All paws accounted for.” His matching buddy uses the same recognizable illustration. The same Orbs artwork is the canonical Captain look for cameos in every BibleBucket game. This implementation change is confined to Noah 2.0.
+- **Captain:** Jake’s American Pitbull. The active sprite is now the exact Orbs artwork, not a redraw: `art/captain-orbs.png`, copied byte-for-byte from `../orbs-2/captain-character.png`. It has his happy face, brown/brindle coat, white chest/toes, and red collar. Use **Captain** only in the game. His first pickup reveals the cameo with a bark; boarding announces “Captain’s aboard. All paws accounted for.” His matching buddy uses the same recognizable illustration. The same Orbs artwork is the canonical Captain look for cameos in every BibleBucket game. This implementation change is confined to Noah 2.0.
 
 Jake approved Noah’s current look and later authorized broader character changes if needed to suit the painting. This release keeps his illustration and enlarges it slightly for readability.
 
@@ -54,3 +54,5 @@ The painting fills the scene vertically with a minimum horizontal image extent o
 The painted Ark is not drawn a second time. Endings layer a closing-door overlay and rising water over the same painting; they never swap back to the legacy vector Ark. Readability is preserved by shading/flooding the world before drawing actors, with only a light near-rain pass over them. Rain, clouds, runoff, ripples and the flood remain animated code-art. Main assets finish decoding before the start button enables, so downloads do not eat into the 60-second round.
 
 Captain is intentionally a little larger than the other animals, with his paws aligned to the ground, original aspect ratio preserved, and pickup radius scaled accordingly. The brief partner hint lasts 1.15 active-game seconds. The animal identity in the task panel remains available afterwards, but there is no permanent map locator.
+
+Noah and all animal artwork render 15% larger for readability, including automatic boarding. Artwork, movement, pickup distances, and the round mechanics are unchanged.
