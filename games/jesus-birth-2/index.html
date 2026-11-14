@@ -113,6 +113,8 @@ const btnAgain  = document.getElementById('btnAgain');
 
 /* ===== Assets ===== */
 const Img=s=>{const i=new Image(); i.src=s; return i;};
+const wiseManPainting=Img('wise-man-painted.png');
+const companionPainting=Img('wise-men-companions-painted.png');
 const captain=Img('captain-orbs.png'); // Canonical Captain cameo, shared with Orbs and Noah.
 const bg=Img('background.png'); // preserved as the original-scene fallback
 const journeyBackgrounds=[
@@ -202,6 +204,7 @@ const companions=[];
 let starPopActive=false, starPopT=0, endDelay=0;
 let megaPulseFired=false;
 let megaPulseT=0;
+let landingAt=-100;
 
 /* ===== Dust ===== */
 const dust=[];
@@ -477,7 +480,7 @@ let inFinale=false, finaleTriggered=false, finaleRippleFired=false;
 const palettes=[{robeTop:'#5f5f2b',robeBot:'#3a3a18',hat:'#c78a2a',beard:'#2a2a2a',skin:'#bd8963',sash:'#24321f',jar:'#d1a22b'},{robeTop:'#2b6d5f',robeBot:'#19443a',hat:'#a33e2a',beard:'#000',skin:'#b9825c',sash:'#14322e',jar:'#c58f2a'}];
 
 function reset(){
-  elapsed=0; timer=60; hits=0; groundX=0; rocks.length=0; man.vy=0; man.t=0; man.scale=1; dust.length=0; wasAir=false;
+  landingAt=-100; elapsed=0; timer=60; hits=0; groundX=0; rocks.length=0; man.vy=0; man.t=0; man.scale=1; dust.length=0; wasAir=false;
   companions.length=0; const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1);
   targetX=W*settleFrac; man.x=-man.w; man.y=H-groundH-man.h;
   comets.length=0; resetVerseQueue(); scheduleComet(); Sky.reset(); Cameo.reset();
@@ -783,13 +786,13 @@ function loop(now){
   const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1);
   if(inFinale){
     const progress=Math.min(1,(10-timer)/10); const ease=progress*progress*(3-2*progress);
-    const finalX=W*.58; const startX=Math.max(man.x,W*settleFrac);
+    const finalX=Math.max(24,Math.min(W*.58,W-250)); const startX=Math.max(man.x,W*settleFrac);
     man.x=startX+(finalX-startX)*ease; man.scale=1;
-    companions.forEach((c,i)=>{ const tx=finalX+25+i*25; c.x=c.x+(tx-c.x)*.035; c.t+=dt*6; if(progress>.85){ c.nodT+=dt; }});
+    companions.forEach((c,i)=>{ const tx=finalX+Math.min(70,W*.2)*(i+1); c.x=c.x+(tx-c.x)*.035; c.t+=dt*6; if(progress>.85){ c.nodT+=dt; }});
   } else if(man.x<targetX){ man.x=Math.min(targetX,man.x+walkSpeed*dt); }
 
   man.vy+=grav*dt; man.y+=man.vy*dt; const groundedNow=onGround();
-  if(groundedNow){ if(man.vy>0) man.vy=0; man.y=H-groundH-man.h; if(wasAir){ const fy=man.y+man.h-6; puff(man.x+man.w*.25,fy,6,.95); puff(man.x+man.w*.75,fy,6,.95); SFX.poof(); } }
+  if(groundedNow){ if(man.vy>0) man.vy=0; man.y=H-groundH-man.h; if(wasAir){ landingAt=elapsed; const fy=man.y+man.h-6; puff(man.x+man.w*.25,fy,6,.95); puff(man.x+man.w*.75,fy,6,.95); SFX.poof(); } }
   wasAir=!groundedNow; man.t+=dt*8;
 
   spawnTimer+=dt; const canSpawn=!inFinale && (!rocks.length || rocks[rocks.length-1].x < W - minGap);
@@ -906,8 +909,70 @@ function drawCaptain(W,H){
   ctx.drawImage(captain,-width/2,-height,width,height);ctx.restore();
 }
 
+/* Painted figures are cached at sprite resolution; a small cloth mesh animates
+   the existing art without moving physics/collision coordinates. Legacy art
+   below stays available if an illustration fails to load. */
+const paintedWiseCache=new Map();
+function wiseSprite(pal){
+  const key=pal?palettes.indexOf(pal)+1:0;
+  if(paintedWiseCache.has(key))return paintedWiseCache.get(key);
+  const source=key?companionPainting:wiseManPainting;
+  if(!source.complete||!source.naturalWidth)return null;
+  const cellWidth=source.naturalWidth/(key?2:1), sx=key===2?cellWidth:0;
+  const work=document.createElement('canvas');work.width=Math.round(cellWidth);work.height=source.naturalHeight;
+  const c=work.getContext('2d',{willReadFrequently:true});c.drawImage(source,sx,0,cellWidth,source.naturalHeight,0,0,work.width,work.height);
+  const pixels=c.getImageData(0,0,work.width,work.height).data;
+  let left=work.width,top=work.height,right=0,bottom=0;
+  for(let y=0;y<work.height;y++)for(let x=0;x<work.width;x++)if(pixels[(y*work.width+x)*4+3]>16){left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);}
+  if(right<=left||bottom<=top)return null;
+  const sprite=document.createElement('canvas');sprite.height=256;sprite.width=Math.round(256*(right-left+1)/(bottom-top+1));
+  sprite.getContext('2d').drawImage(work,left,top,right-left+1,bottom-top+1,0,0,sprite.width,sprite.height);
+  paintedWiseCache.set(key,sprite);return sprite;
+}
+function drawPaintedWiseMan(x,y,w,h,t,grounded,scale,pal,tilt){
+  const sprite=wiseSprite(pal);if(!sprite)return false;
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const phase=t*1.05, stride=reduced?0:Math.sin(phase);
+  const bob=grounded&&!reduced?Math.sin(phase*2)*1.8:0;
+  const jump=grounded?0:Math.max(-1,Math.min(1,man.vy/1050));
+  const sinceLanding=elapsed-landingAt;
+  const settle=grounded&&sinceLanding>=0&&sinceLanding<.65?Math.sin(sinceLanding*17)*Math.exp(-sinceLanding*6):0;
+  const height=h*1.1,width=height*sprite.width/sprite.height;
+  const footY=y+h,centerX=x+w*.5;
+  ctx.save();ctx.translate(centerX,footY);ctx.scale(scale,scale);ctx.rotate(tilt||0);
+  const shadowY=((cvs.height/(devicePixelRatio||1))-groundH-footY)/scale;
+  ctx.fillStyle=grounded?'rgba(0,0,0,.18)':'rgba(0,0,0,.09)';ctx.beginPath();ctx.ellipse(0,shadowY+2,w*(grounded?.36:.25),grounded?4:3,0,0,Math.PI*2);ctx.fill();
+  const cols=6,rows=12,points=[];
+  const smooth=v=>{v=Math.max(0,Math.min(1,v));return v*v*(3-2*v)};
+  for(let row=0;row<=rows;row++){points[row]=[];for(let col=0;col<=cols;col++){
+    const u=col/cols,v=row/rows,side=u<.58?-1:1;
+    const feet=smooth((v-.76)/.24),cloth=Math.max(0,1-u/.55)*Math.max(0,Math.sin(Math.PI*Math.max(0,Math.min(1,(v-.19)/.5))));
+    let dx=grounded?stride*side*9*feet:(.6-u)*12*feet;
+    let dy=grounded?-Math.max(0,stride*side)*5*feet:-5*feet;
+    if(!reduced){dy+=cloth*(Math.sin(phase*1.6+u*5)*3-jump*17+settle*9);dx+=cloth*(jump*6+Math.sin(phase+v*4)*2);}
+    points[row][col]={x:(u-.63)*width+dx,y:(v-1)*height+dy+bob*(1-feet)};
+  }}
+  function triangle(a,b,c,sa,sb,sc){
+    const det=(sb.x-sa.x)*(sc.y-sa.y)-(sc.x-sa.x)*(sb.y-sa.y);
+    const A=((b.x-a.x)*(sc.y-sa.y)-(c.x-a.x)*(sb.y-sa.y))/det;
+    const B=((b.y-a.y)*(sc.y-sa.y)-(c.y-a.y)*(sb.y-sa.y))/det;
+    const C=((c.x-a.x)*(sb.x-sa.x)-(b.x-a.x)*(sc.x-sa.x))/det;
+    const D=((c.y-a.y)*(sb.x-sa.x)-(b.y-a.y)*(sc.x-sa.x))/det;
+    ctx.save();ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.lineTo(c.x,c.y);ctx.closePath();ctx.clip();
+    ctx.transform(A,B,C,D,a.x-A*sa.x-C*sa.y,a.y-B*sa.x-D*sa.y);ctx.drawImage(sprite,0,0);ctx.restore();
+  }
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    const a=points[r][c],b=points[r][c+1],d=points[r+1][c],e=points[r+1][c+1];
+    const sa={x:c/cols*sprite.width,y:r/rows*sprite.height},sb={x:(c+1)/cols*sprite.width,y:sa.y};
+    const sd={x:sa.x,y:(r+1)/rows*sprite.height},se={x:sb.x,y:sd.y};
+    triangle(a,b,e,sa,sb,se);triangle(a,e,d,sa,se,sd);
+  }
+  ctx.restore();return true;
+}
+
 /* ===== Character draw ===== */
 function drawWiseManVariant(x,y,w,h,t,grounded,scale=1,pal,tilt=0){
+  if(drawPaintedWiseMan(x,y,w,h,t,grounded,scale,pal,tilt))return;
   const P = pal || { robeTop:'#087783', robeBot:'#07515b', hat:'#c83220', beard:'#30201b', skin:'#bd8056', sash:'#a92524', jar:'#d59b2b' };
   const walk=Math.sin(t*1.05), bob=Math.sin(t*2.1)*1.8, weight=(1-Math.cos(t*2.1))*0.8;
   const bobT=bob+weight, base=y+h, stride=7*walk, liftF=Math.max(0,Math.sin(t*1.05))*3, liftB=Math.max(0,-Math.sin(t*1.05))*2.4;
@@ -981,6 +1046,12 @@ function drawWiseManVariant(x,y,w,h,t,grounded,scale=1,pal,tilt=0){
   ctx.fillStyle=P.skin;ctx.beginPath();ctx.arc(gx-w*.035,gy-gh*.02,w*.035,0,Math.PI*2);ctx.fill();
   ctx.restore();
 }
+
+// Prepare all three trimmed sprite caches before the finale needs them.
+Promise.allSettled([wiseManPainting.decode(),companionPainting.decode()]).then(()=>{
+  const prepare=()=>{wiseSprite(null);palettes.forEach(p=>wiseSprite(p));};
+  if(window.requestIdleCallback)requestIdleCallback(prepare);else setTimeout(prepare,0);
+});
 
 /* ===== Start loop ===== */
 })();
