@@ -894,9 +894,9 @@ function draw(){
   if(!inFinale) drawComets();
 }
 
-/* Captain gets one quick, purely visual run-by per journey: 7–9.8 active seconds. */
+/* Captain gets one quick, purely visual run-by per journey: 7–11.2 active seconds. */
 function drawCaptain(W,H){
-  const t=elapsed-7, duration=2.8;
+  const t=elapsed-7, duration=4.2;
   if(t<0||t>=duration||!captain.complete||!captain.naturalWidth)return;
   const height=man.h*.58, width=height*captain.naturalWidth/captain.naturalHeight;
   const x=-width+(W+width*2)*(t/duration);
@@ -907,6 +907,19 @@ function drawCaptain(W,H){
   // The reference faces left; mirror him toward Bethlehem, past the wise man.
   ctx.scale(-1.05,1+Math.sin(stride)*.035);
   ctx.drawImage(captain,-width/2,-height,width,height);ctx.restore();
+  // Two silent little barks, outside the mirrored sprite transform.
+  const barkStart=t<2.1?.85:2.35, barkAge=t-barkStart, barkDuration=.75;
+  if(barkAge>=0&&barkAge<barkDuration){
+    const bw=66, bh=31, pad=8;
+    const bx=Math.max(pad,Math.min(W-bw-pad,x+width*.18-bw/2));
+    const by=Math.max(pad,feet-height-bounce-40-barkAge*10);
+    ctx.save();ctx.globalAlpha=Math.min(1,barkAge/.09,(barkDuration-barkAge)/.14);
+    ctx.fillStyle='#fff9e9';ctx.strokeStyle='#614328';ctx.lineWidth=2;
+    ctx.beginPath();ctx.roundRect(bx,by,bw,bh,11);ctx.fill();ctx.stroke();
+    ctx.beginPath();ctx.moveTo(bx+22,by+bh-1);ctx.lineTo(bx+27,by+bh+8);ctx.lineTo(bx+35,by+bh-1);ctx.fill();ctx.stroke();
+    ctx.fillStyle='#49301f';ctx.font='bold 17px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('Woof!',bx+bw/2,by+bh/2);ctx.restore();
+  }
 }
 
 /* Painted figures are cached at sprite resolution; a small cloth mesh animates
