@@ -35,7 +35,7 @@ $('sound').onclick=()=>{soundOn=!soundOn;$('sound').textContent=soundOn?'Sound o
 function fit(){
  const oldW=w,oldH=h;w=Math.max(240,stage.clientWidth);h=Math.max(190,stage.clientHeight);u=clamp(Math.min(w/720,h/640),.68,1.25);
  const dpr=Math.min(devicePixelRatio||1,1.5);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
- if(state){for(const a of state.animals){a.x=a.x/oldW*w;a.y=a.y/oldH*h;}state.noah.x=state.noah.x/oldW*w;state.noah.y=state.noah.y/oldH*h;if(state.target){state.target.x*=w/oldW;state.target.y*=h/oldH;}for(const pair of state.boarding){for(const start of pair.starts){start.x*=w/oldW;start.y*=h/oldH;}}}
+ if(state){for(const a of state.animals){a.x=a.x/oldW*w;a.y=a.y/oldH*h;a.homeX=a.homeX/oldW*w;a.homeY=a.homeY/oldH*h;if(a.wanderTarget){a.wanderTarget.x*=w/oldW;a.wanderTarget.y*=h/oldH;}}state.noah.x=state.noah.x/oldW*w;state.noah.y=state.noah.y/oldH*h;if(state.target){state.target.x*=w/oldW;state.target.y*=h/oldH;}for(const pair of state.boarding){for(const start of pair.starts){start.x*=w/oldW;start.y*=h/oldH;}}}
  buildScene();dirty=true;
 }
 new ResizeObserver(fit).observe(stage);
@@ -82,7 +82,7 @@ function image(c,img,x,y,width,height,alpha=1){if(!img.complete||!img.naturalWid
 function drawAnimal(a,t){
  if(a.safe)return;
  const size=47*u,bob=quiet.matches?0:Math.sin(t*2+a.seed)*1.2*u;
- ellipse(ctx,a.x,a.y+4*u,17*u,4*u,'#294d3226');image(ctx,a.species.img,a.x,a.y+bob,size,size*.92);
+ ellipse(ctx,a.x,a.y+4*u,17*u,4*u,'#294d3226');ctx.save();ctx.translate(a.x,a.y+bob);ctx.scale(a.facing||1,1);image(ctx,a.species.img,0,0,size,size*.92);ctx.restore();
 }
 function marker(x,y,r,color){ctx.strokeStyle=color;ctx.lineWidth=2*u;ctx.beginPath();ctx.ellipse(x,y+7*u,r,r*.42,0,0,Math.PI*2);ctx.stroke();}
 function init(){
@@ -92,7 +92,7 @@ function init(){
  for(let row=0;row<rows;row++)for(let col=0;col<cols;col++)slots.push({x:mix(w*.1,w*.9,col/(cols-1)),y:mix(h*.49,h*.77,row/(rows-1))});
  // Shuffle placement, never species identities: every animal always has one mate.
  for(let i=slots.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[slots[i],slots[j]]=[slots[j],slots[i]];}
- SPECIES.forEach((species,i)=>{for(let j=0;j<2;j++){const pos=slots[i*2+j];animals.push({...pos,species,seed:i*7+j*2,held:false,safe:false,running:false,vx:(Math.random()-.5)*4,vy:(Math.random()-.5)*3});}});
+ SPECIES.forEach((species,i)=>{for(let j=0;j<2;j++){const pos=slots[i*2+j];animals.push({...pos,species,seed:i*7+j*2,held:false,safe:false,running:false,homeX:pos.x,homeY:pos.y,wanderTarget:null,rest:Math.random()*2.5,wanderSpeed:8+Math.random()*5,facing:1});}});
  state={animals,noah:{x:w*.5,y:h*.435},target:null,lead:null,rescued:new Set(),matched:new Set(),seconds:ROUND_SECONDS,elapsed:0,inactive:0,boarding:[],phase:'find',pickupCooldown:0,endStarted:0,won:false,captainFound:false,thunderAt:18,lastBeat:15};
  mode='play';dirty=true;ambient=0;refreshTask();refreshHUD();$('collection').replaceChildren(...SPECIES.map(s=>{const img=document.createElement('img');img.src=s.img.src;img.alt=s.id==='captain'?'A surprise pair: waiting':`${s.name}: waiting`;img.dataset.id=s.id;return img;}));
  $('footerHelp').textContent='Find the partner. They’ll take it from there.';canvas.focus({preventScroll:true});tone(294,.2);tone(392,.3,.035,.15);
@@ -188,7 +188,18 @@ function update(dt,clockDt=dt){
  else if(s.target){dx=s.target.x-n.x;dy=s.target.y-n.y;const dist=Math.hypot(dx,dy),travel=Math.min(dist,speed*dt);if(dist>1){n.x+=dx/dist*travel;n.y+=dy/dist*travel;s.inactive=0;}else s.target=null;}
  n.x=clamp(n.x,24*u,w-24*u);n.y=clamp(n.y,h*.405,h*.79);
  // The meadow stays bounded above the task panel; animals never hide under the UI.
- for(const a of s.animals){if(a.safe||a.held||a.running)continue;a.x=clamp(a.x+a.vx*dt,28*u,w-28*u);a.y=clamp(a.y+a.vy*dt,h*.48,h*.77);if(a.x<=28*u||a.x>=w-28*u)a.vx*=-1;if(a.y<=h*.48||a.y>=h*.77)a.vy*=-1;}
+ for(const a of s.animals){
+  if(a.safe||a.held||a.running||quiet.matches)continue;
+  if(!a.wanderTarget){
+   a.rest-=dt;if(a.rest>0)continue;
+   const angle=Math.random()*Math.PI*2,radius=(14+Math.random()*16)*u;
+   a.wanderTarget={x:clamp(a.homeX+Math.cos(angle)*radius,28*u,w-28*u),y:clamp(a.homeY+Math.sin(angle)*radius,h*.48,h*.77)};
+  }
+  const dx=a.wanderTarget.x-a.x,dy=a.wanderTarget.y-a.y,distance=Math.hypot(dx,dy);
+  if(distance<1){a.wanderTarget=null;a.rest=.8+Math.random()*1.8;continue;}
+  const step=Math.min(distance,a.wanderSpeed*u*dt);a.x+=dx/distance*step;a.y+=dy/distance*step;
+  if(Math.abs(dx)>1)a.facing=dx<0?-1:1;
+ }
  if(s.lead){const follow=(a,tx,ty)=>{const k=1-Math.exp(-dt*9);a.x=mix(a.x,tx,k);a.y=mix(a.y,ty,k);};follow(s.lead,n.x-27*u,n.y+19*u);}
  if(s.pickupCooldown===0){
  const close=s.animals.filter(a=>!a.safe&&!a.held&&!a.running&&(!s.lead||a.species.id===s.lead.species.id)).sort((a,b)=>Math.hypot(a.x-n.x,a.y-n.y)-Math.hypot(b.x-n.x,b.y-n.y))[0];

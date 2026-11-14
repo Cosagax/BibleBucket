@@ -37,3 +37,7 @@ Publishing follows the repository’s GitHub Pages main-branch flow. Verify the 
 - **Captain:** Jake’s American Pitbull, illustrated from his supplied photograph: brindle brown coat, broad happy face, folded ears, white chest and white toes, and a dark collar. Use **Captain** only in the game. His first pickup reveals the cameo with an optional bark; boarding announces “Captain’s aboard. All paws accounted for.” His matching buddy uses the same recognizable illustration. The cameo idea may extend to other BibleBucket games later; this change is confined to Noah 2.0.
 
 Do not modify Noah’s current illustration when adjusting Captain or the round mechanics; Jake specifically approved Noah’s look.
+
+## Gentle meadow movement
+
+Waiting animals take short, slow strolls (8–13 scaled pixels/second), pause between steps, and turn to face their travel direction. Each stays within 30 scaled pixels of its starting spot, with meadow bounds preserved. Collected/running animals use their existing follow/boarding movement; reduced-motion preference disables decorative wandering. Resize remaps home and current destinations together.
