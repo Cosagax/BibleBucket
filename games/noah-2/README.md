@@ -1,6 +1,6 @@
 # Noah’s Ark 2.0 — Two by Two
 
-Independent storybook rebuild, November 2026. The original game remains permanently in `../noah/` and remains linked from the games shelf. Copied legacy PNG artwork is retained here but is no longer used by this version.
+Independent storybook rebuild, November 2026. The original game remains permanently in `../noah/` as an archive, but is no longer listed on the games shelf. Copied legacy PNG artwork is retained here but is no longer used by this version.
 
 ## Play
 
