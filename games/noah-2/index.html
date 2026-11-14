@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#112c30">
-<meta name="description" content="Gather the animals two by two and guide them aboard. A free storybook Noah's Ark rescue game from BibleBucket.">
+<meta name="description" content="Match ten animal pairs before the storm arrives. One fast, 60-second adventure. A free storybook Noah's Ark rescue game from BibleBucket.">
 <title>Noah’s Ark 2.0 — Two by Two | BibleBucket</title>
 <link rel="icon" href="/favicon.png">
-<link rel="stylesheet" href="story.css">
-<script src="story.js" defer></script>
+<link rel="stylesheet" href="story.css?v=60-captain">
+<script src="story.js?v=60-captain" defer></script>
 </head>
 <body>
 <div class="game-shell">
@@ -18,9 +18,9 @@
     <div class="tools"><button id="sound" class="icon-btn" aria-label="Turn sound on" aria-pressed="false">Sound off</button><button id="pause" class="icon-btn" disabled>Pause</button></div>
   </header>
   <main id="stage" aria-label="Noah’s Ark game">
-    <canvas id="game" tabindex="0" aria-label="Move Noah with arrow keys or WASD. On a touchscreen or with a mouse, tap a destination or drag. Find matching animals and guide them to the Ark ramp."></canvas>
+    <canvas id="game" tabindex="0" aria-label="Move Noah with arrow keys or WASD. On a touchscreen or with a mouse, tap a destination or drag. Find matching animals. Each pair runs to the Ark automatically. Match all ten pairs in 60 seconds."></canvas>
     <div id="hud" hidden>
-      <div class="hud-top"><div class="saved"><span id="count">0</span><span>of 8 pairs<br><b>safe aboard</b></span></div><div class="weather"><span id="weatherLabel">The gathering</span><strong id="clock">1:30</strong><div class="time-track"><i id="timeFill"></i></div></div></div>
+      <div class="hud-top"><div class="saved"><span id="count">0</span><span>of 10 pairs<br><b>safe aboard</b></span></div><div class="weather"><span id="weatherLabel">The gathering</span><strong id="clock">1:00</strong><div class="time-track"><i id="timeFill"></i></div></div></div>
       <div id="task" class="task"><img id="taskAnimal" alt="" hidden><div><small id="taskLabel">TWO BY TWO</small><strong id="taskText">Walk to any animal to begin.</strong></div></div>
       <div id="collection" class="collection" aria-label="Animal pairs rescued"></div>
     </div>
@@ -29,8 +29,8 @@
     <section id="intro" class="veil" aria-labelledby="introTitle">
       <div class="intro-card">
         <div class="intro-art"><div class="art-orbit"></div><img src="art/noah.svg" alt="Noah, a white-bearded elder in a cream head covering and terracotta robe, holding a wooden staff."><span class="art-caption">A little courage.<br>A great big Ark.</span></div>
-        <div class="intro-copy"><p class="eyebrow">A BIBLEBUCKET STORYBOOK GAME</p><h1 id="introTitle">Two by Two</h1><p class="subtitle">Noah’s Ark · 2.0</p><p class="lead">The clouds are gathering.<br>There’s still room for everyone.</p><p class="instructions">Find an animal, find its partner, then <strong>guide them to the glowing Ark ramp.</strong> Bring all eight pairs safely aboard.</p>
-          <fieldset class="difficulty"><legend>Choose your journey</legend><label><input type="radio" name="journey" value="storm" checked><span><b>Storm watch</b><small>90 seconds · a race with the rain</small></span></label><label><input type="radio" name="journey" value="peaceful"><span><b>Peaceful gathering</b><small>No time limit · take your time</small></span></label></fieldset>
+        <div class="intro-copy"><p class="eyebrow">A BIBLEBUCKET STORYBOOK GAME</p><h1 id="introTitle">Two by Two</h1><p class="subtitle">Noah’s Ark · 2.0</p><p class="lead">The clouds are gathering.<br>There’s still room for everyone.</p><p class="instructions">Find an animal, find its partner. <strong>Matched pairs run to the Ark themselves!</strong> Keep gathering: ten pairs, sixty seconds, one building storm.</p>
+          <p class="round-badge">10 pairs <span>·</span> 60 seconds <span>·</span> Two by two</p>
           <button id="start" class="primary">Open the gates →</button><p class="control-note">Tap a place to walk · drag to guide · arrows / WASD</p><a class="quiet-link" href="../index.html">← All games</a>
         </div>
       </div>

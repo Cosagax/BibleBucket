@@ -4,7 +4,8 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const canvas=$('game'),ctx=canvas.getContext('2d'),stage=$('stage');
-const SPECIES=[['elephant','Elephants'],['giraffe','Giraffes'],['sheep','Sheep'],['rabbit','Rabbits'],['lion','Lions'],['zebra','Zebras'],['tortoise','Tortoises'],['pig','Pigs']].map(([id,name])=>({id,name,img:new Image()}));
+const SPECIES=[['elephant','Elephants'],['giraffe','Giraffes'],['sheep','Sheep'],['rabbit','Rabbits'],['lion','Lions'],['zebra','Zebras'],['tortoise','Tortoises'],['pig','Pigs'],['red-panda','Red pandas'],['captain','Captain’s pair']].map(([id,name])=>({id,name,img:new Image()}));
+const ROUND_SECONDS=60;
 const noah=new Image();noah.src='art/noah.svg';
 SPECIES.forEach(s=>{s.img.src=`art/${s.id}.svg`;});
 const quiet=matchMedia('(prefers-reduced-motion: reduce)');
@@ -19,12 +20,22 @@ function tone(f,d=.15,volume=.035,delay=0){
  if(!soundOn)return;
  try{audioCtx??=new (window.AudioContext||window.webkitAudioContext)();audioCtx.resume();const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime+delay;o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(volume,t+.025);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(audioCtx.destination);o.start(t);o.stop(t+d+.02);}catch{/* Sound is optional. */}
 }
+function noise(duration,cutoff,volume,delay=0){
+ if(!soundOn)return;
+ try{audioCtx??=new (window.AudioContext||window.webkitAudioContext)();audioCtx.resume();const rate=audioCtx.sampleRate,buffer=audioCtx.createBuffer(1,Math.ceil(rate*duration),rate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;
+ const src=audioCtx.createBufferSource(),filter=audioCtx.createBiquadFilter(),gain=audioCtx.createGain(),at=audioCtx.currentTime+delay;src.buffer=buffer;filter.type='lowpass';filter.frequency.value=cutoff;gain.gain.setValueAtTime(.0001,at);gain.gain.exponentialRampToValueAtTime(volume,at+.04);gain.gain.exponentialRampToValueAtTime(.0001,at+duration);src.connect(filter).connect(gain).connect(audioCtx.destination);src.start(at);src.stop(at+duration);}catch{}
+}
+function bark(){noise(.18,800,.18);tone(135,.13,.07);noise(.18,700,.14,.22);tone(115,.14,.055,.22);}
+function updateStormAudio(){
+ const s=state;if(s.elapsed>=s.thunderAt){noise(1.4,180,.16);s.thunderAt=s.elapsed+(s.elapsed>40?6:12);}
+ const seconds=Math.ceil(s.seconds);if(seconds<=10&&seconds>0&&seconds<s.lastBeat){s.lastBeat=seconds;tone(165,.16,.025);}
+}
 function chime(kind){if(kind==='board'){[392,494,587,784].forEach((f,i)=>tone(f,.4,.045,i*.1));}else if(kind==='pair'){tone(440,.18);tone(660,.28,.04,.11);}else tone(330,.16);}
-$('sound').onclick=()=>{soundOn=!soundOn;$('sound').textContent=soundOn?'Sound on':'Sound off';$('sound').setAttribute('aria-pressed',String(soundOn));$('sound').setAttribute('aria-label',soundOn?'Turn sound off':'Turn sound on');if(soundOn)tone(523,.18);};
+$('sound').onclick=()=>{soundOn=!soundOn;$('sound').textContent=soundOn?'Sound on':'Sound off';$('sound').setAttribute('aria-pressed',String(soundOn));$('sound').setAttribute('aria-label',soundOn?'Turn sound off':'Turn sound on');if(soundOn)tone(523,.18);else if(audioCtx)audioCtx.suspend();};
 function fit(){
  const oldW=w,oldH=h;w=Math.max(240,stage.clientWidth);h=Math.max(190,stage.clientHeight);u=clamp(Math.min(w/720,h/640),.68,1.25);
  const dpr=Math.min(devicePixelRatio||1,1.5);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
- if(state){for(const a of state.animals){a.x=a.x/oldW*w;a.y=a.y/oldH*h;}state.noah.x=state.noah.x/oldW*w;state.noah.y=state.noah.y/oldH*h;if(state.target){state.target.x*=w/oldW;state.target.y*=h/oldH;}state.trails=[];}
+ if(state){for(const a of state.animals){a.x=a.x/oldW*w;a.y=a.y/oldH*h;}state.noah.x=state.noah.x/oldW*w;state.noah.y=state.noah.y/oldH*h;if(state.target){state.target.x*=w/oldW;state.target.y*=h/oldH;}for(const pair of state.boarding){for(const start of pair.starts){start.x*=w/oldW;start.y*=h/oldH;}}}
  buildScene();dirty=true;
 }
 new ResizeObserver(fit).observe(stage);
@@ -76,28 +87,31 @@ function drawAnimal(a,t){
 function marker(x,y,r,color){ctx.strokeStyle=color;ctx.lineWidth=2*u;ctx.beginPath();ctx.ellipse(x,y+7*u,r,r*.42,0,0,Math.PI*2);ctx.stroke();}
 function init(){
  hideNotice();keys.clear();$('intro').hidden=true;$('ending').hidden=true;$('pausePanel').hidden=true;$('skip').hidden=true;$('hud').hidden=false;$('pause').disabled=false;
- const peaceful=document.querySelector('input[name="journey"]:checked').value==='peaceful';
  const animals=[],slots=[];
- for(let row=0;row<4;row++)for(let col=0;col<4;col++)slots.push({x:w*(.12+col*.25+(row%2)*.015),y:mix(h*.49,h*.77,row/3)});
+ const cols=h<360?10:w<600?4:5,rows=Math.ceil(SPECIES.length*2/cols);
+ for(let row=0;row<rows;row++)for(let col=0;col<cols;col++)slots.push({x:mix(w*.1,w*.9,col/(cols-1)),y:mix(h*.49,h*.77,row/(rows-1))});
  // Shuffle placement, never species identities: every animal always has one mate.
  for(let i=slots.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[slots[i],slots[j]]=[slots[j],slots[i]];}
- SPECIES.forEach((species,i)=>{for(let j=0;j<2;j++){const pos=slots[i*2+j];animals.push({...pos,species,seed:i*7+j*2,held:false,safe:false,vx:(Math.random()-.5)*4,vy:(Math.random()-.5)*3});}});
- state={animals,noah:{x:w*.5,y:h*.64},target:null,lead:null,mate:null,rescued:new Set(),seconds:90,peaceful,elapsed:0,inactive:0,boarding:[],trails:[],phase:'find',pickupCooldown:0,endStarted:0,won:false};
- mode='play';dirty=true;ambient=0;refreshTask();refreshHUD();$('collection').replaceChildren(...SPECIES.map(s=>{const img=document.createElement('img');img.src=s.img.src;img.alt=`${s.name}: waiting`;img.dataset.id=s.id;return img;}));
- $('footerHelp').textContent='Find a pair. Walk them to the ramp.';canvas.focus({preventScroll:true});tone(294,.2);tone(392,.3,.035,.15);
+ SPECIES.forEach((species,i)=>{for(let j=0;j<2;j++){const pos=slots[i*2+j];animals.push({...pos,species,seed:i*7+j*2,held:false,safe:false,running:false,vx:(Math.random()-.5)*4,vy:(Math.random()-.5)*3});}});
+ state={animals,noah:{x:w*.5,y:h*.435},target:null,lead:null,rescued:new Set(),matched:new Set(),seconds:ROUND_SECONDS,elapsed:0,inactive:0,boarding:[],phase:'find',pickupCooldown:0,endStarted:0,won:false,captainFound:false,thunderAt:18,lastBeat:15};
+ mode='play';dirty=true;ambient=0;refreshTask();refreshHUD();$('collection').replaceChildren(...SPECIES.map(s=>{const img=document.createElement('img');img.src=s.img.src;img.alt=s.id==='captain'?'A surprise pair: waiting':`${s.name}: waiting`;img.dataset.id=s.id;return img;}));
+ $('footerHelp').textContent='Find the partner. They’ll take it from there.';canvas.focus({preventScroll:true});tone(294,.2);tone(392,.3,.035,.15);
 }
 function refreshTask(){
  if(!state)return;const s=state;const img=$('taskAnimal');img.hidden=!s.lead;
  if(s.lead)img.src=s.lead.species.img.src;
- if(s.phase==='escort'){$('taskLabel').textContent='BRING THEM HOME';$('taskText').textContent=`Guide both ${s.lead.species.name.toLowerCase()} to the glowing ramp.`;}
- else if(s.lead){$('taskLabel').textContent='FIND THE PARTNER';const singular={elephant:'elephant',giraffe:'giraffe',sheep:'sheep',rabbit:'rabbit',lion:'lion',zebra:'zebra',tortoise:'tortoise',pig:'pig'};$('taskText').textContent=`Find the other ${singular[s.lead.species.id]}.`;}
- else{$('taskLabel').textContent='TWO BY TWO';$('taskText').textContent=s.rescued.size?'Choose another animal. Every pair matters.':'Walk to any animal to begin.';}
+ if(mode==='closing'){$('taskLabel').textContent='THE GATES ARE CLOSING';$('taskText').textContent='Your matched pairs are making their way aboard…';img.hidden=true;}
+ else if(s.lead){$('taskLabel').textContent=s.lead.species.id==='captain'?'A FAMILIAR FACE!':'FIND THE PARTNER';const singular={elephant:'elephant',giraffe:'giraffe',sheep:'sheep',rabbit:'rabbit',lion:'lion',zebra:'zebra',tortoise:'tortoise',pig:'pig','red-panda':'red panda',captain:'good boy'};$('taskText').textContent=s.lead.species.id==='captain'?'Captain found you! Find his buddy.':`Find the other ${singular[s.lead.species.id]}.`;}
+ else{$('taskLabel').textContent='TWO BY TWO';$('taskText').textContent=s.matched.size?'Find the next pair. Your matches run aboard!':'Walk to any animal to begin.';}
+
 }
 function refreshHUD(){
  if(!state)return;const s=state;$('count').textContent=s.rescued.size;
- $('clock').textContent=s.peaceful?'No rush':`${Math.floor(Math.ceil(s.seconds)/60)}:${String(Math.ceil(s.seconds)%60).padStart(2,'0')}`;
- $('weatherLabel').textContent=s.peaceful?'A peaceful gathering':s.seconds>65?'The gathering':s.seconds>30?'Rain on the horizon':'The storm is near';
- $('timeFill').style.width=(s.peaceful?100:s.seconds/90*100)+'%';$('timeFill').style.background=s.seconds<20&&!s.peaceful?'#efb38c':'#e5ca8c';
+ $('clock').textContent=`${Math.floor(Math.ceil(s.seconds)/60)}:${String(Math.ceil(s.seconds)%60).padStart(2,'0')}`;
+ $('weatherLabel').textContent=mode==='closing'?'Closing the gates':s.seconds>45?'Clouds gathering':s.seconds>30?'Here comes the rain':s.seconds>15?'The storm is building':'Hurry! The flood is near';
+ $('timeFill').style.width=(s.seconds/ROUND_SECONDS*100)+'%';$('timeFill').style.background=s.seconds<=15?'#f1a778':'#e5ca8c';
+ document.querySelector('.weather').classList.toggle('urgent',s.seconds<=15);
+
 }
 function returnIntro(){mode='intro';dirty=true;state=null;keys.clear();hideNotice();$('intro').hidden=false;$('ending').hidden=true;$('pausePanel').hidden=true;$('hud').hidden=true;$('skip').hidden=true;$('pause').disabled=true;$('footerHelp').textContent='A little story. A little adventure.';$('start').focus({preventScroll:true});}
 function pause(){if(mode!=='play')return;mode='paused';dirty=true;keys.clear();state.target=null;hideNotice();$('pausePanel').hidden=false;$('resume').focus({preventScroll:true});}
@@ -114,16 +128,35 @@ function setTarget(e){if(mode!=='play')return;const r=canvas.getBoundingClientRe
 canvas.addEventListener('pointerdown',e=>{if(mode!=='play')return;e.preventDefault();canvas.focus({preventScroll:true});canvas.setPointerCapture(e.pointerId);setTarget(e);});
 canvas.addEventListener('pointermove',e=>{if(e.buttons||e.pointerType==='touch'&&canvas.hasPointerCapture(e.pointerId))setTarget(e);});
 canvas.addEventListener('pointercancel',()=>{if(state)state.target=null;});
-function boardPair(){
- const s=state,door=doorway(),species=s.lead.species;
- for(const a of [s.lead,s.mate]){a.held=false;a.safe=true;s.boarding.push({species,x:a.x,y:a.y,t:0,door});}
- s.rescued.add(species.id);s.lead=null;s.mate=null;s.phase='find';s.pickupCooldown=.6;s.inactive=0;
+function matchPair(mate){
+ const s=state,species=s.lead.species,pair=[s.lead,mate];
+ for(const a of pair){a.held=false;a.running=true;}
+ s.boarding.push({species,animals:pair,starts:pair.map(a=>({x:a.x,y:a.y})),t:0,duration:2});
+ s.matched.add(species.id);s.lead=null;s.phase='find';s.pickupCooldown=.12;s.inactive=0;
+ chime('pair');note(species.id==='captain'?'Captain and his buddy are heading for the Ark!':'Pair matched! They’ll run aboard. Find the next two.');
+ refreshTask();if(s.matched.size===SPECIES.length)closeGates();
+}
+function completeBoarding(pair){
+ const s=state,species=pair.species;
+ for(const a of pair.animals){a.safe=true;a.running=false;}
+ s.rescued.add(species.id);
  const icon=$('collection').querySelector(`[data-id="${species.id}"]`);icon.classList.add('rescued');icon.alt=`${species.name}: safe aboard`;
- refreshTask();refreshHUD();chime('board');note(`${species.name} are safe aboard. ${s.rescued.size} of 8 pairs!`);
- if(s.rescued.size===8)beginEnding(true);
+ chime('board');
+ if(species.id==='captain'){bark();note('Captain’s aboard. All paws accounted for.');}
+ else if(!s.lead)note(`${species.name} are safe! ${s.rescued.size} of ${SPECIES.length} pairs aboard.`);
+ refreshHUD();
+}
+function closeGates(){
+ if(mode!=='play')return;mode='closing';state.target=null;keys.clear();$('pause').disabled=true;refreshTask();refreshHUD();
+}
+function advanceBoarding(dt){
+ const s=state;
+ for(const pair of s.boarding){pair.t+=dt;if(pair.t>=pair.duration)completeBoarding(pair);}
+ s.boarding=s.boarding.filter(pair=>pair.t<pair.duration);
+ if(mode==='closing'&&s.boarding.length===0)beginEnding(s.rescued.size===SPECIES.length);
 }
 function beginEnding(won){
- if(mode!=='play')return;state.won=won;state.endStarted=performance.now();state.target=null;mode='cinematic';keys.clear();hideNotice();$('hud').hidden=true;$('pause').disabled=true;$('skip').hidden=false;
+ if(mode!=='play'&&mode!=='closing')return;state.won=won;state.endStarted=performance.now();state.target=null;mode='cinematic';keys.clear();hideNotice();$('hud').hidden=true;$('pause').disabled=true;$('skip').hidden=false;
  if(won)[262,330,392,523].forEach((f,i)=>tone(f,1.8,.035,i*.18));else{tone(262,1.2,.025);tone(294,1.2,.018,.3);}
 }
 function finishEnding(){
@@ -131,41 +164,68 @@ function finishEnding(){
  const s=state,won=s.won;
  $('endEyebrow').textContent=won?'SAFE IN THE ARK':'THE RAIN HAS ARRIVED';
  $('endTitle').textContent=won?'Every pair. A new beginning.':'Every rescue mattered.';
- $('endSummary').textContent=won?'Eight pairs, sixteen animals, and one faithful journey. You brought them all home.':`${s.rescued.size} of 8 pairs made it safely aboard. Try again, or choose a peaceful gathering with no clock.`;
+ $('endSummary').textContent=won?'Ten pairs, twenty animals, and one faithful journey. You brought them all home.':`${s.rescued.size} of ${SPECIES.length} pairs made it aboard. A few more matches, a little more speed—give it another go!`;
  $('endVerse').textContent=won?'“and the LORD shut him in.”':'“But with thee will I establish my covenant;”';
  $('endRef').textContent=won?'Genesis 7:16 · KJV':'Genesis 6:18 · KJV';
  $('endNote').textContent=won?'After the Flood, the rainbow recalls God’s covenant. · Genesis 9:13':'There’s still a place for every pair. Take a breath, and open the gates again.';
  $('endAnimals').replaceChildren(...SPECIES.map(species=>{const img=document.createElement('img');img.src=species.img.src;const safe=s.rescued.has(species.id);img.alt=species.name+(safe?' rescued':' waiting');if(!safe)img.className='missing';return img;}));
  $('again').textContent=won?'Gather again →':'Try another journey →';
- // Return unsuccessful rounds to the journey choices, so peaceful mode is reachable.
- $('again').onclick=won?init:returnIntro;$('footerHelp').textContent=won?'Two by two. All aboard.':'A new journey is waiting.';$('again').focus({preventScroll:true});
+ $('again').onclick=init;$('footerHelp').textContent=won?'Two by two. All aboard.':'A new journey is waiting.';$('again').focus({preventScroll:true});
 }
 $('skip').onclick=finishEnding;
-function update(dt){
- const s=state;if(mode!=='play'||!s)return;
- s.elapsed+=dt;s.inactive+=dt;s.pickupCooldown=Math.max(0,s.pickupCooldown-dt);
- if(!s.peaceful)s.seconds=Math.max(0,s.seconds-dt);
+function update(dt,clockDt=dt){
+ const s=state;if(!s)return;
+ if(mode==='closing'){advanceBoarding(dt);return;}
+ if(mode!=='play')return;
+ advanceBoarding(dt);
+ s.elapsed+=clockDt;s.inactive+=dt;s.pickupCooldown=Math.max(0,s.pickupCooldown-dt);
+ s.seconds=Math.max(0,ROUND_SECONDS-s.elapsed);
+ if(s.seconds===0){closeGates();if(s.boarding.length===0)beginEnding(false);return;}
+ updateStormAudio();
  let dx=(keys.has('arrowright')||keys.has('d')?1:0)-(keys.has('arrowleft')||keys.has('a')?1:0),dy=(keys.has('arrowdown')||keys.has('s')?1:0)-(keys.has('arrowup')||keys.has('w')?1:0);
- const n=s.noah,speed=clamp(Math.min(w,h)*.49,155,320)*(s.phase==='escort'?.92:1);
+ const n=s.noah,speed=clamp(Math.min(w,h)*.6,185,390);
  if(dx||dy){const len=Math.hypot(dx,dy);n.x+=dx/len*speed*dt;n.y+=dy/len*speed*dt;s.inactive=0;}
  else if(s.target){dx=s.target.x-n.x;dy=s.target.y-n.y;const dist=Math.hypot(dx,dy),travel=Math.min(dist,speed*dt);if(dist>1){n.x+=dx/dist*travel;n.y+=dy/dist*travel;s.inactive=0;}else s.target=null;}
  n.x=clamp(n.x,24*u,w-24*u);n.y=clamp(n.y,h*.405,h*.79);
  // The meadow stays bounded above the task panel; animals never hide under the UI.
- for(const a of s.animals){if(a.safe||a.held)continue;a.x=clamp(a.x+a.vx*dt,28*u,w-28*u);a.y=clamp(a.y+a.vy*dt,h*.48,h*.77);if(a.x<=28*u||a.x>=w-28*u)a.vx*=-1;if(a.y<=h*.48||a.y>=h*.77)a.vy*=-1;}
- if(s.lead){const follow=(a,tx,ty)=>{const k=1-Math.exp(-dt*9);a.x=mix(a.x,tx,k);a.y=mix(a.y,ty,k);};follow(s.lead,n.x-27*u,n.y+19*u);if(s.mate)follow(s.mate,n.x+25*u,n.y+28*u);}
- if(s.phase!=='escort'&&s.pickupCooldown===0){
- const close=s.animals.filter(a=>!a.safe&&!a.held&&(!s.lead||a.species.id===s.lead.species.id)).sort((a,b)=>Math.hypot(a.x-n.x,a.y-n.y)-Math.hypot(b.x-n.x,b.y-n.y))[0];
- if(close&&Math.hypot(close.x-n.x,close.y-n.y)<28*u){close.held=true;s.inactive=0;if(!s.lead){s.lead=close;s.phase='partner';chime('pick');}else{s.mate=close;s.phase='escort';chime('pair');note('A perfect pair! Guide them up the glowing ramp.');}refreshTask();}
+ for(const a of s.animals){if(a.safe||a.held||a.running)continue;a.x=clamp(a.x+a.vx*dt,28*u,w-28*u);a.y=clamp(a.y+a.vy*dt,h*.48,h*.77);if(a.x<=28*u||a.x>=w-28*u)a.vx*=-1;if(a.y<=h*.48||a.y>=h*.77)a.vy*=-1;}
+ if(s.lead){const follow=(a,tx,ty)=>{const k=1-Math.exp(-dt*9);a.x=mix(a.x,tx,k);a.y=mix(a.y,ty,k);};follow(s.lead,n.x-27*u,n.y+19*u);}
+ if(s.pickupCooldown===0){
+ const close=s.animals.filter(a=>!a.safe&&!a.held&&!a.running&&(!s.lead||a.species.id===s.lead.species.id)).sort((a,b)=>Math.hypot(a.x-n.x,a.y-n.y)-Math.hypot(b.x-n.x,b.y-n.y))[0];
+ if(close&&Math.hypot(close.x-n.x,close.y-n.y)<28*u){close.held=true;s.inactive=0;if(!s.lead){s.lead=close;s.phase='partner';chime('pick');if(close.species.id==='captain'&&!s.captainFound){s.captainFound=true;bark();note('Captain?! There’s room for good boys, too.');}}else{matchPair(close);}refreshTask();}
  }
- const d=doorway();if(s.phase==='escort'&&Math.hypot(n.x-d.x,n.y-d.y)<35*u)boardPair();
- for(const a of s.boarding)a.t+=dt;s.boarding=s.boarding.filter(a=>a.t<1.1);
  refreshHUD();
- if(mode==='play'&&s.seconds===0&&!s.peaceful)beginEnding(false);
+
+}
+function drawStorm(intensity,t){
+ if(intensity<=0)return;
+ // Darken the land first. Noah, animals, and partner markers are drawn afterwards.
+ ctx.fillStyle=`rgba(22,43,62,${intensity*.40})`;ctx.fillRect(0,0,w,h);
+ const sky=ctx.createLinearGradient(0,0,0,h*.52);sky.addColorStop(0,`rgba(18,33,51,${intensity*.65})`);sky.addColorStop(1,'rgba(18,33,51,0)');ctx.fillStyle=sky;ctx.fillRect(0,0,w,h*.52);
+ const drift=quiet.matches?0:t*(3+intensity*12);
+ for(let i=0;i<8;i++){const x=((i*.19*w+drift)%(w*1.35))-w*.16,y=h*(.04+(i%3)*.055);ellipse(ctx,x,y,w*.19,19*u+intensity*17*u,`rgba(37,56,69,${intensity*.68})`);}
+ const flood=smooth((intensity-.48)/.52);
+ for(let i=0;i<5;i++){ellipse(ctx,i%2?w*.97:w*.03,h*(.64+i*.075),w*(.03+flood*.11),3*u+flood*13*u,`rgba(109,157,165,${flood*.4})`);}
+ if(flood>0){ellipse(ctx,w*.55,h*.86,w*.32,flood*20*u,`rgba(116,163,167,${flood*.25})`);}
+ // An occasional distant, low-contrast bolt, not a screen-filling flash.
+ const bolt=!quiet.matches&&intensity>.45&&(t%11)<.17;
+ if(bolt){const x=w*.82;ctx.strokeStyle='#e1e2c580';ctx.lineWidth=2*u;ctx.beginPath();ctx.moveTo(x,h*.06);ctx.lineTo(x-12*u,h*.14);ctx.lineTo(x+2*u,h*.14);ctx.lineTo(x-20*u,h*.24);ctx.stroke();}
 }
 function drawRain(intensity,t){
  if(intensity<=0||quiet.matches)return;
- ctx.save();ctx.strokeStyle=`rgba(218,233,227,${.16+intensity*.14})`;ctx.lineWidth=1*u;ctx.beginPath();
- const count=Math.floor(30+intensity*55);for(let i=0;i<count;i++){const x=((i*.618033*w+t*(20+intensity*25))%(w+25))-25,y=(i*71+t*(160+intensity*180))%(h+25)-25;ctx.moveTo(x,y);ctx.lineTo(x-4*u,y+10*u);}ctx.stroke();ctx.restore();
+ ctx.save();ctx.strokeStyle=`rgba(218,233,227,${.14+intensity*.14})`;ctx.lineWidth=(.8+intensity*.45)*u;ctx.beginPath();
+ const count=Math.floor(35+intensity*130),wind=6+intensity*15;
+ for(let i=0;i<count;i++){const x=((i*.618033*w+t*(30+intensity*100))%(w+40))-20,y=(i*71+t*(180+intensity*420))%(h+40)-30;ctx.moveTo(x,y);ctx.lineTo(x-wind*u,y+(10+intensity*14)*u);}ctx.stroke();ctx.restore();
+}
+function drawBoarding(t){
+ const d=doorway();
+ for(const pair of state.boarding){pair.starts.forEach((start,i)=>{
+ const p=clamp((pair.t-i*.12)/(pair.duration-.12),0,1),k=smooth(p),q=1-k;
+ const x=q*q*start.x+2*q*k*(d.x+(i?10:-10)*u)+k*k*(d.x+(i?3:-3)*u);
+ const y=q*q*start.y+2*q*k*(start.y-28*u)+k*k*(d.y-8*u);
+ const bob=quiet.matches?0:Math.sin(t*19+i)*2*u,scale=1-smooth((p-.75)/.25)*.62;
+ ellipse(ctx,x,y+4*u,14*u*scale,3*u*scale,'#18332e22');image(ctx,pair.species.img,x,y+bob,47*u*scale,43*u*scale,1-smooth((p-.94)/.06));
+ });}
 }
 function drawWater(t,won){
  const p=mode==='ended'?1:smooth(t/(quiet.matches?1:5));
@@ -177,33 +237,26 @@ function drawWater(t,won){
 function render(t){
  ctx.clearRect(0,0,w,h);if(scene)ctx.drawImage(scene,0,0,w,h);
  const s=state,cin=mode==='cinematic'||mode==='ended';
- const storm=s&&!s.peaceful?clamp(s.elapsed/90,0,1):0;
- // Weather alters the landscape, not animal legibility. No lightning flashes.
- if(storm>0){ctx.fillStyle=`rgba(25,53,69,${storm*.34})`;ctx.fillRect(0,0,w,h);}
+ const storm=s?clamp(s.elapsed/ROUND_SECONDS,0,1):0;
+ drawStorm(storm,t);
  if(cin){const elapsed=mode==='ended'?8:(performance.now()-s.endStarted)/1000;drawWater(elapsed,s.won);drawArk(smooth(elapsed/5),true);if(s.won){const dh=Math.min(w*.65,420*u)*.47;image(ctx,noah,w*.49,h*.405-dh*.66-18*u,35*u,46*u);}drawRain(s.won?0:.7,t);return;}
  drawArk();
  if(s){
  const d=doorway();
- if(s.phase==='escort'){
- const pulse=quiet.matches?1:.8+Math.sin(t*2)*.15;
- ellipse(ctx,d.x,d.y+24*u,34*u,12*u,`rgba(255,232,165,${pulse*.55})`);
- ctx.fillStyle='#fff1b7';ctx.font=`600 ${11*u}px system-ui`;ctx.textAlign='center';ctx.fillText('THIS WAY',d.x,d.y-10*u);
- ctx.setLineDash([4*u,7*u]);ctx.strokeStyle='#f7e7b388';ctx.lineWidth=2*u;ctx.beginPath();ctx.moveTo(s.noah.x,s.noah.y);ctx.lineTo(d.x,d.y+24*u);ctx.stroke();ctx.setLineDash([]);
- }
  if(s.target&&mode==='play'){marker(s.target.x,s.target.y,8*u,'#f4e4aeaa');}
- const mate=s.lead&&!s.mate?s.animals.find(a=>!a.held&&!a.safe&&a.species.id===s.lead.species.id):null;
+ const mate=s.lead?s.animals.find(a=>!a.held&&!a.safe&&a.species.id===s.lead.species.id):null;
  if(mate){marker(mate.x,mate.y,23*u,'#f5e5a8');ctx.fillStyle='#fff5ce';ctx.font=`bold ${12*u}px system-ui`;ctx.textAlign='center';ctx.fillText('PARTNER',mate.x,mate.y-29*u);}
- const actors=s.animals.filter(a=>!a.safe).map(a=>({y:a.y,draw:()=>drawAnimal(a,t)}));actors.push({y:s.noah.y,draw:()=>{
+ const actors=s.animals.filter(a=>!a.safe&&!a.running).map(a=>({y:a.y,draw:()=>drawAnimal(a,t)}));actors.push({y:s.noah.y,draw:()=>{
  ellipse(ctx,s.noah.x,s.noah.y+5*u,18*u,5*u,'#294d3240');const bob=!quiet.matches&&(s.target||keys.size)?Math.sin(t*12)*1.1*u:0;image(ctx,noah,s.noah.x,s.noah.y+bob,58*u,76*u);
  }});actors.sort((a,b)=>a.y-b.y).forEach(a=>a.draw());
- for(const a of s.boarding){const k=smooth(a.t/1.1);image(ctx,a.species.img,mix(a.x,d.x,k),mix(a.y,d.y-12*u,k),47*u*(1-k*.65),43*u*(1-k*.65),1-k);}
+ drawBoarding(t);
  }else{
  image(ctx,SPECIES[0].img,w*.25,h*.72,75*u,69*u);image(ctx,SPECIES[0].img,w*.18,h*.77,68*u,62*u);image(ctx,SPECIES[1].img,w*.77,h*.64,70*u,64*u);image(ctx,SPECIES[2].img,w*.82,h*.78,66*u,61*u);
  }
- drawRain(storm>.25?(storm-.25)/.75:0,t);
+ drawRain(storm>.18?(storm-.18)/.82:0,t);
 }
-function loop(now){frame=requestAnimationFrame(loop);if(!w||!h)return;const dt=Math.min((now-(last||now))/1000,.05);last=now;if(mode!=='paused'){ambient+=dt;if(mode==='play')update(dt);if(mode==='cinematic'&&(now-state.endStarted)/1000>(quiet.matches?1.2:6.5))finishEnding();}
- if(dirty||((mode==='play'||mode==='cinematic')&&now-lastPaint>=32)){render(ambient);lastPaint=now;dirty=false;}
+function loop(now){frame=requestAnimationFrame(loop);if(!w||!h)return;const clockDt=(now-(last||now))/1000,dt=Math.min(clockDt,.08);last=now;if(mode!=='paused'){ambient+=dt;if(mode==='play'||mode==='closing')update(dt,clockDt);if(mode==='cinematic'&&(now-state.endStarted)/1000>(quiet.matches?1.2:6.5))finishEnding();}
+ if(dirty||((mode==='play'||mode==='closing'||mode==='cinematic')&&now-lastPaint>=32)){render(ambient);lastPaint=now;dirty=false;}
 }
 fit();frame=requestAnimationFrame(loop);
 // Keep the story playable even if an optional illustration fails to load.
