@@ -2,8 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-<title>Following His Star — Mobile Runner (No‑Dog Build)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Following His Star — Free Christmas Bible Game | BibleBucket</title>
+<meta name="description" content="Follow the star toward Bethlehem in a free, one-minute Christmas Bible game. Jump over rocks, meet Captain, and play on your phone or computer. No download or account needed." />
+<link rel="canonical" href="https://biblebucket.net/games/jesus-birth-2/index.html" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Following His Star — A Free Christmas Game" />
+<meta property="og:description" content="A little Christmas gift from BibleBucket. Follow the star toward Bethlehem in this free, one-minute browser game—no account or download needed." />
+<meta property="og:url" content="https://biblebucket.net/games/jesus-birth-2/index.html" />
+<meta property="og:image" content="https://biblebucket.net/games/jesus-birth-2/intro.png" />
+<meta property="og:image:alt" content="Following His Star Christmas game artwork" />
+<meta property="og:site_name" content="BibleBucket" />
+<meta name="twitter:card" content="summary_large_image" />
 
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
 <style>
@@ -32,6 +42,7 @@
   }
   .big{font-size:clamp(22px,5vw,36px);font-weight:800;letter-spacing:.3px;text-shadow:0 2px 8px #000}
   .small{color:var(--muted);max-width:min(92vw,720px);padding:0 12px}
+  #start .small{color:#f1f5f9;background:rgba(7,15,32,.78);border-radius:12px;padding:10px 14px;line-height:1.45;width:min(80vw,620px)}
   .backlink{color:#dbeafe;font-weight:700;padding:10px 12px;border:1px solid #ffffff55;border-radius:10px}
   @media(max-height:520px){#start,#end{overflow:auto;padding:12px 0}.big{font-size:22px}}
 
@@ -50,7 +61,7 @@
 </head>
 <body>
 <div id="wrap">
-  <canvas id="game"></canvas>
+  <canvas id="game" aria-label="Following His Star. Tap, click, or press Space or Up Arrow to jump over rocks.">Your browser needs canvas support to play Following His Star.</canvas>
 
   <div class="hud">
     <div class="row top">
@@ -61,7 +72,7 @@
 
   <div id="start">
     <div class="big">Following His Star</div>
-    <div class="small">Tap / click to jump. Survive 60 seconds. Each hit pushes you back! Don&#8217;t lose sight of the Star.</div>
+    <div class="small">Tap / click or press Space / ↑ to jump. Survive 60 seconds. Each hit pushes you back! Don&#8217;t lose sight of the Star.</div>
     <a class="backlink" href="../index.html">← All Games</a>
     <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;justify-content:center">
       <button id="btnStart" type="button">Start</button>
@@ -480,7 +491,7 @@ let inFinale=false, finaleTriggered=false, finaleRippleFired=false;
 const palettes=[{robeTop:'#5f5f2b',robeBot:'#3a3a18',hat:'#c78a2a',beard:'#2a2a2a',skin:'#bd8963',sash:'#24321f',jar:'#d1a22b'},{robeTop:'#2b6d5f',robeBot:'#19443a',hat:'#a33e2a',beard:'#000',skin:'#b9825c',sash:'#14322e',jar:'#c58f2a'}];
 
 function reset(){
-  landingAt=-100; elapsed=0; timer=60; hits=0; groundX=0; rocks.length=0; man.vy=0; man.t=0; man.scale=1; dust.length=0; wasAir=false;
+  landingAt=-100; spawnTimer=0; elapsed=0; timer=60; hits=0; groundX=0; rocks.length=0; man.vy=0; man.t=0; man.scale=1; dust.length=0; wasAir=false;
   companions.length=0; const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1);
   targetX=W*settleFrac; man.x=-man.w; man.y=H-groundH-man.h;
   comets.length=0; resetVerseQueue(); scheduleComet(); Sky.reset(); Cameo.reset();
@@ -488,7 +499,13 @@ function reset(){
   megaPulseFired=false; megaPulseT=0;
   endBG1.classList.remove('show'); endBG2.classList.remove('show'); endBtns.classList.add('is-hidden');
 }
-async function start(){ reset(); running=true; startPane.style.display='none'; endPane.style.display='none'; last=0; initAudio(); if(AC && AC.state==='suspended'){ try{ await AC.resume(); }catch{} } requestAnimationFrame(loop); }
+async function start(){
+  if(running) return;
+  reset(); running=true; startPane.style.display='none'; endPane.style.display='none'; last=0;
+  // Audio must not prevent play on devices where Web Audio is unavailable.
+  try{ initAudio(); if(AC && AC.state==='suspended') await AC.resume(); }catch{}
+  requestAnimationFrame(loop);
+}
 
 /* --- Win/Lose panels with timed 2-image sequence for WIN --- */
 function playWinSequence(){
@@ -510,7 +527,13 @@ function end(win){ running=false; endTitle.textContent=''; if(win){ endBtns.clas
 
 function jump(){ if(!running) return; if(onGround()) man.vy=-jumpV; }
 cvs.addEventListener('pointerdown', e=>{e.preventDefault(); if(startPane.style.display!=='none') start(); else jump();},{passive:false});
-addEventListener('keydown', e=>{ if(e.code==='Space'||e.code==='ArrowUp'){ if(startPane.style.display!=='none') start(); else jump(); }});
+addEventListener('keydown', e=>{
+  if(e.code!=='Space' && e.code!=='ArrowUp') return;
+  if(e.target.closest('button,a,input,textarea,select')) return;
+  e.preventDefault();
+  if(e.repeat) return;
+  if(startPane.style.display!=='none') start(); else jump();
+});
 btnStart.addEventListener('click', start);
 btnAgain.addEventListener('click', ()=>{ endPane.style.display='none'; start(); });
 
@@ -802,7 +825,7 @@ function loop(now){
     for(let i=rocks.length-1;i>=0;i--){
       const r=rocks[i]; r.x-=speed*dt; if(r.x+r.w<-20){ rocks.splice(i,1); continue; }
       const pb={x:man.x+16,y:man.y+8,w:man.w-32,h:man.h-16}, rb={x:r.x - r.w*.5, y:r.y - r.h, w:r.w, h:r.h};
-      if(pb.x<pb.w+rb.x && pb.x+pb.w>rb.x && pb.y<pb.h+rb.y && pb.y+pb.h>rb.y){
+      if(pb.x<rb.w+rb.x && pb.x+pb.w>rb.x && pb.y<rb.h+rb.y && pb.y+pb.h>rb.y){
         rocks.splice(i,1); hits++; const push=W*pushBackFrac, minX=-man.w*.25; man.x=Math.max(minX,man.x-push); targetX=Math.max(minX+6,targetX-push);
         const fy=man.y+man.h-6; puff(man.x+man.w*.25,fy,8,1.2); puff(man.x+man.w*.75,fy,8,1.2); SFX.bump();
         if(hits>=5){ end(false); return; }
