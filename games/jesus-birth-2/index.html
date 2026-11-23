@@ -414,7 +414,7 @@ const Sky=(()=>{ let shooting=[], nextStarT=5, angel=null, angelAt=45;
     if(!angelPainting.complete || !angelPainting.naturalWidth) return false;
     const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1);
     const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const height=Math.min(420,H*.36,W*.78*angelPainting.naturalHeight/angelPainting.naturalWidth);
+    const height=Math.min(man.h*1.1,H*.36,W*.78*angelPainting.naturalHeight/angelPainting.naturalWidth);
     const width=height*angelPainting.naturalWidth/angelPainting.naturalHeight;
     const fade=Math.max(0,Math.min(1,(angel.t-.35)/1.1));
     const bob=reduced?0:Math.sin(angel.t*1.35)*Math.min(3,H*.004);
