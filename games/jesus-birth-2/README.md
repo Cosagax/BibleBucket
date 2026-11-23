@@ -30,3 +30,7 @@ Check desktop, portrait phone, and short landscape: walking, jump ascent/descent
 - Check entrance at 45.8 seconds, settled pose at 49.5, and the trio at 55 seconds on desktop, portrait phone, and short landscape. Also check reduced motion, mid-descent rotation, image failure, win sequence, and replay cleanup. Use browser-only intercepted instrumentation; do not publish testing hooks.
 
 - Size adjustment: angel artwork height is capped at `man.h * 1.1`, matching the hero’s painted render height (145.2 CSS px), with the existing small-viewport limits retained. Entrance, hover, robe motion, and gameplay are unchanged.
+
+## Captain's Christmas ending
+
+`ending_scene_merry_christmas_captain.png` is the approved Nativity illustration with Captain resting beside the donkey. `WIN_A` uses this version; the original `ending_scene_merry_christmas.png` remains archived unchanged. The second ending image, crossfade timing, and replay flow are unchanged.
