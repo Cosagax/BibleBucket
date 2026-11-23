@@ -21,3 +21,10 @@ Check desktop, portrait phone, and short landscape: walking, jump ascent/descent
 - Replay resets the obstacle spawn clock. Repeated starts cannot create parallel animation loops; unavailable audio cannot block starting.
 - Axis-aligned collision comparisons use each rock’s own width and height, fixing false hits when jumping above a rock.
 - Preserve the approved art, 60-second journey, Captain’s 4.2-second cameo, and finale.
+
+## Painted angel (2026-11-22)
+
+- `angel-painted.png`: approved transparent, auburn-haired angel artwork. Original generated PNG is preserved byte-for-byte. No reference portrait is published.
+- The angel retains her 45-second arrival and existing descent/audio timing. An entrance fade and gentle hover accompany subtle lower-robe movement; the face and wings remain unwarped. Reduced-motion preference removes the decorative sway, bob, and new descent particles.
+- Draw the portrait after the star glow to protect facial detail. Size and anchors derive from the current viewport each frame, including rotation during descent. Retain the original code-drawn angel solely as a failed-image fallback.
+- Check entrance at 45.8 seconds, settled pose at 49.5, and the trio at 55 seconds on desktop, portrait phone, and short landscape. Also check reduced motion, mid-descent rotation, image failure, win sequence, and replay cleanup. Use browser-only intercepted instrumentation; do not publish testing hooks.

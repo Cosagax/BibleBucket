@@ -124,6 +124,7 @@ const btnAgain  = document.getElementById('btnAgain');
 
 /* ===== Assets ===== */
 const Img=s=>{const i=new Image(); i.src=s; return i;};
+const angelPainting=Img('angel-painted.png'); // Jake-approved portrait-inspired angel.
 const wiseManPainting=Img('wise-man-painted.png');
 const companionPainting=Img('wise-men-companions-painted.png');
 const captain=Img('captain-orbs.png'); // Canonical Captain cameo, shared with Orbs and Noah.
@@ -367,10 +368,13 @@ const Sky=(()=>{ let shooting=[], nextStarT=5, angel=null, angelAt=45;
   }
   function updateAngel(dt){ if(!angel) return;
     angel.t+=dt;
+    // Recompute anchors from the live viewport, including mid-descent rotation.
+    const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1);
+    angel.x=W*.5; angel.startY=H*.18; angel.targetY=H*.28; angel.s=Math.min(W,H)*.0010;
     const p=Math.max(0,Math.min(1,(angel.t-.65)/angel.descent));
     const ease=p*p*(3-2*p); angel.y=angel.startY+(angel.targetY-angel.startY)*ease;
     angel.hold=Math.max(0,angel.t-.65-angel.descent);
-    if(p<1 && Math.random()<dt*22){
+    if(p<1 && !matchMedia('(prefers-reduced-motion: reduce)').matches && Math.random()<dt*22){
       angel.particles.push({x:angel.x+(Math.random()-.5)*24,y:angel.y+45+Math.random()*36,
         vx:(Math.random()-.5)*24,vy:20+Math.random()*48,life:.7+Math.random()*.8,max:1});
     }
@@ -406,6 +410,28 @@ const Sky=(()=>{ let shooting=[], nextStarT=5, angel=null, angelAt=45;
     }
     ctx.restore();
   }
+  function drawPaintedAngel(){
+    if(!angelPainting.complete || !angelPainting.naturalWidth) return false;
+    const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1);
+    const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const height=Math.min(420,H*.36,W*.78*angelPainting.naturalHeight/angelPainting.naturalWidth);
+    const width=height*angelPainting.naturalWidth/angelPainting.naturalHeight;
+    const fade=Math.max(0,Math.min(1,(angel.t-.35)/1.1));
+    const bob=reduced?0:Math.sin(angel.t*1.35)*Math.min(3,H*.004);
+    const x=angel.x-width/2, y=angel.y-height*.16+bob;
+    ctx.save(); ctx.globalAlpha=fade;
+    // Keep the portrait and wings steady; only the lower drapery breathes.
+    const fixed=angelPainting.naturalHeight*.43;
+    ctx.drawImage(angelPainting,0,0,angelPainting.naturalWidth,fixed,x,y,width,height*.43);
+    const rows=18, rest=angelPainting.naturalHeight-fixed;
+    for(let i=0;i<rows;i++){
+      const sy=fixed+rest*i/rows, sh=Math.min(rest/rows+1,angelPainting.naturalHeight-sy);
+      const v=i/rows, sway=reduced?0:Math.sin(angel.t*1.45-v*2.5)*width*.009*v*v;
+      ctx.drawImage(angelPainting,0,sy,angelPainting.naturalWidth,sh,
+        x+sway,y+sy/angelPainting.naturalHeight*height,width,sh/angelPainting.naturalHeight*height+.35);
+    }
+    ctx.restore(); return true;
+  }
   function drawAngel(){
     if(!angel) return;
     const s=angel.s*100,x=angel.x,y=angel.y;
@@ -417,6 +443,7 @@ const Sky=(()=>{ let shooting=[], nextStarT=5, angel=null, angelAt=45;
     g.addColorStop(0,`rgba(255,245,220,${0.22*a+arrivalBloom*.17})`); g.addColorStop(.42,`rgba(255,228,172,${arrivalBloom*.08})`); g.addColorStop(1,'rgba(255,245,220,0)');
     ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,radius,0,Math.PI*2); ctx.fill(); ctx.restore();
 
+    if(drawPaintedAngel()) return; // Retain the original drawing as an image-load fallback.
     ctx.save(); ctx.translate(x,y); ctx.scale(s/100,s/100); ctx.globalAlpha=a; ctx.lineJoin='round'; ctx.lineCap='round';
     const wing=(side)=>{
       ctx.save(); ctx.scale(side,1);
@@ -854,7 +881,6 @@ function draw(){
 
   // Angel (45s)
   Sky.renderAngelArrival();
-  Sky.renderAngel();
 
   // STAR glow — steady pulse only (no endgame growth)
   const cx=W*.5, cy=H*.22, baseR=Math.min(W,H)*.26;
@@ -888,6 +914,8 @@ function draw(){
   // Ripples + shooters
   Sky.renderRipples();
   Sky.renderStars();
+  // Paint her portrait above the star glow so her expression is never washed out.
+  Sky.renderAngel();
 
   // Ground band
   ctx.save(); ctx.translate(groundX,0); const y0=H-groundH;
