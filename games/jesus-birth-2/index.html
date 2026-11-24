@@ -566,30 +566,31 @@ btnAgain.addEventListener('click', ()=>{ endPane.style.display='none'; start(); 
 
 /* ===== Distant travelers and Bethlehem gathering ===== */
 const Cameo = (() => {
+  // Approved family groups replace every former procedural background person.
+  // Adult height matches the old ridge figures (~45–50 CSS pixels).
+  const groups = [
+    {key:'friends', x:.18, y:.60, at:5},
+    {key:'amy', x:.37, y:.60, at:14},
+    {key:'father-daughters', x:.54, y:.60, at:25},
+    {key:'sister-kids', x:.79, y:.60, at:35}
+  ].map(g=>({...g, image:Img(`cast/${g.key}-v1.png`)}));
+  const animals = [
+    {key:'tabby', x:.43, y:.619, h:18, at:18},
+    {key:'sheep', x:.10, y:.625, h:23, at:20},
+    {key:'camel-red', x:.65, y:.617, h:30, at:28},
+    {key:'camel-blue', x:.91, y:.615, h:29, at:37}
+  ].map(a=>({...a, image:Img(`cast/${a.key}-v1.png`)}));
+  // Offsets identify individual faces while the family artwork stays together.
   const figs = [
-    {x:0.10,y:0.59,s:0.92,flip:false},{x:0.14,y:0.60,s:0.98,flip:false},
-    {x:0.18,y:0.60,s:1.00,flip:false},{x:0.22,y:0.61,s:1.02,flip:true },
-    {x:0.25,y:0.60,s:1.05,flip:true },{x:0.28,y:0.61,s:1.06,flip:false},
-    {x:0.32,y:0.61,s:1.10,flip:true },{x:0.36,y:0.60,s:1.04,flip:true },
-    {x:0.40,y:0.59,s:1.00,flip:false},{x:0.44,y:0.60,s:1.03,flip:false},
-    {x:0.48,y:0.60,s:1.05,flip:false},{x:0.52,y:0.60,s:1.07,flip:true },
-    {x:0.58,y:0.60,s:1.10,flip:true },{x:0.62,y:0.60,s:1.06,flip:false},
-    {x:0.66,y:0.59,s:1.00,flip:true },{x:0.70,y:0.60,s:1.04,flip:true },
-    {x:0.74,y:0.60,s:1.08,flip:true },{x:0.78,y:0.60,s:1.05,flip:false},
-    {x:0.82,y:0.59,s:1.02,flip:false},{x:0.86,y:0.60,s:0.98,flip:true },
-    // Keep the later-arriving figures on the same distant ridge as the crowd.
-    {x:0.20,y:0.59,s:0.92,flip:false},{x:0.28,y:0.59,s:0.94,flip:true },
-    {x:0.56,y:0.59,s:0.95,flip:false},{x:0.72,y:0.59,s:0.96,flip:true },
-    {x:0.12,y:0.62,s:0.88,flip:true },{x:0.24,y:0.62,s:0.91,flip:false},
-    {x:0.38,y:0.62,s:0.93,flip:true },{x:0.46,y:0.62,s:0.90,flip:false},
-    {x:0.64,y:0.62,s:0.92,flip:true },{x:0.76,y:0.62,s:0.89,flip:false},
-    {x:0.84,y:0.62,s:0.91,flip:true },{x:0.90,y:0.59,s:0.90,flip:false}
-  ].map(f => ({...f, seed: Math.random()*Math.PI*2 }));
+    {group:0, offset:-.30},{group:0, offset:0},{group:0, offset:.29},
+    {group:1, offset:0},
+    {group:2, offset:-.21},{group:2, offset:0},{group:2, offset:.22},
+    {group:3, offset:-.13},{group:3, offset:.10},
+    {group:3, offset:-.20},{group:3, offset:.27}
+  ];
+  const crowdHeight=W=>Math.min(49,Math.max(37,W*.105));
+  const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
 
-  // Sheep and the child retain this shared distant-silhouette color.
-  const tone = 'rgba(10,20,40,0.55)';
-  const robeTones = ['#51465a','#65524a','#3f5360','#78624d','#594d42','#475252'];
-  const skinTones = ['#9a6848','#bd8963','#d0a17a','#80583f'];
   const sayings = [
     'The King has been born!',
     'We’ve come to worship the child.',
@@ -621,15 +622,14 @@ const Cameo = (() => {
   let speechEvents = [];
   function resetSpeech(){
     const phraseOrder = shuffled(sayings);
-    const availableSpeakers = figs.map((_, index)=>index);
+    let availableSpeakers = figs.map((_, index)=>index);
     let nextAt = 6;
-    speechEvents = phraseOrder.map((text,index)=>{
-      const cap = Math.min(nextAt, 50);
-      const revealed = Math.min(figs.length, Math.floor((cap - 5)/1.45) + 1);
-      const eligible = availableSpeakers.filter(speaker=>speaker < revealed);
-      const pool = eligible.length ? eligible : availableSpeakers;
-      const speaker = pool.splice(Math.floor(Math.random()*pool.length),1)[0];
-      availableSpeakers.splice(availableSpeakers.indexOf(speaker),1);
+    speechEvents = phraseOrder.map(text=>{
+      const eligible=figs.map((f,i)=>i).filter(i=>groups[figs[i].group].at<=nextAt);
+      let pool=eligible.filter(i=>availableSpeakers.includes(i));
+      if(!pool.length){ availableSpeakers=figs.map((_,i)=>i); pool=eligible; }
+      const speaker=pool[Math.floor(Math.random()*pool.length)];
+      availableSpeakers=availableSpeakers.filter(i=>i!==speaker);
       const event = { text, speaker, at: nextAt, until: nextAt + 2.2 };
       nextAt = event.until + 0.7 + Math.random()*0.4;
       return event;
@@ -638,12 +638,13 @@ const Cameo = (() => {
   resetSpeech();
 
   function drawSpeech(elapsed, W, H, reveal){
-    if(reveal < 2) return;
+    if(reveal < 1) return;
     const event = speechEvents.find(item=>elapsed >= item.at && elapsed < item.until);
-    if(!event || event.speaker >= reveal) return;
+    if(!event || groups[figs[event.speaker].group].at > elapsed) return;
     const f = figs[event.speaker];
-    const px = f.x * W, py = H * 0.58 + (f.y - 0.60) * H;
-    const bob = 2 * Math.sin(elapsed*0.35 + f.seed*1.3);
+    const group=groups[f.group], figureHeight=crowdHeight(W);
+    const px=group.x*W+f.offset*figureHeight, py=H*.58+(group.y-.60)*H;
+    const bob=reducedMotion.matches?0:Math.sin(elapsed*.35+f.group)*.6;
     const text = event.text;
     const fontSize = Math.max(11, Math.min(15, W * 0.014));
     const padX = 10, padY = 7, maxWidth = W * 0.42;
@@ -661,7 +662,7 @@ const Cameo = (() => {
     const width = Math.min(maxWidth, Math.max(...lines.map(value=>ctx.measureText(value).width)) + padX*2);
     const height = lines.length*lineHeight + padY*2;
     const x = Math.max(6, Math.min(W-width-6, px-width/2));
-    const y = Math.max(8, py + bob - 61 - height);
+    const y = Math.max(8, py + bob - crowdHeight(W) - 9 - height);
     ctx.globalAlpha = 0.96;
     ctx.fillStyle = '#fff8e8'; ctx.strokeStyle = '#bd9d63'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.roundRect(x, y, width, height, 9); ctx.fill(); ctx.stroke();
@@ -674,97 +675,27 @@ const Cameo = (() => {
     ctx.restore();
   }
 
-  function person(px,py,s,flip,t,seed){
-    const lean = 0.03 * Math.sin(t*0.35 + seed);
-    const bob  = 2 * Math.sin(t*0.35 + seed*1.3);
-    const armR = -0.45 + 0.08 * Math.sin(t*0.45 + seed*0.7);
-    const robe=robeTones[Math.floor(seed*13+robeTones.length*3)%robeTones.length];
-    const skin=skinTones[Math.floor(seed*19+skinTones.length*2)%skinTones.length];
-
+  function drawCastSprite(actor,elapsed,W,H,height){
+    const image=actor.image;
+    if(!image.complete || !image.naturalWidth || elapsed<actor.at) return;
+    const fade=Math.min(1,(elapsed-actor.at)/.8);
+    const width=height*image.naturalWidth/image.naturalHeight;
+    const bob=reducedMotion.matches?0:Math.sin(elapsed*.35+actor.x*9)*.6;
+    const baseline=H*.58+(actor.y-.60)*H;
     ctx.save();
-    // The travelers are on the far ridge; keep them legible but visually behind
-    // the nearer landmarks that pass through the foreground.
-    ctx.globalAlpha=0.78;
-    ctx.translate(px, py + bob);
-    ctx.scale(flip?-s:s, s);
-    ctx.rotate(lean);
-    // Feet, then a loose, individually colored travel robe with a visible hem and folds.
-    ctx.fillStyle='#292a31';
-    ctx.beginPath(); ctx.ellipse(-4,-1,4,2,0,0,Math.PI*2); ctx.ellipse(4,-1,4,2,0,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle=robe;
-    ctx.beginPath(); ctx.moveTo(-6,-35); ctx.lineTo(6,-35); ctx.lineTo(10,-5); ctx.quadraticCurveTo(0,-2,-10,-5); ctx.closePath(); ctx.fill();
-    ctx.strokeStyle='rgba(238,211,164,.28)'; ctx.lineWidth=1.3;
-    ctx.beginPath(); ctx.moveTo(0,-31); ctx.lineTo(1,-8); ctx.moveTo(-7,-7); ctx.quadraticCurveTo(0,-5,8,-7); ctx.stroke();
-    // Sleeves and hands are separated from the body so the crowd reads as people, not pegs.
-    ctx.strokeStyle=robe; ctx.lineWidth=4; ctx.lineCap='round';
-    ctx.beginPath(); ctx.moveTo(-5,-30); ctx.lineTo(-10,-19); ctx.stroke();
-    ctx.save(); ctx.translate(5,-30); ctx.rotate(armR); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(13,-3); ctx.stroke(); ctx.restore();
-    ctx.fillStyle=skin; ctx.beginPath(); ctx.arc(4,-33,2.5,0,Math.PI*2); ctx.fill();
-    // Face, beard/head wrap: small warm accents remain legible against the blue night.
-    ctx.fillStyle=skin; ctx.beginPath(); ctx.ellipse(0,-42,5.2,6.2,0,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='#433a37'; ctx.beginPath(); ctx.moveTo(-4,-41); ctx.quadraticCurveTo(0,-35,4,-41); ctx.lineTo(2,-37); ctx.quadraticCurveTo(0,-35,-2,-37); ctx.closePath(); ctx.fill();
-    ctx.fillStyle=seed%2?'#c2a36e':'#d0c2a0';
-    ctx.beginPath(); ctx.moveTo(-6,-44); ctx.quadraticCurveTo(-5,-51,1,-49); ctx.quadraticCurveTo(7,-48,6,-44); ctx.lineTo(3,-43); ctx.quadraticCurveTo(0,-46,-4,-43); ctx.closePath(); ctx.fill();
-    ctx.restore();
-  }
-
-  function shepherd(px, py, s, flip, t, seed){
-    ctx.save();
-    ctx.translate(px, py + Math.sin(t*0.35+seed)*2);
-    ctx.scale(flip?-s:s, s);
-    ctx.fillStyle='#75614c';
-    ctx.beginPath(); ctx.moveTo(-6,-30); ctx.lineTo(6,-30); ctx.lineTo(10,-3); ctx.quadraticCurveTo(0,0,-10,-3); ctx.closePath(); ctx.fill();
-    ctx.fillStyle='#bc8964'; ctx.beginPath(); ctx.arc(0,-36,5,-Math.PI,Math.PI); ctx.fill();
-    ctx.fillStyle='#d4c49e'; ctx.beginPath(); ctx.arc(0,-38,6,Math.PI,Math.PI*2); ctx.fill();
-    ctx.restore();
-  }
-
-  function sheep(px,py,s,t,seed){
-    ctx.save();
-    const bob = Math.sin(t*1.4 + seed)*1.6;
-    ctx.translate(px, py + bob);
-    ctx.scale(s,s);
-    ctx.fillStyle=tone;
-    ctx.beginPath(); ctx.ellipse(0,0,10,7,0,0,Math.PI*2); ctx.fill();
-    const look = 0.6 + 0.4*Math.max(0,Math.sin(t*0.6 + seed));
-    ctx.beginPath(); ctx.ellipse(9, -2 - 2*look, 4, 3, 0, 0, Math.PI*2); ctx.fill();
-    ctx.fillRect(-6,6,2,4); ctx.fillRect(-2,6,2,4); ctx.fillRect(2,6,2,4); ctx.fillRect(6,6,2,4);
-    ctx.restore();
-  }
-
-  function boy(px,py,s,t){
-    ctx.save();
-    const lift = 2*Math.max(0, Math.sin(t*0.8));
-    ctx.translate(px, py - 4 - lift);
-    ctx.scale(s,s);
-    ctx.fillStyle=tone;
-    ctx.fillRect(-6,-24,12,24);
-    ctx.beginPath(); ctx.arc(0,-28,6,0,Math.PI*2); ctx.fill();
-    ctx.fillRect(6,-24,10,3); ctx.fillRect(-16,-24,10,3);
+    ctx.globalAlpha=.9*fade;
+    ctx.drawImage(image,actor.x*W-width/2,baseline-height+bob,width,height);
     ctx.restore();
   }
 
   function render(elapsed){
-    if(elapsed < 5) return;
-    const cap = Math.min(elapsed, 50);
-    const reveal = Math.min(figs.length, Math.floor((cap - 5)/1.45) + 1);
-    const dpr = Math.max(1, devicePixelRatio||1);
-    const W = cvs.width/dpr, H = cvs.height/dpr;
-    const ridgeY = H*0.58;
-
-    for(let i=0;i<reveal;i++){
-      const f = figs[i % figs.length];
-      person(f.x*W, ridgeY + (f.y-0.60)*H, 0.9*f.s, f.flip, elapsed, f.seed);
-    }
-    drawSpeech(elapsed, W, H, reveal);
-
-    if(elapsed > 15){
-      shepherd(W*0.08, ridgeY, 1.0, false, elapsed, 1.7);
-      shepherd(W*0.12, ridgeY, 0.9,  true,  elapsed, 2.1);
-    }
-    if(elapsed > 35){
-      boy(W*0.50, ridgeY-2, 0.95, elapsed);
-    }
+    if(elapsed<5) return;
+    const dpr=Math.max(1,devicePixelRatio||1);
+    const W=cvs.width/dpr,H=cvs.height/dpr;
+    const height=crowdHeight(W);
+    for(const group of groups) drawCastSprite(group,elapsed,W,H,height);
+    for(const animal of animals) drawCastSprite(animal,elapsed,W,H,animal.h*height/49);
+    drawSpeech(elapsed,W,H,groups.filter(g=>elapsed>=g.at).length);
   }
   return { render, reset: resetSpeech };
 })();
@@ -872,7 +803,7 @@ function draw(){
   ctx.clearRect(0,0,W,H);
   drawJourneyBackground(elapsed,W,H);
 
-  // Travelers and crowd stay code-driven above the art.
+  // Approved friends, family, and animals gather above the landscape art.
   Cameo.render(elapsed);
 
   // Starfield

@@ -34,3 +34,10 @@ Check desktop, portrait phone, and short landscape: walking, jump ascent/descent
 ## Captain's Christmas ending
 
 `ending_scene_merry_christmas_captain.png` is the approved Nativity illustration with Captain resting beside the donkey. `WIN_A` uses this version; the original `ending_scene_merry_christmas.png` remains archived unchanged. The second ending image, crossfade timing, and replay flow are unchanged.
+
+## Friends and family crowd (2026-11-24)
+
+- Eight transparent, tightly cropped `cast/*-v1.png` sprites are derived from the approved cast concept: three friends; Amy; father and two daughters; sister and three children; tabby; three sheep; and two resting camels. Only painted sprites are published, not reference photographs.
+- These eleven people replace all former procedural background travelers, shepherds, and the child. Family clusters remain together, with adult heights capped at 49 CSS pixels on the same ridge as the old crowd. They gradually gather from 5 to 35 seconds; nearby animals arrive between 18 and 37 seconds.
+- Speech chooses individual members of already-present groups and safely reuses speakers after the smaller cast has spoken. Subtle bobbing respects reduced motion. The tabby stays in the background; Captain, the main wise man, finale companions, angel, endings, and gameplay remain unchanged.
+- Gameplay/browser testing intentionally left to Jake after lunch for this release.
