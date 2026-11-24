@@ -48,4 +48,4 @@ Check desktop, portrait phone, and short landscape: walking, jump ascent/descent
 
 ## Single-image finale (2026-11-24)
 
-The approved family artwork is now the only winning end screen. After its existing 0.8-second entrance fade, it remains unobstructed for seven seconds before Replay, Home, and The Real Christmas Story controls appear. The artwork remains behind those controls indefinitely. The former second artwork is retained as an unused archive.
+The approved family artwork is now the only winning end screen. After its existing 0.8-second entrance fade, it remains unobstructed for four seconds before Replay, Home, and The Real Christmas Story controls appear. The artwork remains behind those controls indefinitely. The former second artwork is retained as an unused archive.

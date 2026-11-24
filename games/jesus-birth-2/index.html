@@ -531,14 +531,14 @@ async function start(){
   requestAnimationFrame(loop);
 }
 
-/* --- Single approved WIN artwork; controls follow seven fully visible seconds --- */
+/* --- Single approved WIN artwork; controls follow four fully visible seconds --- */
 function playWinSequence(){
   setTimeout(() => {
     endPane.style.display='flex';
     endBG1.onload = () => {
       endBG1.classList.add('show');
-      // Allow the existing 0.8-second entrance fade, then seven unobstructed seconds.
-      setTimeout(() => endBtns.classList.remove('is-hidden'), 7800);
+      // Allow the existing 0.8-second entrance fade, then four unobstructed seconds.
+      setTimeout(() => endBtns.classList.remove('is-hidden'), 4800);
     };
     endBG1.src=WIN_A;
   }, 1000);
