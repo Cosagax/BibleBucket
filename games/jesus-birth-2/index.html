@@ -359,15 +359,25 @@ const Sky=(()=>{ let shooting=[], nextStarT=5, angel=null, angelAt=45;
   function drawRipples(){ if(!ripples.length) return; ctx.save(); ctx.globalCompositeOperation='lighter';
     for(const rp of ripples){ const a=Math.max(0,1-rp.t/rp.dur)*.25; ctx.strokeStyle=`rgba(255,245,200,${a})`; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(rp.x,rp.y,rp.r,0,Math.PI*2); ctx.stroke(); }
     ctx.restore(); }
+  function angelLayout(W,H){
+    // Reserve the whole family row, including the robe's bob and a clear sky gap.
+    const ceiling=Cameo.peopleTop(W,H,elapsed)-12;
+    const top=Math.max(8,Math.min(H*.12,ceiling-40));
+    const ratio=angelPainting.naturalWidth?angelPainting.naturalHeight/angelPainting.naturalWidth:1;
+    const height=Math.max(1,Math.min(man.h*1.1,H*.36,W*.78*ratio,ceiling-top-3));
+    const targetY=top+height*.16;
+    return {height,targetY,startY:targetY-Math.min(H*.06,top-8),s:Math.min(Math.min(W,H)*.0010,height/164)};
+  }
   function spawnAngel(){ const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1);
-    angel={x:W*.5,startY:H*.18,targetY:H*.28,y:H*.18,t:0,descent:3.8,hold:0,s:Math.min(W,H)*.0010,particles:[]};
+    const layout=angelLayout(W,H);
+    angel={x:W*.5,...layout,y:layout.startY,t:0,descent:3.8,hold:0,particles:[]};
     SFX.angelArrival();
   }
   function updateAngel(dt){ if(!angel) return;
     angel.t+=dt;
     // Recompute anchors from the live viewport, including mid-descent rotation.
     const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1);
-    angel.x=W*.5; angel.startY=H*.18; angel.targetY=H*.28; angel.s=Math.min(W,H)*.0010;
+    angel.x=W*.5; Object.assign(angel,angelLayout(W,H));
     const p=Math.max(0,Math.min(1,(angel.t-.65)/angel.descent));
     const ease=p*p*(3-2*p); angel.y=angel.startY+(angel.targetY-angel.startY)*ease;
     angel.hold=Math.max(0,angel.t-.65-angel.descent);
@@ -385,7 +395,7 @@ const Sky=(()=>{ let shooting=[], nextStarT=5, angel=null, angelAt=45;
     ctx.save(); ctx.globalCompositeOperation='lighter';
     // The star opens into a tapering ray that travels down with her.
     if(column>.01){
-      const top=H*.205, endY=y-22, width=12+column*W*.075;
+      const top=Math.min(H*.205,y-48), endY=y-22, width=12+column*W*.075;
       const beam=ctx.createLinearGradient(0,top,0,endY);
       beam.addColorStop(0,`rgba(255,247,212,${.018+.055*column})`);
       beam.addColorStop(.58,`rgba(255,232,170,${.045+.11*column})`);
@@ -411,7 +421,7 @@ const Sky=(()=>{ let shooting=[], nextStarT=5, angel=null, angelAt=45;
     if(!angelPainting.complete || !angelPainting.naturalWidth) return false;
     const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1);
     const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const height=Math.min(man.h*1.1,H*.36,W*.78*angelPainting.naturalHeight/angelPainting.naturalWidth);
+    const height=angel.height;
     const width=height*angelPainting.naturalWidth/angelPainting.naturalHeight;
     const fade=Math.max(0,Math.min(1,(angel.t-.35)/1.1));
     const bob=reduced?0:Math.sin(angel.t*1.35)*Math.min(3,H*.004);
@@ -705,7 +715,9 @@ const Cameo = (() => {
     for(const animal of animals) drawCastSprite(animal,elapsed,W,H,animal.h*height/49);
     drawSpeech(elapsed,W,H,groups.filter(g=>elapsed>=g.at).length);
   }
-  return { render, reset: resetSpeech };
+  return { render, reset: resetSpeech,
+    peopleTop:(W,H,time)=>H*.58-peopleHeight(W,time)-.6
+  };
 })();
 
 function drawJourneyBackground(elapsed,W,H){
