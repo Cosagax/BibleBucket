@@ -49,7 +49,7 @@
   /* END overlay */
   #end{position:absolute;inset:0;display:none;align-items:center;justify-content:center;
     flex-direction:column;gap:12px;text-align:center;z-index:30;background: rgba(0,0,0,0.25)}
-  /* crossfade stack */
+  /* Ending artwork */
   #end .stack{position:absolute;inset:0;z-index:-1}
   .endBG{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.96);opacity:0;transition:opacity .8s ease}
   .endBG.show{opacity:1}
@@ -85,7 +85,6 @@
   <div id="end">
     <div class="stack">
       <img id="endBG1" class="endBG" alt="">
-      <img id="endBG2" class="endBG" alt="">
     </div>
     <div class="big" id="endTitle"></div>
     <div id="endBtns" class="">
@@ -117,7 +116,6 @@ const startPane = document.getElementById('start');
 const endPane   = document.getElementById('end');
 const endTitle  = document.getElementById('endTitle');
 const endBG1    = document.getElementById('endBG1');
-const endBG2    = document.getElementById('endBG2');
 const endBtns   = document.getElementById('endBtns');
 const btnStart  = document.getElementById('btnStart');
 const btnAgain  = document.getElementById('btnAgain');
@@ -138,7 +136,6 @@ const journeyBackgrounds=[
 // The final background then stays put for the remaining 35 seconds and finale.
 const JOURNEY_BACKGROUND_TIMING={ approachAt:10, arrivalAt:25, fadeSeconds:1 };
 const WIN_A='ending_scene_merry_christmas_family.png';
-const WIN_B='ending_scene_reason_for_season.png';
 const LOSE ='lose_bg_tall.png';
 
 /* ===== Audio (working build) ===== */
@@ -524,7 +521,7 @@ function reset(){
   comets.length=0; resetVerseQueue(); scheduleComet(); Sky.reset(); Cameo.reset();
   inFinale=false; finaleTriggered=false; finaleRippleFired=false; starPopActive=false; starPopT=0; endDelay=0;
   megaPulseFired=false; megaPulseT=0;
-  endBG1.classList.remove('show'); endBG2.classList.remove('show'); endBtns.classList.add('is-hidden');
+  endBG1.classList.remove('show'); endBtns.classList.add('is-hidden');
 }
 async function start(){
   if(running) return;
@@ -534,19 +531,16 @@ async function start(){
   requestAnimationFrame(loop);
 }
 
-/* --- Win/Lose panels with timed 2-image sequence for WIN --- */
+/* --- Single approved WIN artwork; controls follow seven fully visible seconds --- */
 function playWinSequence(){
   setTimeout(() => {
     endPane.style.display='flex';
-    endBG1.src=WIN_A; endBG1.onload = () => endBG1.classList.add('show');
-    setTimeout(() => {
-      endBG2.src=WIN_B;
-      endBG2.onload = () => endBG2.classList.add('show');
-      setTimeout(() => {
-        endBG1.classList.remove('show');
-        setTimeout(() => endBtns.classList.remove('is-hidden'), 900);
-      }, 3000);
-    }, 3000);
+    endBG1.onload = () => {
+      endBG1.classList.add('show');
+      // Allow the existing 0.8-second entrance fade, then seven unobstructed seconds.
+      setTimeout(() => endBtns.classList.remove('is-hidden'), 7800);
+    };
+    endBG1.src=WIN_A;
   }, 1000);
 }
 function showLose(){ endPane.style.display='flex'; endBG1.src=LOSE; endBG1.onload = () => endBG1.classList.add('show'); endBtns.classList.remove('is-hidden'); }

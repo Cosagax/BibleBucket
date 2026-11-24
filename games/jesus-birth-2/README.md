@@ -45,3 +45,7 @@ Check desktop, portrait phone, and short landscape: walking, jump ascent/descent
 ## Family Christmas ending (2026-11-24)
 
 `ending_scene_merry_christmas_family.png` is the approved complete Nativity ending: family cast, Mom as the angel, Captain and Oliver, and radiant baby Jesus. Amy and the sister’s family gesture and look toward Jesus; both upper groups are preserved. `WIN_A` uses this new artwork. Previous ending assets remain archived. Timing is unchanged: first artwork begins fading in after a 1-second delay, the second begins its 0.8-second crossfade 3 seconds later, and the final artwork remains until navigation or replay.
+
+## Single-image finale (2026-11-24)
+
+The approved family artwork is now the only winning end screen. After its existing 0.8-second entrance fade, it remains unobstructed for seven seconds before Replay, Home, and The Real Christmas Story controls appear. The artwork remains behind those controls indefinitely. The former second artwork is retained as an unused archive.
