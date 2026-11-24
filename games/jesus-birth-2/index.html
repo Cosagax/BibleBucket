@@ -575,7 +575,7 @@ const Cameo = (() => {
     {key:'sister-kids', x:.79, y:.60, at:27}
   ].map(g=>({...g, image:Img(`cast/${g.key}-v1.png`)}));
   const animals = [
-    {key:'tabby', x:.43, y:.619, h:18, at:14},
+    {key:'tabby', x:.52, y:.635, h:18, at:14},
     {key:'sheep', x:.10, y:.625, h:23, at:16},
     {key:'camel-red', x:.65, y:.617, h:30, at:22},
     {key:'camel-blue', x:.91, y:.615, h:29, at:29}
@@ -598,7 +598,7 @@ const Cameo = (() => {
   function peopleHeight(W,elapsed){
     const {approachAt,arrivalAt}=JOURNEY_BACKGROUND_TIMING;
     const approach=Math.max(0,Math.min(1,(elapsed-approachAt)/(arrivalAt-approachAt)));
-    return crowdHeight(W,elapsed)*(1+.18*approach);
+    return crowdHeight(W,elapsed)*1.05*(1+.18*approach);
   }
   const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
 
