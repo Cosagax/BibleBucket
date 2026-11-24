@@ -594,6 +594,12 @@ const Cameo = (() => {
     const scale=1.25+.35*fadeTo(approachAt)+.40*fadeTo(arrivalAt);
     return Math.min(49,Math.max(37,W*.105))*scale*1.10;
   }
+  // Only people get the extra close-up; animal sizes retain their existing progression.
+  function peopleHeight(W,elapsed){
+    const {approachAt,arrivalAt}=JOURNEY_BACKGROUND_TIMING;
+    const approach=Math.max(0,Math.min(1,(elapsed-approachAt)/(arrivalAt-approachAt)));
+    return crowdHeight(W,elapsed)*(1+.18*approach);
+  }
   const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
 
   const sayings = [
@@ -647,7 +653,7 @@ const Cameo = (() => {
     const event = speechEvents.find(item=>elapsed >= item.at && elapsed < item.until);
     if(!event || groups[figs[event.speaker].group].at > elapsed) return;
     const f = figs[event.speaker];
-    const group=groups[f.group], figureHeight=crowdHeight(W,elapsed);
+    const group=groups[f.group], figureHeight=peopleHeight(W,elapsed);
     const px=group.x*W+f.offset*figureHeight, py=H*.58+(group.y-.60)*H;
     const bob=reducedMotion.matches?0:Math.sin(elapsed*.35+f.group)*.6;
     const text = event.text;
@@ -680,7 +686,7 @@ const Cameo = (() => {
     ctx.restore();
   }
 
-  function drawCastSprite(actor,elapsed,W,H,height){
+  function drawCastSprite(actor,elapsed,W,H,height,isPerson=false){
     const image=actor.image;
     if(!image.complete || !image.naturalWidth || elapsed<actor.at) return;
     const fade=Math.min(1,(elapsed-actor.at)/.8);
@@ -688,7 +694,8 @@ const Cameo = (() => {
     const bob=reducedMotion.matches?0:Math.sin(elapsed*.35+actor.x*9)*.6;
     const baseline=H*.58+(actor.y-.60)*H;
     ctx.save();
-    ctx.globalAlpha=.9*fade;
+    ctx.globalAlpha=fade;
+    if(isPerson) ctx.filter='contrast(1.08) brightness(1.03)';
     ctx.drawImage(image,actor.x*W-width/2,baseline-height+bob,width,height);
     ctx.restore();
   }
@@ -698,7 +705,7 @@ const Cameo = (() => {
     const dpr=Math.max(1,devicePixelRatio||1);
     const W=cvs.width/dpr,H=cvs.height/dpr;
     const height=crowdHeight(W,elapsed);
-    for(const group of groups) drawCastSprite(group,elapsed,W,H,height);
+    for(const group of groups) drawCastSprite(group,elapsed,W,H,peopleHeight(W,elapsed),true);
     for(const animal of animals) drawCastSprite(animal,elapsed,W,H,animal.h*height/49);
     drawSpeech(elapsed,W,H,groups.filter(g=>elapsed>=g.at).length);
   }
