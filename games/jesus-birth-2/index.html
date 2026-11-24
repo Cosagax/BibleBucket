@@ -244,7 +244,7 @@ addEventListener('resize', makeStarfield); makeStarfield();
 const comets=[], COMET_MAX=1; let cometT=0, nextCometIn=0;
 function scheduleComet(){ nextCometIn=4+Math.random()*3; cometT=0; }
 function spawnComet(){ if(comets.length>=COMET_MAX) return;
-  const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1), y=H*(.18+Math.random()*.24), vx=.5*(1.6+Math.random()*.6)*(W/260);
+  const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1), y=H*(.08+Math.random()*.12), vx=.5*(1.6+Math.random()*.6)*(W/260);
   comets.push({x:-60,y,vx,a:0,state:'in',hold:0,tail:[]});}
 function updateComets(dt){
   cometT+=dt;
@@ -332,7 +332,7 @@ const Sky=(()=>{ let shooting=[], nextStarT=5, angel=null, angelAt=45;
   const ripples=[]; let nextRipple=5;
   function reset(){ shooting.length=0; nextStarT=5; angel=null; angelAt=45; ripples.length=0; nextRipple=5; }
   function spawnStar(){ const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1); const dir=Math.random()<.5?1:-1;
-    shooting.push({x:dir<0?W+80:-80,y:H*(.10+Math.random()*.15),vx:dir*(700+Math.random()*250),vy:180+Math.random()*120,life:1.4,maxLife:1.4}); }
+    shooting.push({x:dir<0?W+80:-80,y:H*(.06+Math.random()*.10),vx:dir*(700+Math.random()*250),vy:H*(.045+Math.random()*.035),life:1.4,maxLife:1.4}); }
   function updateStars(dt){ for(let i=shooting.length-1;i>=0;i--){ const s=shooting[i]; s.x+=s.vx*dt; s.y+=s.vy*dt; s.life-=dt; if(s.life<=0) shooting.splice(i,1);} }
   function drawStars(){ if(!shooting.length) return; ctx.save(); ctx.globalCompositeOperation='lighter';
     for(const s of shooting){ const t=Math.max(0,s.life)/s.maxLife; const tx=s.x-s.vx*0.025, ty=s.y-s.vy*0.025;
