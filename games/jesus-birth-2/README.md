@@ -41,3 +41,7 @@ Check desktop, portrait phone, and short landscape: walking, jump ascent/descent
 - These eleven people replace all former procedural background travelers, shepherds, and the child. Family clusters remain together, with adult heights capped at 49 CSS pixels on the same ridge as the old crowd. They gradually gather from 5 to 35 seconds; nearby animals arrive between 18 and 37 seconds.
 - Speech chooses individual members of already-present groups and safely reuses speakers after the smaller cast has spoken. Subtle bobbing respects reduced motion. The tabby stays in the background; Captain, the main wise man, finale companions, angel, endings, and gameplay remain unchanged.
 - Gameplay/browser testing intentionally left to Jake after lunch for this release.
+
+## Family Christmas ending (2026-11-24)
+
+`ending_scene_merry_christmas_family.png` is the approved complete Nativity ending: family cast, Mom as the angel, Captain and Oliver, and radiant baby Jesus. Amy and the sister’s family gesture and look toward Jesus; both upper groups are preserved. `WIN_A` uses this new artwork. Previous ending assets remain archived. Timing is unchanged: first artwork begins fading in after a 1-second delay, the second begins its 0.8-second crossfade 3 seconds later, and the final artwork remains until navigation or replay.
