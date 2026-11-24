@@ -570,15 +570,15 @@ const Cameo = (() => {
   // Start larger than the old ridge figures, then grow with the Bethlehem scenes.
   const groups = [
     {key:'friends', x:.18, y:.60, at:5},
-    {key:'amy', x:.37, y:.60, at:14},
-    {key:'father-daughters', x:.54, y:.60, at:25},
-    {key:'sister-kids', x:.79, y:.60, at:35}
+    {key:'amy', x:.37, y:.60, at:11},
+    {key:'father-daughters', x:.54, y:.60, at:19},
+    {key:'sister-kids', x:.79, y:.60, at:27}
   ].map(g=>({...g, image:Img(`cast/${g.key}-v1.png`)}));
   const animals = [
-    {key:'tabby', x:.43, y:.619, h:18, at:18},
-    {key:'sheep', x:.10, y:.625, h:23, at:20},
-    {key:'camel-red', x:.65, y:.617, h:30, at:28},
-    {key:'camel-blue', x:.91, y:.615, h:29, at:37}
+    {key:'tabby', x:.43, y:.619, h:18, at:14},
+    {key:'sheep', x:.10, y:.625, h:23, at:16},
+    {key:'camel-red', x:.65, y:.617, h:30, at:22},
+    {key:'camel-blue', x:.91, y:.615, h:29, at:29}
   ].map(a=>({...a, image:Img(`cast/${a.key}-v1.png`)}));
   // Offsets identify individual faces while the family artwork stays together.
   const figs = [
@@ -592,7 +592,7 @@ const Cameo = (() => {
     const {approachAt,arrivalAt,fadeSeconds}=JOURNEY_BACKGROUND_TIMING;
     const fadeTo=at=>Math.max(0,Math.min(1,(elapsed-at+fadeSeconds)/fadeSeconds));
     const scale=1.25+.35*fadeTo(approachAt)+.40*fadeTo(arrivalAt);
-    return Math.min(49,Math.max(37,W*.105))*scale;
+    return Math.min(49,Math.max(37,W*.105))*scale*1.10;
   }
   const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
 
