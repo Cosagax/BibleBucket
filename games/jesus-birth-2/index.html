@@ -240,15 +240,12 @@ function makeStarfield(){
 }
 addEventListener('resize', makeStarfield); makeStarfield();
 
-/* ===== Verses (comet orbs) ===== */
-const versesAll=[{ref:'Isa 7:14',text:'A virgin will conceive and bear a son—Immanuel.'},{ref:'Isa 9:2',text:'The people in darkness have seen a great light.'},{ref:'Isa 9:6',text:'Unto us a child is born… Prince of Peace.'},{ref:'Isa 11:1',text:'A shoot from Jesse—a Branch from his roots.'},{ref:'Isa 11:10',text:'The Root of Jesse stands as a banner for nations.'},{ref:'Isa 40:3',text:'A voice: Prepare in the wilderness the way of the LORD.'},{ref:'Isa 42:1',text:'Behold my Servant; my chosen one in whom I delight.'},{ref:'Isa 53:5',text:'He was pierced for our transgressions; by His wounds we are healed.'},{ref:'Isa 61:1',text:'The Spirit of the Lord is on me to proclaim good news.'},{ref:'Mic 5:2',text:'From Bethlehem will come the Ruler in Israel.'},{ref:'Jer 23:5',text:'I will raise up for David a righteous Branch.'},{ref:'Zech 9:9',text:'Your King comes humble, riding on a donkey.'},{ref:'Ps 2:7',text:'You are my Son; today I have begotten you.'},{ref:'Ps 22:16–18',text:'They pierced my hands and feet… they cast lots for my clothing.'},{ref:'Mal 4:2',text:'The Sun of Righteousness rises with healing in His wings.'}];
-let verseQueue=[]; function resetVerseQueue(){ verseQueue=versesAll.slice(); for(let i=verseQueue.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [verseQueue[i],verseQueue[j]]=[verseQueue[j],verseQueue[i]]; } }
-
+/* ===== Silent comet orbs ===== */
 const comets=[], COMET_MAX=1; let cometT=0, nextCometIn=0;
 function scheduleComet(){ nextCometIn=4+Math.random()*3; cometT=0; }
-function spawnComet(){ if(comets.length>=COMET_MAX) return; if(verseQueue.length===0) resetVerseQueue();
+function spawnComet(){ if(comets.length>=COMET_MAX) return;
   const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1), y=H*(.18+Math.random()*.24), vx=.5*(1.6+Math.random()*.6)*(W/260);
-  comets.push({x:-60,y,vx,a:0,state:'in',hold:0,tail:[],verse:verseQueue.pop()});}
+  comets.push({x:-60,y,vx,a:0,state:'in',hold:0,tail:[]});}
 function updateComets(dt){
   cometT+=dt;
   if(running && !inFinale && timer>8 && startPane.style.display==='none' && endPane.style.display==='none'){
@@ -264,25 +261,13 @@ function updateComets(dt){
   }
 }
 function drawComets(){
-  const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1);
   for(const c of comets){
     for(const t of c.tail){ ctx.fillStyle=`rgba(255,255,255,${0.12*t.a})`; ctx.beginPath(); ctx.arc(t.x,t.y,Math.max(1,t.r),0,Math.PI*2); ctx.fill(); }
     const grd=ctx.createRadialGradient(c.x,c.y,0,c.x,c.y,18);
     grd.addColorStop(0,`rgba(255,255,255,${0.95*c.a})`); grd.addColorStop(1,`rgba(255,255,255,${0.06*c.a})`);
     ctx.fillStyle=grd; ctx.beginPath(); ctx.arc(c.x,c.y,18,0,Math.PI*2); ctx.fill();
-    const text=c.verse.text, ref=c.verse.ref;
-    ctx.save(); ctx.shadowColor=`rgba(0,0,0,${0.65*c.a})`; ctx.shadowBlur=6;
-    ctx.fillStyle=`rgba(230,237,243,${c.a})`; ctx.textAlign='left'; ctx.textBaseline='alphabetic'; ctx.font='bold 12px system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial';
-    const maxW=Math.min(W*.72,480), tx=Math.max(8,Math.min(W-8,c.x-Math.min(ctx.measureText(text).width,maxW)-24)), ty=Math.max(14,Math.min(H*.45-10,c.y-22));
-    wrapText(text, tx, ty, maxW, 16);
-    ctx.font='11px system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial'; ctx.fillStyle=`rgba(185,199,230,${c.a})`; ctx.fillText(ref, tx, ty+14);
-    ctx.restore();
   }
 }
-function wrapText(str,x,y,maxW,lh){ ctx.font='bold 12px system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial'; const words=str.split(' '); let line='',yy=y;
-  for(const w of words){ const test=line? line+' '+w : w; if(ctx.measureText(test).width>maxW){ ctx.fillText(line,x,yy); yy+=lh; line=w; } else line=test; }
-  if(line) ctx.fillText(line,x,yy); }
-
 /* ===== Rocks (flat sandstone) ===== */
 const rocks=[];
 function spawnRock(){
@@ -528,7 +513,7 @@ function reset(){
   landingAt=-100; spawnTimer=0; elapsed=0; timer=60; hits=0; groundX=0; rocks.length=0; man.vy=0; man.t=0; man.scale=1; dust.length=0; wasAir=false;
   companions.length=0; const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1);
   targetX=W*settleFrac; man.x=-man.w; man.y=H-groundH-man.h;
-  comets.length=0; resetVerseQueue(); scheduleComet(); Sky.reset(); Cameo.reset();
+  comets.length=0; scheduleComet(); Sky.reset(); Cameo.reset();
   inFinale=false; finaleTriggered=false; finaleRippleFired=false; starPopActive=false; starPopT=0; endDelay=0;
   megaPulseFired=false; megaPulseT=0;
   endBG1.classList.remove('show'); endBtns.classList.add('is-hidden');
@@ -899,7 +884,7 @@ function draw(){
   // Dust
   for(const p of dust){ ctx.fillStyle=p.c.replace(',1)',`,`+(p._a*0.7).toFixed(3)+')'); ctx.beginPath(); ctx.arc(p.x,p.y,p.r*(.8+.4*(1-p._a)),0,Math.PI*2); ctx.fill(); }
 
-  // Verse comets
+  // Silent comet trails
   if(!inFinale) drawComets();
 }
 
