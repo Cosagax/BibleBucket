@@ -594,6 +594,13 @@ const Cameo = (() => {
     {group:3, offset:-.13},{group:3, offset:.10},
     {group:3, offset:-.20},{group:3, offset:.27}
   ];
+  // Match feet to each painting's sandy foreground, blending with the scene.
+  // Arrival keeps its approved .58 baseline unchanged.
+  function crowdBaseline(H,elapsed){
+    const {approachAt,arrivalAt,fadeSeconds}=JOURNEY_BACKGROUND_TIMING;
+    const fadeTo=at=>Math.max(0,Math.min(1,(elapsed-at+fadeSeconds)/fadeSeconds));
+    return H*(.64+.07*fadeTo(approachAt)-.13*fadeTo(arrivalAt));
+  }
   function crowdHeight(W,elapsed){
     const {approachAt,arrivalAt,fadeSeconds}=JOURNEY_BACKGROUND_TIMING;
     const fadeTo=at=>Math.max(0,Math.min(1,(elapsed-at+fadeSeconds)/fadeSeconds));
@@ -660,7 +667,7 @@ const Cameo = (() => {
     if(!event || groups[figs[event.speaker].group].at > elapsed) return;
     const f = figs[event.speaker];
     const group=groups[f.group], figureHeight=peopleHeight(W,elapsed);
-    const px=group.x*W+f.offset*figureHeight, py=H*.58+(group.y-.60)*H;
+    const px=group.x*W+f.offset*figureHeight, py=crowdBaseline(H,elapsed)+(group.y-.60)*H;
     const bob=reducedMotion.matches?0:Math.sin(elapsed*.35+f.group)*.6;
     const text = event.text;
     const fontSize = Math.max(11, Math.min(15, W * 0.014));
@@ -698,7 +705,7 @@ const Cameo = (() => {
     const fade=Math.min(1,(elapsed-actor.at)/.8);
     const width=height*image.naturalWidth/image.naturalHeight;
     const bob=reducedMotion.matches?0:Math.sin(elapsed*.35+actor.x*9)*.6;
-    const baseline=H*.58+(actor.y-.60)*H;
+    const baseline=crowdBaseline(H,elapsed)+(actor.y-.60)*H;
     ctx.save();
     ctx.globalAlpha=fade;
     if(isPerson) ctx.filter='contrast(1.08) brightness(1.03)';
@@ -716,7 +723,7 @@ const Cameo = (() => {
     drawSpeech(elapsed,W,H,groups.filter(g=>elapsed>=g.at).length);
   }
   return { render, reset: resetSpeech,
-    peopleTop:(W,H,time)=>H*.58-peopleHeight(W,time)-.6
+    peopleTop:(W,H,time)=>crowdBaseline(H,time)-peopleHeight(W,time)-.6
   };
 })();
 
