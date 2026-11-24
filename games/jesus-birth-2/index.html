@@ -567,7 +567,7 @@ btnAgain.addEventListener('click', ()=>{ endPane.style.display='none'; start(); 
 /* ===== Distant travelers and Bethlehem gathering ===== */
 const Cameo = (() => {
   // Approved family groups replace every former procedural background person.
-  // Adult height matches the old ridge figures (~45–50 CSS pixels).
+  // Start larger than the old ridge figures, then grow with the Bethlehem scenes.
   const groups = [
     {key:'friends', x:.18, y:.60, at:5},
     {key:'amy', x:.37, y:.60, at:14},
@@ -588,7 +588,12 @@ const Cameo = (() => {
     {group:3, offset:-.13},{group:3, offset:.10},
     {group:3, offset:-.20},{group:3, offset:.27}
   ];
-  const crowdHeight=W=>Math.min(49,Math.max(37,W*.105));
+  function crowdHeight(W,elapsed){
+    const {approachAt,arrivalAt,fadeSeconds}=JOURNEY_BACKGROUND_TIMING;
+    const fadeTo=at=>Math.max(0,Math.min(1,(elapsed-at+fadeSeconds)/fadeSeconds));
+    const scale=1.25+.35*fadeTo(approachAt)+.40*fadeTo(arrivalAt);
+    return Math.min(49,Math.max(37,W*.105))*scale;
+  }
   const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
 
   const sayings = [
@@ -642,7 +647,7 @@ const Cameo = (() => {
     const event = speechEvents.find(item=>elapsed >= item.at && elapsed < item.until);
     if(!event || groups[figs[event.speaker].group].at > elapsed) return;
     const f = figs[event.speaker];
-    const group=groups[f.group], figureHeight=crowdHeight(W);
+    const group=groups[f.group], figureHeight=crowdHeight(W,elapsed);
     const px=group.x*W+f.offset*figureHeight, py=H*.58+(group.y-.60)*H;
     const bob=reducedMotion.matches?0:Math.sin(elapsed*.35+f.group)*.6;
     const text = event.text;
@@ -662,7 +667,7 @@ const Cameo = (() => {
     const width = Math.min(maxWidth, Math.max(...lines.map(value=>ctx.measureText(value).width)) + padX*2);
     const height = lines.length*lineHeight + padY*2;
     const x = Math.max(6, Math.min(W-width-6, px-width/2));
-    const y = Math.max(8, py + bob - crowdHeight(W) - 9 - height);
+    const y = Math.max(8, py + bob - figureHeight - 9 - height);
     ctx.globalAlpha = 0.96;
     ctx.fillStyle = '#fff8e8'; ctx.strokeStyle = '#bd9d63'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.roundRect(x, y, width, height, 9); ctx.fill(); ctx.stroke();
@@ -692,7 +697,7 @@ const Cameo = (() => {
     if(elapsed<5) return;
     const dpr=Math.max(1,devicePixelRatio||1);
     const W=cvs.width/dpr,H=cvs.height/dpr;
-    const height=crowdHeight(W);
+    const height=crowdHeight(W,elapsed);
     for(const group of groups) drawCastSprite(group,elapsed,W,H,height);
     for(const animal of animals) drawCastSprite(animal,elapsed,W,H,animal.h*height/49);
     drawSpeech(elapsed,W,H,groups.filter(g=>elapsed>=g.at).length);
