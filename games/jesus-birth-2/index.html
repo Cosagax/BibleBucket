@@ -56,6 +56,14 @@
   #end .big{display:none!important;}
   #endBtns{position:absolute;top:70%;left:50%;transform:translate(-50%,-50%);display:flex;gap:10px;
     width:min(94vw,700px);flex-wrap:wrap;justify-content:center}
+  /* Retry controls stay within the approved painting's navy footer. */
+  #end.is-loss{background:#10172e;padding:0;overflow:hidden}
+  #end.is-loss .endBG{object-fit:contain;filter:none}
+  #end.is-loss #endBtns{top:calc(50% + min(50vh,75vw)*.87);
+    width:min(94vw,62.66vh);flex-wrap:nowrap;gap:8px;align-items:stretch}
+  #end.is-loss #endBtns button{box-sizing:border-box;
+    font-size:clamp(9px,min(2.8vw,2.8vh),14px);padding:8px 6px;min-height:32px}
+  #end.is-loss #endBtns a{display:flex;text-decoration:none}
   #endBtns.is-hidden{display:none}
 </style>
 </head>
@@ -137,7 +145,7 @@ const journeyBackgrounds=[
 // The final background then stays put for the remaining 35 seconds and finale.
 const JOURNEY_BACKGROUND_TIMING={ approachAt:10, arrivalAt:25, fadeSeconds:1 };
 const WIN_A='ending_scene_merry_christmas_family.png';
-const LOSE ='lose_bg_tall.png';
+const LOSE ='lose-cast-encouragement-v1.png';
 
 /* ===== Audio (working build) ===== */
 let AC=null,gSFX=null;
@@ -555,6 +563,7 @@ let inFinale=false, finaleTriggered=false, finaleRippleFired=false;
 const palettes=[{robeTop:'#5f5f2b',robeBot:'#3a3a18',hat:'#c78a2a',beard:'#2a2a2a',skin:'#bd8963',sash:'#24321f',jar:'#d1a22b'},{robeTop:'#2b6d5f',robeBot:'#19443a',hat:'#a33e2a',beard:'#000',skin:'#b9825c',sash:'#14322e',jar:'#c58f2a'}];
 
 function reset(){
+  endPane.classList.remove('is-loss');
   landingAt=-100; spawnTimer=0; elapsed=0; timer=60; hits=0; groundX=0; rocks.length=0; man.vy=0; man.t=0; man.scale=1; dust.length=0; wasAir=false;
   wiseManTrail.length=0; lastWiseFootfall=-1;
   companions.length=0; const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1);
@@ -584,7 +593,7 @@ function playWinSequence(){
     endBG1.src=WIN_A;
   }, 1000);
 }
-function showLose(){ endPane.style.display='flex'; endBG1.src=LOSE; endBG1.onload = () => endBG1.classList.add('show'); endBtns.classList.remove('is-hidden'); }
+function showLose(){ endPane.classList.add('is-loss'); endPane.style.display='flex'; endBG1.onload = () => endBG1.classList.add('show'); endBG1.src=LOSE; endBtns.classList.remove('is-hidden'); }
 function end(win){ running=false; endTitle.textContent=''; if(win){ endBtns.classList.add('is-hidden'); playWinSequence(); } else { showLose(); } }
 
 function jump(){ if(!running) return; if(onGround()) man.vy=-jumpV; }
