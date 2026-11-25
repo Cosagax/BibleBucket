@@ -125,6 +125,7 @@ const Img=s=>{const i=new Image(); i.src=s; return i;};
 const angelPainting=Img('angel-painted.png'); // Jake-approved portrait-inspired angel.
 const wiseManPainting=Img('wise-man-painted.png');
 const companionPainting=Img('wise-men-companions-painted.png');
+const sandstoneRock=Img('sandstone-rock-v1.png');
 const captain=Img('captain-orbs.png'); // Canonical Captain cameo, shared with Orbs and Noah.
 const bg=Img('background.png'); // preserved as the original-scene fallback
 const journeyBackgrounds=[
@@ -283,6 +284,13 @@ function drawRock(x, y, s, light){
   ctx.globalAlpha=0.28; ctx.fillStyle='#56300f';
   ctx.beginPath(); ctx.ellipse(x+W*0.04,y-H*0.015,W*0.57,H*0.24,0,0,Math.PI*2); ctx.fill();
   ctx.restore();
+
+  // Approved painted sandstone, cropped to its visible silhouette.
+  // Physics and obstacle dimensions stay unchanged; retain legacy art as a load fallback.
+  if(sandstoneRock.complete&&sandstoneRock.naturalWidth){
+    ctx.drawImage(sandstoneRock,28,50,1616,820,x-W*.53,y-H*.86,W*1.06,H*.86);
+    return;
+  }
 
   // Rounded, irregular desert stone with a warm sunlit crown.
   ctx.fillStyle='#8d5635';
