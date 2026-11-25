@@ -264,7 +264,7 @@ const SFX={
 
 // Original procedural sound palette: no sampled recordings or external assets.
 const JourneyAudio=(()=>{
-  const voices=new Set(); let wind=null, noise=null, nextStep=0, nextCricket=3, stage=0;
+  const voices=new Set(); let noise=null, nextStep=0, nextCricket=3, stage=0;
   function track(source,nodes){
     voices.add(source);
     source.onended=()=>{voices.delete(source);for(const node of [source,...nodes])node.disconnect();};
@@ -297,19 +297,14 @@ const JourneyAudio=(()=>{
   }
   function stop(){
     for(const source of voices){try{source.stop();}catch{}}
-    voices.clear();wind=null;
+    voices.clear();
   }
   function start(){
     stop();nextStep=.25;nextCricket=3;stage=0;if(!AC||AC.state!=='running')return;
-    const source=AC.createBufferSource(),filter=AC.createBiquadFilter(),g=AC.createGain();
-    source.buffer=makeNoise();source.loop=true;filter.type='lowpass';filter.frequency.value=650;
-    g.gain.setValueAtTime(0,AC.currentTime);g.gain.linearRampToValueAtTime(.035,AC.currentTime+2);
-    source.connect(filter).connect(g).connect(gSFX);track(source,[filter,g]);wind=g;source.start();
     notes([523.25,659.25,783.99],.10,.18,.85);
   }
   function tick(time,grounded){
     if(!AC||AC.state!=='running')return;
-    if(wind)wind.gain.setTargetAtTime(.025+.012*(1+Math.sin(time*.37)),AC.currentTime,.5);
     if(time>=nextStep){nextStep=time+.38;if(grounded)sand(.10,.075);}
     if(time>=nextCricket){nextCricket=time+7+Math.random()*4;
       for(let i=0;i<3;i++)tone(3100,AC.currentTime+i*.13,.055,.012,3250);
