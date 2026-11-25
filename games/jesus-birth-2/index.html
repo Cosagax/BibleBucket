@@ -567,19 +567,20 @@ btnAgain.addEventListener('click', ()=>{ endPane.style.display='none'; start(); 
 const Cameo = (() => {
   // Approved family groups replace every former procedural background person.
   // Start larger than the old ridge figures, then grow with the Bethlehem scenes.
+  // The whole gathering finishes fading in by 21.8s, ahead of background 3.
   const groups = [
     {key:'friends', x:.18, y:.60, at:5},
-    {key:'amy', x:.37, y:.60, at:11},
-    {key:'father-daughters', x:.54, y:.60, at:19},
-    {key:'sister-kids', x:.79, y:.60, at:27}
+    {key:'amy', x:.37, y:.60, at:8},
+    {key:'father-daughters', x:.54, y:.60, at:12},
+    {key:'sister-kids', x:.79, y:.60, at:17}
   ].map(g=>({...g, image:Img(`cast/${g.key}-v1.png`)}));
   const animals = [
-    {key:'tabby', x:.52, y:.635, h:18, at:14},
-    {key:'sheep', x:.10, y:.625, h:23, at:16},
-    {key:'camel-red', x:.65, y:.617, h:30, at:22},
-    {key:'camel-blue', x:.91, y:.615, h:29, at:29},
+    {key:'tabby', x:.52, y:.635, h:18, at:10},
+    {key:'sheep', x:.10, y:.625, h:23, at:11},
+    {key:'camel-red', x:.65, y:.617, h:30, at:15},
+    {key:'camel-blue', x:.91, y:.615, h:29, at:19},
     // Captain joins last, seated at Jake's feet beside the daughters.
-    {key:'captain-sitting', x:.575, y:.655, h:27, at:30}
+    {key:'captain-sitting', x:.575, y:.655, h:27, at:21}
   ].map(a=>({...a, image:Img(`cast/${a.key}-v1.png`)}));
   // Offsets identify individual faces while the family artwork stays together.
   const figs = [
