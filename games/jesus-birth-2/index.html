@@ -245,7 +245,7 @@ const comets=[], COMET_MAX=1; let cometT=0, nextCometIn=0;
 function scheduleComet(){ nextCometIn=4+Math.random()*3; cometT=0; }
 function spawnComet(){ if(comets.length>=COMET_MAX) return;
   const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1), y=H*(.08+Math.random()*.12), vx=.5*(1.6+Math.random()*.6)*(W/260);
-  comets.push({x:-60,y,vx,a:0,state:'in',hold:0,tail:[]});}
+  comets.push({x:-60,y,vx,a:0,fadeEnd:.5+Math.random()*.5,tail:[]});}
 function updateComets(dt){
   cometT+=dt;
   if(running && !inFinale && timer>8 && startPane.style.display==='none' && endPane.style.display==='none'){
@@ -254,15 +254,15 @@ function updateComets(dt){
   for(let i=comets.length-1;i>=0;i--){
     const c=comets[i]; c.x+=c.vx*(dt*60); c.tail.push({x:c.x,y:c.y,a:1,r:5}); if(c.tail.length>60) c.tail.shift();
     for(const t of c.tail){ t.a*=.96; t.r*=.992; }
-    if(c.state==='in'){ c.a+=dt*2; if(c.a>=1){ c.a=1; c.state='hold'; c.hold=2.2; } }
-    else if(c.state==='hold'){ c.hold-=dt; if(c.hold<=0) c.state='out'; }
-    else if(c.state==='out'){ c.a-=dt*1.5; }
-    const W=cvs.width/(devicePixelRatio||1); if(c.x>W+120 || (c.a<=0 && c.state==='out')) comets.splice(i,1);
+    const W=cvs.width/(devicePixelRatio||1);
+    // Each comet fades over its last 12% of screen travel, ending at 50-100%.
+    c.a=Math.max(0,Math.min(1,(c.x+60)/(c.vx*30),(c.fadeEnd-c.x/W)/.12));
+    if(c.x>=W*c.fadeEnd) comets.splice(i,1);
   }
 }
 function drawComets(){
   for(const c of comets){
-    for(const t of c.tail){ ctx.fillStyle=`rgba(255,255,255,${0.12*t.a})`; ctx.beginPath(); ctx.arc(t.x,t.y,Math.max(1,t.r),0,Math.PI*2); ctx.fill(); }
+    for(const t of c.tail){ ctx.fillStyle=`rgba(255,255,255,${0.12*t.a*c.a})`; ctx.beginPath(); ctx.arc(t.x,t.y,Math.max(1,t.r),0,Math.PI*2); ctx.fill(); }
     const grd=ctx.createRadialGradient(c.x,c.y,0,c.x,c.y,18);
     grd.addColorStop(0,`rgba(255,255,255,${0.95*c.a})`); grd.addColorStop(1,`rgba(255,255,255,${0.06*c.a})`);
     ctx.fillStyle=grd; ctx.beginPath(); ctx.arc(c.x,c.y,18,0,Math.PI*2); ctx.fill();
@@ -332,10 +332,12 @@ const Sky=(()=>{ let shooting=[], nextStarT=5, angel=null, angelAt=45;
   const ripples=[]; let nextRipple=5;
   function reset(){ shooting.length=0; nextStarT=5; angel=null; angelAt=45; ripples.length=0; nextRipple=5; }
   function spawnStar(){ const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1); const dir=Math.random()<.5?1:-1;
-    shooting.push({x:dir<0?W+80:-80,y:H*(.06+Math.random()*.10),vx:dir*(700+Math.random()*250),vy:H*(.045+Math.random()*.035),life:1.4,maxLife:1.4}); }
+    const vx=dir*(700+Math.random()*250), travel=.5+Math.random()*.5;
+    const life=(80+W*travel)/Math.abs(vx), fadeSeconds=W*.12/Math.abs(vx);
+    shooting.push({x:dir<0?W+80:-80,y:H*(.06+Math.random()*.10),vx,vy:H*(.06+Math.random()*.04)/life,life,fadeSeconds}); }
   function updateStars(dt){ for(let i=shooting.length-1;i>=0;i--){ const s=shooting[i]; s.x+=s.vx*dt; s.y+=s.vy*dt; s.life-=dt; if(s.life<=0) shooting.splice(i,1);} }
   function drawStars(){ if(!shooting.length) return; ctx.save(); ctx.globalCompositeOperation='lighter';
-    for(const s of shooting){ const t=Math.max(0,s.life)/s.maxLife; const tx=s.x-s.vx*0.025, ty=s.y-s.vy*0.025;
+    for(const s of shooting){ const t=Math.min(1,Math.max(0,s.life)/s.fadeSeconds); const tx=s.x-s.vx*0.025, ty=s.y-s.vy*0.025;
       const grad=ctx.createLinearGradient(s.x,s.y,tx,ty); grad.addColorStop(0,`rgba(255,255,255,${0.9*t})`); grad.addColorStop(1,`rgba(140,180,255,0)`);
       ctx.strokeStyle=grad; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(s.x,s.y); ctx.lineTo(tx,ty); ctx.stroke(); }
     ctx.restore(); }
