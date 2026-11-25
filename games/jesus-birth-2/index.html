@@ -227,6 +227,31 @@ function puff(x,y,count=6,power=1){
   if(dust.length>200) dust.splice(0,dust.length-200);
 }
 
+/* A lighter footfall trail for the wise man, separate from impact dust. */
+const wiseManTrail=[];
+let lastWiseFootfall=-1;
+function updateWiseManTrail(dt,grounded){
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  for(let i=wiseManTrail.length-1;i>=0;i--){
+    const p=wiseManTrail[i];p.age+=dt;p.x-=52*dt;
+    if(p.age>=.48||reduced)wiseManTrail.splice(i,1);
+  }
+  const footfall=Math.floor(man.t*1.05/Math.PI);
+  if(grounded&&!reduced&&footfall!==lastWiseFootfall){
+    for(let i=0;i<2;i++)wiseManTrail.push({x:man.x+man.w*.20-i*5,age:i*.035,r:3.6+i*.7});
+  }
+  lastWiseFootfall=footfall;
+}
+function drawWiseManTrail(H){
+  ctx.save();ctx.fillStyle='#ffe0a6';
+  for(const p of wiseManTrail){
+    const fade=Math.max(0,1-p.age/.48),r=p.r*(1+p.age*2);
+    ctx.globalAlpha=.44*fade*Math.min(1,p.age/.035);
+    ctx.beginPath();ctx.ellipse(p.x,H-groundH-2-p.age*14,r*1.35,r*.65,0,0,Math.PI*2);ctx.fill();
+  }
+  ctx.restore();
+}
+
 /* ===== Starfield ===== */
 let starT=0, stars=[];
 function makeStarfield(){
@@ -521,6 +546,7 @@ const palettes=[{robeTop:'#5f5f2b',robeBot:'#3a3a18',hat:'#c78a2a',beard:'#2a2a2
 
 function reset(){
   landingAt=-100; spawnTimer=0; elapsed=0; timer=60; hits=0; groundX=0; rocks.length=0; man.vy=0; man.t=0; man.scale=1; dust.length=0; wasAir=false;
+  wiseManTrail.length=0; lastWiseFootfall=-1;
   companions.length=0; const W=cvs.width/(devicePixelRatio||1), H=cvs.height/(devicePixelRatio||1);
   targetX=W*settleFrac; man.x=-man.w; man.y=H-groundH-man.h;
   comets.length=0; scheduleComet(); Sky.reset(); Cameo.reset();
@@ -798,6 +824,7 @@ function loop(now){
   man.vy+=grav*dt; man.y+=man.vy*dt; const groundedNow=onGround();
   if(groundedNow){ if(man.vy>0) man.vy=0; man.y=H-groundH-man.h; if(wasAir){ landingAt=elapsed; const fy=man.y+man.h-6; puff(man.x+man.w*.25,fy,6,.95); puff(man.x+man.w*.75,fy,6,.95); SFX.poof(); } }
   wasAir=!groundedNow; man.t+=dt*8;
+  updateWiseManTrail(dt,groundedNow);
 
   spawnTimer+=dt; const canSpawn=!inFinale && (!rocks.length || rocks[rocks.length-1].x < W - minGap);
   const every=1.6+Math.random()*1.0; if(spawnTimer>every && canSpawn){ spawnTimer=0; spawnRock(); }
@@ -883,6 +910,7 @@ function draw(){
     drawWiseManVariant(c.x,c.y,c.w,c.h,c.t,true,c.scale,c.palette,nod);
   }
   const grounded=onGround();
+  drawWiseManTrail(H);
   drawWiseManVariant(man.x,man.y,man.w,man.h,man.t,grounded,1,null,0);
 
   drawCaptainTrail(W,H);
