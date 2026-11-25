@@ -77,6 +77,7 @@
   <div class="hud">
     <div class="row top">
       <div class="pill" id="time">Time: 60</div>
+      <button class="pill" id="musicToggle" type="button" aria-pressed="true" aria-label="Toggle Silent Night background music">Music: On</button>
       <div class="pill" id="hits">Hits: 0 / 5</div>
     </div>
   </div>
@@ -151,11 +152,61 @@ const WIN_A='ending_scene_merry_christmas_family.png';
 const LOSE ='lose-cast-encouragement-v1.png';
 
 /* ===== Audio (working build) ===== */
-let AC=null,gSFX=null;
+let AC=null,gSFX=null,gMusic=null;
 function initAudio(){ if(AC) return; AC=new (window.AudioContext||window.webkitAudioContext)();
   const master=AC.createGain(); master.gain.value=.9; master.connect(AC.destination);
+  gMusic=AC.createGain(); gMusic.gain.value=.12; gMusic.connect(master);
   gSFX=AC.createGain(); gSFX.gain.value=.9; gSFX.connect(master);
 }
+// Public-domain Silent Night melody, synthesized locally; no recording or download.
+const NightMusic=(()=>{
+  const tune=[
+    ['G4',1.5],['A4',.5],['G4',1],['E4',3],
+    ['G4',1.5],['A4',.5],['G4',1],['E4',3],
+    ['D5',2],['D5',1],['B4',3],['C5',2],['C5',1],['G4',3],
+    ['A4',2],['A4',1],['C5',1.5],['B4',.5],['A4',1],
+    ['G4',1.5],['A4',.5],['G4',1],['E4',3],
+    ['A4',2],['A4',1],['C5',1.5],['B4',.5],['A4',1],
+    ['G4',1.5],['A4',.5],['G4',1],['E4',3],
+    ['D5',2],['D5',1],['F5',1.5],['D5',.5],['B4',1],['C5',3],['E5',3],
+    ['C5',1],['G4',1],['E4',1],['G4',1.5],['F4',.5],['D4',1],['C4',3]
+  ];
+  const midi={C4:60,D4:62,E4:64,F4:65,G4:67,A4:69,B4:71,C5:72,D5:74,E5:76,F5:77};
+  const voices=new Set(); let enabled=true;
+  function stop(){
+    for(const voice of voices){try{voice.stop();}catch{} voice.disconnect();}
+    voices.clear();
+  }
+  function start(){
+    stop(); if(!AC || !gMusic) return;
+    gMusic.gain.setValueAtTime(enabled?.12:0,AC.currentTime);
+    // 84 quarter notes/minute: gentle 6/8 phrasing, with a small breath on each note.
+    const beat=60/84; let offset=0;
+    while(offset<61){
+      for(const [pitch,beats] of tune){
+        if(offset>=61) break;
+        const at=AC.currentTime+.06+offset, duration=beats*beat;
+        const oscillator=AC.createOscillator(), envelope=AC.createGain();
+        oscillator.type='sine'; oscillator.frequency.value=440*2**((midi[pitch]-69)/12);
+        envelope.gain.setValueAtTime(0,at);
+        envelope.gain.linearRampToValueAtTime(.68,at+.018);
+        envelope.gain.exponentialRampToValueAtTime(.12,at+duration*.72);
+        envelope.gain.linearRampToValueAtTime(0,at+duration*.96);
+        oscillator.connect(envelope).connect(gMusic); voices.add(oscillator);
+        oscillator.onended=()=>{voices.delete(oscillator);oscillator.disconnect();envelope.disconnect();};
+        oscillator.start(at); oscillator.stop(at+duration);
+        offset+=duration;
+      }
+    }
+  }
+  document.getElementById('musicToggle').addEventListener('click',()=>{
+    enabled=!enabled;
+    if(gMusic)gMusic.gain.setTargetAtTime(enabled?.12:0,AC.currentTime,.035);
+    const button=document.getElementById('musicToggle');
+    button.textContent='Music: '+(enabled?'On':'Off');button.setAttribute('aria-pressed',String(enabled));
+  });
+  return {start,stop};
+})();
 const SFX={
   poof(){ if(!AC) return; const now=AC.currentTime;
     const src=AC.createBufferSource(); const len=AC.sampleRate*.35, buf=AC.createBuffer(1,len,AC.sampleRate), d=buf.getChannelData(0);
@@ -580,6 +631,7 @@ let revealingStart=false;
 async function start(){
   if(running || revealingStart) return;
   revealingStart=true;
+  NightMusic.stop();
   reset(); endPane.style.display='none';
   startPane.style.display='flex';
   startPane.classList.add('is-revealing');
@@ -592,6 +644,7 @@ async function start(){
   startPane.style.display='none';
   startPane.classList.remove('is-revealing');
   startPane.inert=false; revealingStart=false; running=true; last=0;
+  try{NightMusic.start();}catch{}
   requestAnimationFrame(loop);
 }
 
@@ -608,7 +661,7 @@ function playWinSequence(){
   }, 1000);
 }
 function showLose(){ endPane.classList.add('is-loss'); endPane.style.display='flex'; endBG1.onload = () => endBG1.classList.add('show'); endBG1.src=LOSE; endBtns.classList.remove('is-hidden'); }
-function end(win){ running=false; endTitle.textContent=''; if(win){ endBtns.classList.add('is-hidden'); playWinSequence(); } else { showLose(); } }
+function end(win){ running=false; NightMusic.stop(); endTitle.textContent=''; if(win){ endBtns.classList.add('is-hidden'); playWinSequence(); } else { showLose(); } }
 
 function jump(){ if(!running) return; if(onGround()) man.vy=-jumpV; }
 cvs.addEventListener('pointerdown', e=>{e.preventDefault(); if(startPane.style.display!=='none') start(); else jump();},{passive:false});
