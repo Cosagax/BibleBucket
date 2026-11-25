@@ -49,3 +49,10 @@ Check desktop, portrait phone, and short landscape: walking, jump ascent/descent
 ## Single-image finale (2026-11-24)
 
 The approved family artwork is now the only winning end screen. After its existing 0.8-second entrance fade, it remains unobstructed for four seconds before Replay, Home, and The Real Christmas Story controls appear. The artwork remains behind those controls indefinitely. The former second artwork is retained as an unused archive.
+
+## DJ August soundscape (2026-11-24)
+
+- Public-domain Silent Night stays on its independent music bus; Music On/Off affects only the melody and retains its state on replay.
+- `JourneyAudio` synthesizes a launch arpeggio, quiet desert wind and occasional cricket chirps, grounded sandy footsteps, rising jump/soft landing, shooting-star bells, Bethlehem milestones at 10/25 seconds, the trio's 50-second flourish, and distinct victory/retry phrases. Existing rock/angel/pulse sounds remain, with the effects bus softened for the mix. No recordings, libraries, or network audio assets are required.
+- Audio begins after the two-second artwork reveal. New sources are tracked/disconnected, ambient playback stops at round end, finite ending phrases decay naturally, and replay clears the previous soundscape. Hidden tabs suspend the audio context.
+- Preserve artwork, gameplay timing, hitboxes, controls, and the archived original game. Check real start/jump/landing, music toggle, loss/replay, milestone cues, victory cleanup, and desktop/phone rendering; subjective balance and physical phone-speaker sound need human listening.
