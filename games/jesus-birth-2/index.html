@@ -893,7 +893,7 @@ function draw(){
 
 /* Footfall dust uses the journey clock: bounded, replay-safe, and frame-rate independent. */
 function drawCaptainTrail(W,H){
-  const t=elapsed-7, duration=4.2, life=.55, step=Math.PI/22;
+  const t=elapsed-7, duration=4.2, life=.65, step=Math.PI/22;
   if(t<0||t>=duration+life||!captain.complete||!captain.naturalWidth||
      matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   const height=man.h*.58, width=height*captain.naturalWidth/captain.naturalHeight;
@@ -906,10 +906,10 @@ function drawCaptainTrail(W,H){
     const pawX=-width+(W+width*2)*(born/duration)-width*.28;
     for(let i=0;i<3;i++){
       const x=pawX-age*(20+i*12)-i*3;
-      const y=feet-2-age*(10+i*6);
-      const radius=(2.2+i*.65)*(1+age*2.4);
-      ctx.fillStyle=i===1?'#b98248':'#d6a664';
-      ctx.globalAlpha=.25*fade*fade*Math.min(1,age/.045);
+      const y=feet-3-age*(15+i*8);
+      const radius=(4.8+i*1.1)*(1+age*2.1);
+      ctx.fillStyle=i===1?'#e9c38a':'#ffe0a6';
+      ctx.globalAlpha=.64*fade*Math.min(1,age/.035);
       ctx.beginPath();ctx.ellipse(x,y,radius*1.35,radius*.75,0,0,Math.PI*2);ctx.fill();
     }
   }
