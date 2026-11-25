@@ -42,7 +42,10 @@
   }
   .big{font-size:clamp(22px,5vw,36px);font-weight:800;letter-spacing:.3px;text-shadow:0 2px 8px #000}
   .small{color:var(--muted);max-width:min(92vw,720px);padding:0 12px}
-  #start .small{color:rgba(241,245,249,.85);background:rgba(7,15,32,.48);border-radius:12px;padding:10px 14px;line-height:1.45;width:min(80vw,620px)}
+  #start .big{color:rgba(241,245,249,.72)}
+  #start .backlink{color:rgba(219,234,254,.72);border-color:#ffffff33}
+  #start.is-revealing > *{visibility:hidden;pointer-events:none}
+  #start .small{color:rgba(241,245,249,.68);background:rgba(7,15,32,.22);border-radius:12px;padding:10px 14px;line-height:1.45;width:min(80vw,620px)}
   .backlink{color:#dbeafe;font-weight:700;padding:10px 12px;border:1px solid #ffffff55;border-radius:10px}
   @media(max-height:520px){#start,#end{overflow:auto;padding:12px 0}.big{font-size:22px}}
 
@@ -573,11 +576,22 @@ function reset(){
   megaPulseFired=false; megaPulseT=0;
   endBG1.classList.remove('show'); endBtns.classList.add('is-hidden');
 }
+let revealingStart=false;
 async function start(){
-  if(running) return;
-  reset(); running=true; startPane.style.display='none'; endPane.style.display='none'; last=0;
-  // Audio must not prevent play on devices where Web Audio is unavailable.
-  try{ initAudio(); if(AC && AC.state==='suspended') await AC.resume(); }catch{}
+  if(running || revealingStart) return;
+  revealingStart=true;
+  reset(); endPane.style.display='none';
+  startPane.style.display='flex';
+  startPane.classList.add('is-revealing');
+  startPane.inert=true;
+  if(document.activeElement instanceof HTMLElement) document.activeElement.blur();
+  // Unlock audio in the user gesture without holding up the artwork reveal.
+  try{ initAudio(); if(AC && AC.state==='suspended') AC.resume().catch(()=>{}); }catch{}
+  // The round clock and animation start only after two unobstructed seconds.
+  await new Promise(resolve=>setTimeout(resolve,2000));
+  startPane.style.display='none';
+  startPane.classList.remove('is-revealing');
+  startPane.inert=false; revealingStart=false; running=true; last=0;
   requestAnimationFrame(loop);
 }
 
