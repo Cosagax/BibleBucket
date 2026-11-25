@@ -874,6 +874,7 @@ function draw(){
   const grounded=onGround();
   drawWiseManVariant(man.x,man.y,man.w,man.h,man.t,grounded,1,null,0);
 
+  drawCaptainTrail(W,H);
   drawCaptain(W,H);
 
   // Rocks + jar lighting
@@ -886,6 +887,31 @@ function draw(){
 
   // Silent comet trails
   if(!inFinale) drawComets();
+}
+
+/* Footfall dust uses the journey clock: bounded, replay-safe, and frame-rate independent. */
+function drawCaptainTrail(W,H){
+  const t=elapsed-7, duration=4.2, life=.55, step=Math.PI/22;
+  if(t<0||t>=duration+life||!captain.complete||!captain.naturalWidth||
+     matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const height=man.h*.58, width=height*captain.naturalWidth/captain.naturalHeight;
+  const feet=H-groundH+7;
+  ctx.save();
+  for(let n=Math.max(0,Math.ceil((t-life)/step));n<=Math.floor(t/step);n++){
+    const born=n*step;
+    if(born>=duration)continue;
+    const age=t-born, fade=1-age/life;
+    const pawX=-width+(W+width*2)*(born/duration)-width*.28;
+    for(let i=0;i<3;i++){
+      const x=pawX-age*(20+i*12)-i*3;
+      const y=feet-2-age*(10+i*6);
+      const radius=(2.2+i*.65)*(1+age*2.4);
+      ctx.fillStyle=i===1?'#b98248':'#d6a664';
+      ctx.globalAlpha=.25*fade*fade*Math.min(1,age/.045);
+      ctx.beginPath();ctx.ellipse(x,y,radius*1.35,radius*.75,0,0,Math.PI*2);ctx.fill();
+    }
+  }
+  ctx.restore();
 }
 
 /* Captain gets one quick, purely visual run-by per journey: 7–11.2 active seconds. */
